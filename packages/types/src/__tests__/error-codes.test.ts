@@ -28,6 +28,7 @@ const REQUIRED_PARSE_CODES = [
   'PARSE_TIMEOUT',
   'PARSE_UNSUPPORTED_LANGUAGE',
   'WASM_INTEGRITY',
+  'WASM_MISSING',
 ] as const satisfies readonly ParseErrorCode[];
 
 const REQUIRED_CACHE_CODES = [
@@ -101,6 +102,10 @@ describe('ConfigErrorCode', () => {
 describe('ParseErrorCode', () => {
   it('contains WASM_INTEGRITY (SC-19)', () => {
     expect(REQUIRED_PARSE_CODES).toContain('WASM_INTEGRITY');
+  });
+
+  it('contains WASM_MISSING (SC-19, manifest/path coverage)', () => {
+    expect(REQUIRED_PARSE_CODES).toContain('WASM_MISSING');
   });
 
   it('contains the required entries from PRP / spec', () => {

@@ -1,0 +1,5 @@
+{
+  "$schema": "https://fugazi.dev/schemas/wasm-manifest.json",
+  "comment": "SHA-256 hashes of bundled WASM blobs. Populated at install time when oxc-parser-wasm and swc-wasm dependencies land. Empty entries are placeholders that flag a fail-soft install error rather than letting a parser silently load unverified bytes.",
+  "blobs": {}
+}

@@ -19,7 +19,8 @@ export type ParseErrorCode =
   | 'PARSE_SYNTAX_ERROR'
   | 'PARSE_TIMEOUT'
   | 'PARSE_UNSUPPORTED_LANGUAGE'
-  | 'WASM_INTEGRITY';
+  | 'WASM_INTEGRITY'
+  | 'WASM_MISSING';
 
 export type CacheErrorCode =
   | 'CACHE_VERSION_MISMATCH'
