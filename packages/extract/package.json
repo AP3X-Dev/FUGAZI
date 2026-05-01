@@ -19,6 +19,7 @@
   "dependencies": {
     "@fugazi/config": "workspace:*",
     "@fugazi/types": "workspace:*",
-    "@swc/wasm": "1.15.32"
+    "@swc/wasm": "1.15.32",
+    "msgpackr": "^1.11.10"
   }
 }

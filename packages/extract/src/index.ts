@@ -28,3 +28,16 @@ export {
   unsupportedLanguageMessage,
 } from './scan-error.js';
 export { ScanErrorAggregator, scanFile, type ScanResult } from './parsers/scan.js';
+export {
+  CACHE_VERSION,
+  encode as encodeCacheBlob,
+  decode as decodeCacheBlob,
+} from './cache/codec.js';
+export {
+  type CacheKeyParts,
+  type ParseCacheStore,
+  createStore,
+  deriveKey,
+  read as readCache,
+  write as writeCache,
+} from './cache/store.js';
