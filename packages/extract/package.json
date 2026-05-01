@@ -5,7 +5,10 @@
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -b",
@@ -14,7 +17,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@fugazi/config": "workspace:*",
     "@fugazi/types": "workspace:*",
-    "@fugazi/config": "workspace:*"
+    "@swc/wasm": "1.15.32"
   }
 }

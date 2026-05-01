@@ -9,3 +9,10 @@
 
 export { verifyWasmIntegrity, type Manifest, type ManifestEntry } from './wasm/integrity.js';
 export { loadWasmModule } from './wasm/load.js';
+export {
+  parse,
+  type ParseError,
+  type ParseOptions,
+  type ParseResult,
+  type Program,
+} from './parsers/oxc.js';

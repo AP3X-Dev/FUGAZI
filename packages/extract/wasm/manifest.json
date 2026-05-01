@@ -1,5 +1,10 @@
 {
   "$schema": "https://fugazi.dev/schemas/wasm-manifest.json",
-  "comment": "SHA-256 hashes of bundled WASM blobs. Populated at install time when oxc-parser-wasm and swc-wasm dependencies land. Empty entries are placeholders that flag a fail-soft install error rather than letting a parser silently load unverified bytes.",
-  "blobs": {}
+  "comment": "SHA-256 hashes of bundled WASM blobs. Wave 5b-2 selected SWC over oxc — no maintained oxc-parser-wasm npm package as of 2026-04-30; the unified oxc-parser package only ships native napi-rs bindings, which would require a Rust toolchain at install time and violate Fugazi's no-bundling design constraint. The 'oxc' blob key remains reserved for Wave 5b-3 / future swap if a WASM build of oxc-parser ever lands on npm.",
+  "blobs": {
+    "swc": {
+      "path": "node_modules/@swc/wasm/wasm_bg.wasm",
+      "sha256": "a400243367e0731a958f97e4cafd76b7282bd361c6a13e65d1d177d32ee125ec"
+    }
+  }
 }
