@@ -136,8 +136,8 @@ const sampleParts = (
 });
 
 const writeAndRead = async (key: string, value: ScanResult): Promise<ScanResult | null> => {
-  await write(store, key, value);
-  return read(store, key);
+  await write<ScanResult>(store, key, value);
+  return read<ScanResult>(store, key);
 };
 
 // --------------------------------------------------------------------------
@@ -215,8 +215,8 @@ describe('cache codec — determinism', () => {
   it('byte-equal after read/re-encode (full round-trip stays deterministic)', async () => {
     const value: ScanResult = { ast: tinyProgram(), errors: [] };
     const key = deriveKey(sampleParts({ filePath: '/repo/det.ts' }));
-    await write(store, key, value);
-    const got = await read(store, key);
+    await write<ScanResult>(store, key, value);
+    const got = await read<ScanResult>(store, key);
     expect(got).not.toBeNull();
     if (got !== null) {
       const b1 = encodeCacheBlob(value);
@@ -241,13 +241,13 @@ describe('cache codec — version stamp', () => {
   it('read returns null when the stored version != CACHE_VERSION', async () => {
     const value: ScanResult = { ast: tinyProgram(), errors: [] };
     const key = deriveKey(sampleParts({ filePath: '/repo/version-mismatch.ts' }));
-    await write(store, key, value);
+    await write<ScanResult>(store, key, value);
     const blobPath = join(tmpRoot, 'parse', `${key}.msgpack`);
     const blob = await readFile(blobPath);
     // Overwrite first 4 bytes with version=999 (still valid uint32, !== CACHE_VERSION).
     blob.writeUInt32BE(999, 0);
     await writeFile(blobPath, blob);
-    const got = await read(store, key);
+    const got = await read<ScanResult>(store, key);
     expect(got).toBeNull();
   });
 });
@@ -260,42 +260,42 @@ describe('cache codec — corruption', () => {
   it('truncated blob (last 5 bytes chopped) throws CACHE_CORRUPTED on read', async () => {
     const value: ScanResult = { ast: fiftyStatementProgram(), errors: [] };
     const key = deriveKey(sampleParts({ filePath: '/repo/truncated.ts' }));
-    await write(store, key, value);
+    await write<ScanResult>(store, key, value);
     const blobPath = join(tmpRoot, 'parse', `${key}.msgpack`);
     const blob = await readFile(blobPath);
     // Slice off final 5 bytes — guaranteed to mangle the msgpackr payload tail
     // for a non-trivial Program (>5 trailing bytes).
     expect(blob.length).toBeGreaterThan(5);
     await writeFile(blobPath, blob.subarray(0, blob.length - 5));
-    await expect(read(store, key)).rejects.toBeInstanceOf(FugaziCacheError);
-    await expect(read(store, key)).rejects.toMatchObject({ code: 'CACHE_CORRUPTED' });
+    await expect(read<ScanResult>(store, key)).rejects.toBeInstanceOf(FugaziCacheError);
+    await expect(read<ScanResult>(store, key)).rejects.toMatchObject({ code: 'CACHE_CORRUPTED' });
   });
 
   it('empty blob (0 bytes) throws CACHE_CORRUPTED', async () => {
     const key = deriveKey(sampleParts({ filePath: '/repo/empty-blob.ts' }));
     // Pre-create the parse subdir via a successful write, then overwrite.
-    await write(store, key, { ast: null, errors: [] });
+    await write<ScanResult>(store, key, { ast: null, errors: [] });
     const blobPath = join(tmpRoot, 'parse', `${key}.msgpack`);
     await writeFile(blobPath, Buffer.alloc(0));
-    await expect(read(store, key)).rejects.toMatchObject({
+    await expect(read<ScanResult>(store, key)).rejects.toMatchObject({
       code: 'CACHE_CORRUPTED',
     });
   });
 
   it('sub-magic blob (3 bytes) throws CACHE_CORRUPTED', async () => {
     const key = deriveKey(sampleParts({ filePath: '/repo/sub-magic.ts' }));
-    await write(store, key, { ast: null, errors: [] });
+    await write<ScanResult>(store, key, { ast: null, errors: [] });
     const blobPath = join(tmpRoot, 'parse', `${key}.msgpack`);
     await writeFile(blobPath, Buffer.from([0x00, 0x00, 0x00]));
-    await expect(read(store, key)).rejects.toMatchObject({
+    await expect(read<ScanResult>(store, key)).rejects.toMatchObject({
       code: 'CACHE_CORRUPTED',
     });
   });
 
   it('decode of an empty Buffer throws CACHE_CORRUPTED directly', () => {
-    expect(() => decodeCacheBlob(Buffer.alloc(0))).toThrow(FugaziCacheError);
+    expect(() => decodeCacheBlob<ScanResult>(Buffer.alloc(0))).toThrow(FugaziCacheError);
     try {
-      decodeCacheBlob(Buffer.alloc(0));
+      decodeCacheBlob<ScanResult>(Buffer.alloc(0));
     } catch (err) {
       expect((err as FugaziCacheError).code).toBe('CACHE_CORRUPTED');
     }
@@ -340,7 +340,10 @@ describe('cache key derivation', () => {
 
 describe('cache store — write', () => {
   it('read on a never-written key returns null (no throw)', async () => {
-    const got = await read(store, deriveKey(sampleParts({ filePath: '/repo/never-written.ts' })));
+    const got = await read<ScanResult>(
+      store,
+      deriveKey(sampleParts({ filePath: '/repo/never-written.ts' })),
+    );
     expect(got).toBeNull();
   });
 
@@ -351,11 +354,11 @@ describe('cache store — write', () => {
     await writeFile(fileAsDir, 'this is a file, not a directory');
     const badStore = createStore(fileAsDir);
     const key = deriveKey(sampleParts({ filePath: '/repo/should-fail.ts' }));
-    await expect(write(badStore, key, { ast: null, errors: [] })).rejects.toBeInstanceOf(
-      FugaziCacheError,
-    );
+    await expect(
+      write<ScanResult>(badStore, key, { ast: null, errors: [] }),
+    ).rejects.toBeInstanceOf(FugaziCacheError);
     try {
-      await write(badStore, key, { ast: null, errors: [] });
+      await write<ScanResult>(badStore, key, { ast: null, errors: [] });
     } catch (err) {
       expect(err).toBeInstanceOf(FugaziCacheError);
       const ce = err as FugaziCacheError;
@@ -373,8 +376,8 @@ describe('cache store — write', () => {
   it('write then read returns deep-equal value (sanity)', async () => {
     const value: ScanResult = { ast: tinyProgram(), errors: [] };
     const key = deriveKey(sampleParts({ filePath: '/repo/sanity.ts' }));
-    await write(store, key, value);
-    const got = await read(store, key);
+    await write<ScanResult>(store, key, value);
+    const got = await read<ScanResult>(store, key);
     expect(got).toEqual(value);
   });
 });

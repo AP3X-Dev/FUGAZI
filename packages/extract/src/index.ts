@@ -36,8 +36,18 @@ export {
 export {
   type CacheKeyParts,
   type ParseCacheStore,
+  blobPathFor,
   createStore,
   deriveKey,
   read as readCache,
   write as writeCache,
 } from './cache/store.js';
+export type {
+  CacheEntry,
+  CacheHit,
+  CacheMeta,
+  CacheableResult,
+} from './cache/types.js';
+export { xxh3 } from './cache/hash.js';
+export { type LockOptions, withLock } from './cache/lock.js';
+export { type DispatchOptions, getCacheable } from './cache/dispatch.js';

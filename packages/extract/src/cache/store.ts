@@ -27,7 +27,6 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { FugaziCacheError } from '@fugazi/types';
-import type { ScanResult } from '../parsers/scan.js';
 import { CACHE_VERSION, decode, encode } from './codec.js';
 
 const PARSE_SUBDIR = 'parse';
@@ -96,8 +95,12 @@ export function createStore(cacheDir: string): ParseCacheStore {
   return { cacheDir };
 }
 
-/** Compose the absolute on-disk path for a given key. */
-function blobPathFor(store: ParseCacheStore, key: string): string {
+/**
+ * Compose the absolute on-disk path for a given key. Exported so Dispatch B's
+ * dispatcher (cache/dispatch.ts) can compute the path for `withLock` without
+ * duplicating the path-construction logic.
+ */
+export function blobPathFor(store: ParseCacheStore, key: string): string {
   return join(store.cacheDir, PARSE_SUBDIR, `${key}${BLOB_EXT}`);
 }
 
@@ -108,9 +111,12 @@ function blobPathFor(store: ParseCacheStore, key: string): string {
  * verbatim message contract:
  *
  *     `Cache write failed for key '<key>' at '<path>': <cause.message>`
+ *
+ * Generic over `T`: callers must type-bind at the call site. Dispatch A uses
+ * `ScanResult`; Dispatch B uses `CacheEntry`.
  */
-export async function write(store: ParseCacheStore, key: string, value: ScanResult): Promise<void> {
-  const blob = encode(value);
+export async function write<T>(store: ParseCacheStore, key: string, value: T): Promise<void> {
+  const blob = encode<T>(value);
   const path = blobPathFor(store, key);
   const parseDir = join(store.cacheDir, PARSE_SUBDIR);
   try {
@@ -127,7 +133,7 @@ export async function write(store: ParseCacheStore, key: string, value: ScanResu
 }
 
 /**
- * Read the cached `ScanResult` for `key`. Returns `null` on:
+ * Read the cached value for `key`. Returns `null` on:
  *   - file missing (ENOENT / ENOTDIR), OR
  *   - decoded version differs from the compile-time `CACHE_VERSION`
  *     (clean cache miss across version bumps; intentional, not an error).
@@ -135,8 +141,11 @@ export async function write(store: ParseCacheStore, key: string, value: ScanResu
  * Propagates `FugaziCacheError(CACHE_CORRUPTED)` from the codec when the blob
  * is malformed — corruption is a signal that an upstream re-parse should
  * occur (and overwrite the bad blob via a subsequent `write`).
+ *
+ * Generic over `T`: callers are responsible for typing `T` at the call site
+ * (the codec does not validate runtime shape).
  */
-export async function read(store: ParseCacheStore, key: string): Promise<ScanResult | null> {
+export async function read<T>(store: ParseCacheStore, key: string): Promise<T | null> {
   const path = blobPathFor(store, key);
   let blob: Buffer;
   try {
@@ -145,7 +154,7 @@ export async function read(store: ParseCacheStore, key: string): Promise<ScanRes
     if (isFileNotFound(cause)) return null;
     throw cause;
   }
-  const { value, version } = decode(blob);
+  const { value, version } = decode<T>(blob);
   if (version !== CACHE_VERSION) return null;
   return value;
 }
