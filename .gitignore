@@ -1,0 +1,44 @@
+# clean-room planning artifacts — do not commit
+clean-room/
+
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+
+# build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# test output
+coverage/
+.nyc_output/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# bun
+.bun/
+
+# packaged binaries
+*.tgz
