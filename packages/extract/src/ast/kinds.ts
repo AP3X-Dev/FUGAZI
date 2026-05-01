@@ -230,6 +230,37 @@ export interface MemberExpression {
 }
 
 /**
+ * `NewExpression` — `new Foo(a, b)`. Visitor uses this to recognise the
+ * `new URL(literal, import.meta.url)` asset-edge pattern (Wave 5b-3 / T066).
+ * `args` mirrors `CallExpression.args` shape — each call argument flattened
+ * into the `Expression` union.
+ */
+export interface NewExpression {
+  readonly kind: 'NewExpression';
+  readonly range: Range;
+  readonly callee: Expression;
+  readonly args: readonly Expression[];
+}
+
+/**
+ * `TemplateLiteral` — backtick string with optional `${...}` interpolation.
+ * `quasis` is the literal "cooked" string segments separated by interpolation
+ * slots; `expressions` is the inner Expression nodes for those slots. The
+ * invariant `quasis.length === expressions.length + 1` always holds:
+ *   - `\`abc\``                  → quasis: ['abc'],          expressions: []
+ *   - `\`prefix-${x}-suffix\``   → quasis: ['prefix-','-suffix'], expressions: [x]
+ *
+ * Visitor uses this to recognise constant-prefix dynamic imports
+ * (`import(\`./mod-\${name}\`)`), narrowing resolver candidates.
+ */
+export interface TemplateLiteral {
+  readonly kind: 'TemplateLiteral';
+  readonly range: Range;
+  readonly quasis: readonly string[];
+  readonly expressions: readonly Expression[];
+}
+
+/**
  * `Program` — the root of every successfully-parsed source. `body` is the
  * ordered list of top-level statements; `filename` echoes the input options
  * for reporter convenience; `language` records which parser configuration was
@@ -353,6 +384,8 @@ export type Expression =
   | JSXElement
   | Literal
   | MemberExpression
+  | NewExpression
+  | TemplateLiteral
   | UnknownExpression;
 
 /**

@@ -36,8 +36,10 @@ import type {
   JSXElement,
   Literal,
   MemberExpression,
+  NewExpression,
   Program,
   SwitchStatement,
+  TemplateLiteral,
   TypeDecl,
   UnknownExpression,
   UnknownStatement,
@@ -99,8 +101,12 @@ export function childrenOf(node: ASTNode): readonly ASTNode[] {
       return literalChildren(node);
     case 'MemberExpression':
       return memberChildren(node);
+    case 'NewExpression':
+      return newChildren(node);
     case 'SwitchStatement':
       return switchChildren(node);
+    case 'TemplateLiteral':
+      return templateChildren(node);
     case 'TypeDecl':
       return typeChildren(node);
     case 'UnknownExpression':
@@ -168,8 +174,16 @@ function literalChildren(_n: Literal): readonly ASTNode[] {
 function memberChildren(n: MemberExpression): readonly ASTNode[] {
   return [n.object, n.property];
 }
+function newChildren(n: NewExpression): readonly ASTNode[] {
+  return [n.callee, ...n.args];
+}
 function switchChildren(n: SwitchStatement): readonly ASTNode[] {
   return n.body;
+}
+function templateChildren(n: TemplateLiteral): readonly ASTNode[] {
+  // `quasis` is a list of cooked strings, not nodes — only the inner
+  // `expressions` are walkable.
+  return n.expressions;
 }
 function typeChildren(_n: TypeDecl): readonly ASTNode[] {
   return [];

@@ -30,6 +30,7 @@
  * appears in source.
  */
 
+import { matchAssetUrl } from '../asset-url.js';
 import type { ASTNode, Program } from '../ast/kinds.js';
 import { walk } from '../ast/visit.js';
 import {
@@ -93,6 +94,24 @@ export function buildInventory(program: Program, options?: BuildOptions): Invent
         case 'CallExpression':
           handleDynamicImport(node, imports);
           return;
+        case 'NewExpression': {
+          // Asset-URL pattern: `new URL(literal, import.meta.url)`. Pure
+          // structural detector returns null for any non-matching shape.
+          // Known limitation: variable initializers (`const u = new URL(...)`)
+          // are not reached because the walker does not currently descend
+          // into VariableDecl declarators. Expression-statement form is
+          // reached normally. A future visitor pre-scan could close that gap.
+          const match = matchAssetUrl(node);
+          if (match !== null) {
+            imports.push({
+              kind: 'asset',
+              source: match.source,
+              resolvable: true,
+              range: node.range,
+            });
+          }
+          return;
+        }
         case 'Identifier':
           handleIdentifier(node, parent, usages);
           return;

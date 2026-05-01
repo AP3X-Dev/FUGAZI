@@ -44,9 +44,11 @@ import type {
   JSXElement,
   Literal,
   MemberExpression,
+  NewExpression,
   Program,
   Statement,
   SwitchStatement,
+  TemplateLiteral,
   TypeDecl,
   UnknownExpression,
   UnknownStatement,
@@ -109,6 +111,22 @@ interface SwcNode {
   readonly meta?: SwcNode | null;
   // `import.meta` MetaProperty in SWC carries `kind: 'import.meta'`. The
   // generic `kind?: string` above already covers it.
+  // TemplateLiteral / TaggedTemplateExpression fields:
+  readonly quasis?: readonly SwcTemplateElement[];
+  readonly expressions?: readonly SwcNode[];
+  readonly tag?: SwcNode | null;
+  readonly template?: SwcNode | null;
+  // AwaitExpression / YieldExpression carry their inner expression in
+  // `argument`. (CallExpression args use `arguments` above.)
+  readonly argument?: SwcNode | null;
+}
+
+interface SwcTemplateElement {
+  readonly type: 'TemplateElement';
+  readonly span: SwcSpan;
+  readonly cooked?: string | null;
+  readonly raw?: string | null;
+  readonly tail?: boolean;
 }
 
 interface SwcVariableDeclarator {
@@ -522,6 +540,70 @@ function classifyExpression(node: SwcNode, ctx: SpanContext): Expression {
       );
       const out: CallExpression = { kind: 'CallExpression', range, callee, args };
       return out;
+    }
+    case 'NewExpression': {
+      // `new Foo(a, b)` — args list mirrors CallExpression's `.arguments`.
+      const callee =
+        node.callee !== null && node.callee !== undefined
+          ? classifyExpression(node.callee, ctx)
+          : ({ kind: 'UnknownExpression', range } satisfies UnknownExpression);
+      const args: readonly Expression[] = (node.arguments ?? []).map((a) =>
+        classifyExpression(a.expression, ctx),
+      );
+      const out: NewExpression = { kind: 'NewExpression', range, callee, args };
+      return out;
+    }
+    case 'TemplateLiteral': {
+      // `quasis` is a list of TemplateElement nodes carrying `.cooked` strings.
+      // `expressions` is a list of inner SwcNodes for the `${...}` slots. The
+      // invariant `quasis.length === expressions.length + 1` is guaranteed by
+      // the JS template grammar; we coerce missing `cooked` (invalid escape)
+      // to '' rather than null so consumers see uniform string segments.
+      const quasis: readonly string[] = (node.quasis ?? []).map((q) =>
+        typeof q.cooked === 'string' ? q.cooked : '',
+      );
+      const expressions: readonly Expression[] = (node.expressions ?? []).map((e) =>
+        classifyExpression(e, ctx),
+      );
+      const out: TemplateLiteral = { kind: 'TemplateLiteral', range, quasis, expressions };
+      return out;
+    }
+    case 'TaggedTemplateExpression': {
+      // Best-effort: treat as a CallExpression whose callee is the tag and
+      // whose single argument is the template. Reduces UnknownExpression
+      // collapse for `sql\`select ...\`` and similar patterns. Downstream
+      // consumers that care about the precise tagged-template shape can
+      // distinguish via the args[0].kind === 'TemplateLiteral' check.
+      const callee =
+        node.tag !== null && node.tag !== undefined
+          ? classifyExpression(node.tag, ctx)
+          : ({ kind: 'UnknownExpression', range } satisfies UnknownExpression);
+      const tmpl =
+        node.template !== null && node.template !== undefined
+          ? classifyExpression(node.template, ctx)
+          : ({ kind: 'UnknownExpression', range } satisfies UnknownExpression);
+      const out: CallExpression = {
+        kind: 'CallExpression',
+        range,
+        callee,
+        args: [tmpl],
+      };
+      return out;
+    }
+    case 'AwaitExpression':
+    case 'YieldExpression': {
+      // Pass-through: the visitor's walker can't see past these wrappers, so
+      // `await import('./x')` and `yield foo()` would otherwise hide their
+      // inner CallExpression behind UnknownExpression. Recurse into the
+      // wrapped expression and adopt its classification (range stays the
+      // wrapper's own — the inner expression already carries its own range
+      // when reached via a child slot, but we don't expose a child slot for
+      // the wrapper here).
+      if (node.argument !== null && node.argument !== undefined) {
+        return classifyExpression(node.argument, ctx);
+      }
+      const fallback: UnknownExpression = { kind: 'UnknownExpression', range };
+      return fallback;
     }
     case 'Import': {
       // Dynamic-import callee — surface as a synthetic identifier.

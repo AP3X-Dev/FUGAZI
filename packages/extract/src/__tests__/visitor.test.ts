@@ -319,10 +319,14 @@ describe('visitor — dynamic imports', () => {
     expect(s.imports).toEqual([{ kind: 'dynamic', source: './m', resolvable: true }]);
   });
 
-  it('template literal argument is non-resolvable', async () => {
+  it('template literal argument is non-resolvable but carries constant prefix', async () => {
+    // Phase 3c.4 Dispatch C-1 (T066): TemplateLiteral arguments now classify
+    // explicitly. The constant prefix `'./'` is preserved on the Import record
+    // so the resolver can narrow candidates by directory prefix even though
+    // the full source remains unresolvable.
     const program = await parseProgram('import(`./${x}`);');
     const s = shapeOf(buildInventory(program));
-    expect(s.imports).toEqual([{ kind: 'dynamic', source: '', resolvable: false }]);
+    expect(s.imports).toEqual([{ kind: 'dynamic', source: './', resolvable: false }]);
   });
 
   it('variable argument is non-resolvable', async () => {

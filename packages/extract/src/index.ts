@@ -61,3 +61,14 @@ export {
   type Usage,
   type UsageKind,
 } from './visitor/index.js';
+export {
+  type AssetUrlMatch,
+  isImportMetaUrl,
+  matchAssetUrl,
+} from './asset-url.js';
+export {
+  classifyDynamicImport,
+  constantPrefix,
+  type DynamicImportShape,
+  type TemplatePrefix,
+} from './visitor/dynamic.js';

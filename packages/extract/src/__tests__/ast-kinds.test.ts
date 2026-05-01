@@ -119,6 +119,10 @@ function expressionKind(e: Expression): string {
       return 'Literal';
     case 'MemberExpression':
       return 'MemberExpression';
+    case 'NewExpression':
+      return 'NewExpression';
+    case 'TemplateLiteral':
+      return 'TemplateLiteral';
     case 'UnknownExpression':
       return 'UnknownExpression';
     default:
@@ -151,6 +155,8 @@ function astNodeKind(n: ASTNode): string {
     case 'JSXElement':
     case 'Literal':
     case 'MemberExpression':
+    case 'NewExpression':
+    case 'TemplateLiteral':
     case 'UnknownExpression':
       return expressionKind(n);
     default:
@@ -207,6 +213,18 @@ describe('AST kinds — discriminated-union exhaustiveness', () => {
         range: ZERO_RANGE,
         object: { kind: 'Identifier', range: ZERO_RANGE, name: 'a' },
         property: id('b'),
+      },
+      {
+        kind: 'NewExpression',
+        range: ZERO_RANGE,
+        callee: { kind: 'Identifier', range: ZERO_RANGE, name: 'URL' },
+        args: [],
+      },
+      {
+        kind: 'TemplateLiteral',
+        range: ZERO_RANGE,
+        quasis: ['abc'],
+        expressions: [],
       },
       { kind: 'UnknownExpression', range: ZERO_RANGE },
     ];
@@ -385,7 +403,19 @@ describe('walk() — visit semantics', () => {
         object: id('a'),
         property: id('b'),
       },
+      {
+        kind: 'NewExpression',
+        range: ZERO_RANGE,
+        callee: id('URL'),
+        args: [],
+      },
       { kind: 'SwitchStatement', range: ZERO_RANGE, body: [] },
+      {
+        kind: 'TemplateLiteral',
+        range: ZERO_RANGE,
+        quasis: ['abc'],
+        expressions: [],
+      },
       { kind: 'TypeDecl', range: ZERO_RANGE, name: 'T' },
       { kind: 'UnknownExpression', range: ZERO_RANGE },
       { kind: 'UnknownStatement', range: ZERO_RANGE },
