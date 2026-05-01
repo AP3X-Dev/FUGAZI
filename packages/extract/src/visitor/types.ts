@@ -22,7 +22,7 @@ export interface Declaration {
   readonly members: readonly string[];
 }
 
-export type ImportKind = 'static' | 'dynamic' | 'reexport' | 'asset';
+export type ImportKind = 'static' | 'dynamic' | 'reexport' | 'asset' | 'type';
 
 export interface Import {
   readonly kind: ImportKind;

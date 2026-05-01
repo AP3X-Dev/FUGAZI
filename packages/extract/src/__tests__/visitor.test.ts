@@ -300,13 +300,26 @@ describe('visitor — imports', () => {
 
 describe('visitor — type-only imports', () => {
   it(`import type { X } from './m'`, async () => {
+    // Phase 3c.4 Dispatch C-2: declaration-level `import type { ... }` now
+    // surfaces as `kind: 'type'` so the runtime-graph builder can skip it.
     const program = await parseProgram(`import type { X } from './m';`);
     const s = shapeOf(buildInventory(program));
-    expect(s.imports).toEqual([{ kind: 'static', source: './m', resolvable: true }]);
+    expect(s.imports).toEqual([{ kind: 'type', source: './m', resolvable: true }]);
   });
 
   it(`import { type Y } from './m'`, async () => {
+    // Phase 3c.4 Dispatch C-2: when every specifier carries `isTypeOnly: true`,
+    // the whole import is flagged `kind: 'type'` (option (b) policy — see
+    // `visitor/imports.ts` for the rationale).
     const program = await parseProgram(`import { type Y } from './m';`);
+    const s = shapeOf(buildInventory(program));
+    expect(s.imports).toEqual([{ kind: 'type', source: './m', resolvable: true }]);
+  });
+
+  it(`mixed import keeps kind 'static': import { Foo, type Bar } from './m'`, async () => {
+    // Mixed imports (at least one runtime specifier) stay `kind: 'static'` —
+    // the runtime binding `Foo` keeps the module live regardless of `Bar`.
+    const program = await parseProgram(`import { Foo, type Bar } from './m';`);
     const s = shapeOf(buildInventory(program));
     expect(s.imports).toEqual([{ kind: 'static', source: './m', resolvable: true }]);
   });

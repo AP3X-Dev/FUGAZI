@@ -90,6 +90,12 @@ interface SwcNode {
   readonly identifier?: SwcNode | null;
   readonly id?: SwcNode | null;
   readonly kind?: string;
+  // ImportDeclaration: declaration-level `typeOnly` flag (true for
+  // `import type { ... } from './m'`).
+  readonly typeOnly?: boolean;
+  // ImportDeclaration: list of specifiers; each may carry per-specifier
+  // `isTypeOnly` (true for `import { type Y } from './m'`).
+  readonly specifiers?: readonly SwcImportSpecifier[];
   readonly declarations?: readonly SwcVariableDeclarator[];
   readonly body?: SwcNode | readonly SwcNode[] | null;
   readonly stmts?: readonly SwcNode[];
@@ -133,6 +139,17 @@ interface SwcVariableDeclarator {
   readonly type: 'VariableDeclarator';
   readonly span: SwcSpan;
   readonly id: SwcNode;
+}
+
+/**
+ * SWC import specifier — minimum surface needed to read per-specifier
+ * `isTypeOnly`. Other slots (`local`, `imported`) are not consumed at this
+ * layer; the full structural specifier shape is opaque past this property.
+ */
+interface SwcImportSpecifier {
+  readonly type: 'ImportSpecifier' | 'ImportDefaultSpecifier' | 'ImportNamespaceSpecifier';
+  readonly span: SwcSpan;
+  readonly isTypeOnly?: boolean;
 }
 
 interface SwcCallArgument {
@@ -349,10 +366,25 @@ function classifyStatement(node: SwcNode, ctx: SpanContext): Statement {
 }
 
 function classifyImport(node: SwcNode, range: Range): ImportDecl {
+  // Determine whether the entire import contributes only to the TypeScript
+  // type graph. Two source shapes qualify (per `ast/kinds.ts ImportDecl`):
+  //   - declaration-level `import type { ... } from './m'` → SWC sets
+  //     `typeOnly: true` on the declaration node.
+  //   - `import { type Y } from './m'` (with no runtime specifiers) → SWC
+  //     keeps `typeOnly: false` on the declaration but sets `isTypeOnly: true`
+  //     on every specifier.
+  // Mixed imports (`import { Foo, type Bar } from './m'`) keep `typeOnly: false`
+  // because at least one specifier remains a runtime binding.
+  const declTypeOnly = node.typeOnly === true;
+  const specifiers = node.specifiers ?? [];
+  const allSpecifiersTypeOnly =
+    specifiers.length > 0 && specifiers.every((s) => s.isTypeOnly === true);
+  const typeOnly = declTypeOnly || allSpecifiersTypeOnly;
   return {
     kind: 'ImportDecl',
     range,
     source: node.source?.value ?? '',
+    ...(typeOnly ? { typeOnly: true } : {}),
   };
 }
 

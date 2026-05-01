@@ -175,6 +175,20 @@ export interface IfStatement {
  * `ImportDecl` — `import foo from './x';` and friends. `source` carries the
  * raw module specifier verbatim (no resolution applied).
  *
+ * `typeOnly` is `true` when the import contributes ONLY to the TypeScript type
+ * graph (no runtime value bindings). Two SWC source-shapes set this:
+ *
+ *   - declaration-level `import type { ... } from './m'` (SWC sets the
+ *     `typeOnly: true` flag on the ImportDeclaration), or
+ *   - declaration-level `import { type Y, type Z } from './m'` where every
+ *     specifier carries `isTypeOnly: true` (per-specifier flag, the
+ *     declaration-level flag stays `false`).
+ *
+ * Mixed imports — e.g. `import { Foo, type Bar } from './m'` — keep
+ * `typeOnly: false` because at least one specifier is a runtime binding.
+ *
+ * Absent / `undefined` is interpreted as `false` by all consumers.
+ *
  * NOTE: This was named `ImportDeclaration` through Wave 5b-2; Phase 3c.4
  * renamed it to `ImportDecl` for consistency with `FunctionDecl` / `ClassDecl`.
  */
@@ -182,6 +196,7 @@ export interface ImportDecl {
   readonly kind: 'ImportDecl';
   readonly range: Range;
   readonly source: string;
+  readonly typeOnly?: boolean;
 }
 
 /**
