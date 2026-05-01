@@ -144,8 +144,8 @@ describe('parser-oxc adapter — language fixtures (T050: ≥18 fixtures across 
     const body = r.program?.body ?? [];
     expect(body.length).toBe(1);
     const stmt = body[0];
-    if (stmt?.kind !== 'ImportDeclaration') {
-      throw new Error(`expected ImportDeclaration, got ${stmt?.kind ?? 'undefined'}`);
+    if (stmt?.kind !== 'ImportDecl') {
+      throw new Error(`expected ImportDecl, got ${stmt?.kind ?? 'undefined'}`);
     }
     expect(stmt.source).toBe('./m');
   });
@@ -156,8 +156,8 @@ describe('parser-oxc adapter — language fixtures (T050: ≥18 fixtures across 
     const body = r.program?.body ?? [];
     expect(body.length).toBe(1);
     const stmt = body[0];
-    if (stmt?.kind !== 'ExportDeclaration') {
-      throw new Error(`expected ExportDeclaration, got ${stmt?.kind ?? 'undefined'}`);
+    if (stmt?.kind !== 'ExportDecl') {
+      throw new Error(`expected ExportDecl, got ${stmt?.kind ?? 'undefined'}`);
     }
     expect(stmt.source).toBeNull();
   });
@@ -166,8 +166,8 @@ describe('parser-oxc adapter — language fixtures (T050: ≥18 fixtures across 
     const r = await parse(`export * from './re';`, { filename: 'a.ts', lang: 'ts' });
     expect(r.errors).toEqual([]);
     const stmt = r.program?.body[0];
-    if (stmt?.kind !== 'ExportDeclaration') {
-      throw new Error('expected ExportDeclaration');
+    if (stmt?.kind !== 'ExportDecl') {
+      throw new Error('expected ExportDecl');
     }
     expect(stmt.source).toBe('./re');
   });
@@ -217,8 +217,8 @@ describe('parser-oxc adapter — language fixtures (T050: ≥18 fixtures across 
     });
     expect(r.errors).toEqual([]);
     const stmt = r.program?.body[0];
-    if (stmt?.kind !== 'ImportDeclaration') {
-      throw new Error('expected ImportDeclaration');
+    if (stmt?.kind !== 'ImportDecl') {
+      throw new Error('expected ImportDecl');
     }
     expect(stmt.source).toBe('./x.json');
   });

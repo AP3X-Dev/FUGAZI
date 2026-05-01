@@ -27,6 +27,12 @@ const FORBIDDEN_TOKENS = [
   'sidecar',
   'paid',
   'enterprise',
+  // Phase 3c.4 — IMP-DEBT-08: the original Fallow Rust pipeline used a string
+  // sentinel `INSTANCE_EXPORT_SENTINEL` to thread state across its 4-pass
+  // visitor. Fugazi's single-pass typed visitor uses a discriminated-union
+  // accumulator instead. Reintroducing the sentinel string anywhere in source
+  // is forbidden per the clean-room contract.
+  'INSTANCE_EXPORT_SENTINEL',
 ];
 
 const ALLOWLISTED_PATHS = new Set([

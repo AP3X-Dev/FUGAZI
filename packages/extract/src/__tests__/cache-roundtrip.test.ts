@@ -59,7 +59,7 @@ const tinyProgram = (): Program => ({
   kind: 'Program',
   body: [
     {
-      kind: 'ImportDeclaration',
+      kind: 'ImportDecl',
       source: './neighbour.js',
       range: range([1, 0, 0], [1, 27, 27]),
     },
@@ -75,13 +75,13 @@ const fiftyStatementProgram = (): Program => {
     const r = range([i + 1, 0, i * 32], [i + 1, 30, i * 32 + 30]);
     if (i % 3 === 0) {
       body.push({
-        kind: 'ImportDeclaration',
+        kind: 'ImportDecl',
         source: `./mod-${i}.js`,
         range: r,
       });
     } else if (i % 3 === 1) {
       body.push({
-        kind: 'ExportDeclaration',
+        kind: 'ExportDecl',
         source: i % 2 === 0 ? null : `./reexp-${i}.js`,
         range: r,
       });
@@ -152,7 +152,7 @@ describe('cache codec — round-trip', () => {
     expect(got).toEqual(value);
   });
 
-  it('round-trips a tiny Program with one ImportDeclaration', async () => {
+  it('round-trips a tiny Program with one ImportDecl', async () => {
     const value: ScanResult = { ast: tinyProgram(), errors: [] };
     const key = deriveKey(sampleParts({ filePath: '/repo/tiny.ts' }));
     const got = await writeAndRead(key, value);
