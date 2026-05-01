@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../../../../../etc/passwd",
+  "rules": {
+    "unused-files": "error"
+  }
+}

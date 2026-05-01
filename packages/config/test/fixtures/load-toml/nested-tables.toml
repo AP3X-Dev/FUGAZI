@@ -1,0 +1,7 @@
+production = true
+
+[rules]
+"unused-files" = "error"
+
+[rules.complexity]
+threshold = 20

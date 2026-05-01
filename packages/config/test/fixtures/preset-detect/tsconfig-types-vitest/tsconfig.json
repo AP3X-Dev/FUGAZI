@@ -1,0 +1,6 @@
+{
+  // tsconfig with comments to exercise jsonc-parser
+  "compilerOptions": {
+    "types": ["vitest", "node"]
+  }
+}

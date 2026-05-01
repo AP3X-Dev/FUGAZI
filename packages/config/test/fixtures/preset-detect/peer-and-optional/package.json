@@ -1,0 +1,10 @@
+{
+  "name": "peer-and-optional",
+  "version": "0.0.0",
+  "peerDependencies": {
+    "@angular/core": "^17.0.0"
+  },
+  "optionalDependencies": {
+    "vitest": "^1.0.0"
+  }
+}

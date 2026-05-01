@@ -1,0 +1,7 @@
+{
+  "name": "jest-only",
+  "version": "0.0.0",
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}

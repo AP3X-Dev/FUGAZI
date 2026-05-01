@@ -1,0 +1,7 @@
+{
+  // line comment — JSONC supports these
+  "rules": {
+    /* block comment — JSONC supports these too */
+    "unused-files": "warn"
+  }
+}

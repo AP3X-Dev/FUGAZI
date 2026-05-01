@@ -1,0 +1,4 @@
+{
+  "extends": "./node_modules/shared-config/preset.json",
+  "include": ["src/**/*.ts"]
+}

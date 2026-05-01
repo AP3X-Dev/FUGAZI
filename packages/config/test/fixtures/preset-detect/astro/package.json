@@ -1,0 +1,7 @@
+{
+  "name": "astro-site",
+  "version": "0.0.0",
+  "dependencies": {
+    "astro": "^4.0.0"
+  }
+}

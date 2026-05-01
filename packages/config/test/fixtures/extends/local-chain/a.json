@@ -1,0 +1,7 @@
+{
+  "extends": "./b.json",
+  "rules": {
+    "unused-exports": "warn"
+  },
+  "production": true
+}

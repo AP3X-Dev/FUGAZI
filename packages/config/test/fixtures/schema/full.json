@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "unused-files": "error",
+    "unused-exports": "warn",
+    "unused-types": "off"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "dist", "build", "coverage"],
+  "entrypoints": ["src/index.ts"],
+  "extends": ["./base.json"],
+  "frameworks": ["react", "next"],
+  "production": true,
+  "strict": false,
+  "experimentalTsPlugins": false
+}

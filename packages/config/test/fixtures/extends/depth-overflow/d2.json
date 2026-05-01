@@ -1,0 +1,6 @@
+{
+  "extends": "./d3.json",
+  "rules": {
+    "unused-files": "error"
+  }
+}

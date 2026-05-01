@@ -1,0 +1,7 @@
+{
+  "extends": "./c.json",
+  "rules": {
+    "unused-files": "error"
+  },
+  "exclude": ["dist"]
+}

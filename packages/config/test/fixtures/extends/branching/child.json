@@ -1,0 +1,6 @@
+{
+  "extends": ["./p1.json", "./p2.json", "./p3.json"],
+  "rules": {
+    "circular-dependencies": "error"
+  }
+}

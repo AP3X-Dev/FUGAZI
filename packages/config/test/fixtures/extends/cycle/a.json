@@ -1,0 +1,6 @@
+{
+  "extends": "./b.json",
+  "rules": {
+    "unused-files": "error"
+  }
+}

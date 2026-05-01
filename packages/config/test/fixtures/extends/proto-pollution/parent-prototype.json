@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "unused-files": "error"
+  },
+  "prototype": {
+    "polluted": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "react-vitest",
+  "version": "0.0.0",
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "unused-files": "error"
+  },
+  "production": false
+}

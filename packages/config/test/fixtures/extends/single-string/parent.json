@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "unused-files": "warn"
+  },
+  "include": ["src/**/*.ts"]
+}

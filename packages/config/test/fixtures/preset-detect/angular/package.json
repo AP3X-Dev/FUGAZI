@@ -1,0 +1,10 @@
+{
+  "name": "angular-app",
+  "version": "0.0.0",
+  "dependencies": {
+    "@angular/core": "^17.0.0"
+  },
+  "devDependencies": {
+    "@angular/cli": "^17.0.0"
+  }
+}

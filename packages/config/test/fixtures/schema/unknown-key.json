@@ -1,0 +1,4 @@
+{
+  "rules": { "unused-files": "error" },
+  "totallyUnknownField": "value"
+}

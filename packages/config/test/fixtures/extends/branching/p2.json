@@ -1,0 +1,7 @@
+{
+  "rules": {
+    "unused-files": "error",
+    "unused-types": "warn"
+  },
+  "include": ["from-p2/**/*.ts"]
+}
