@@ -93,6 +93,12 @@ export interface EnumDecl {
  * `source` is non-null only for re-exports (`from './w'`); for declarations
  * exporting a local symbol it is `null`.
  *
+ * `declaration` is the wrapped `FunctionDecl` / `ClassDecl` / `VariableDecl` /
+ * `TypeDecl` / `EnumDecl` for forms like `export function f() {}` and
+ * `export default function g() {}`. Absent for plain re-exports
+ * (`export { x } from './m'`) and bare specifier exports (`export { x }`).
+ * The visitor uses this to flag the wrapped declaration's `exported: true`.
+ *
  * NOTE: This was named `ExportDeclaration` through Wave 5b-2; Phase 3c.4
  * renamed it to `ExportDecl` for consistency with `FunctionDecl` / `ClassDecl`.
  */
@@ -100,6 +106,7 @@ export interface ExportDecl {
   readonly kind: 'ExportDecl';
   readonly range: Range;
   readonly source: string | null;
+  readonly declaration?: Statement;
 }
 
 /**

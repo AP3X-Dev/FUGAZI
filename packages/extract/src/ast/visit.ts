@@ -135,8 +135,8 @@ function classChildren(n: ClassDecl): readonly ASTNode[] {
 function enumChildren(n: EnumDecl): readonly ASTNode[] {
   return n.members;
 }
-function exportChildren(_n: ExportDecl): readonly ASTNode[] {
-  return [];
+function exportChildren(n: ExportDecl): readonly ASTNode[] {
+  return n.declaration !== undefined ? [n.declaration] : [];
 }
 function expressionStatementChildren(n: ExpressionStatement): readonly ASTNode[] {
   return [n.expression];

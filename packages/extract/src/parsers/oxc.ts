@@ -296,7 +296,7 @@ function classifyStatement(node: SwcNode, ctx: SpanContext): Statement {
     case 'ExportDefaultDeclaration':
     case 'ExportDefaultExpression':
     case 'ExportAllDeclaration':
-      return classifyExport(node, range);
+      return classifyExport(node, range, ctx);
     case 'FunctionDeclaration':
       return classifyFunctionDecl(node, range, ctx);
     case 'ClassDeclaration':
@@ -338,12 +338,52 @@ function classifyImport(node: SwcNode, range: Range): ImportDecl {
   };
 }
 
-function classifyExport(node: SwcNode, range: Range): ExportDecl {
+function classifyExport(node: SwcNode, range: Range, ctx: SpanContext): ExportDecl {
+  const wrapped = exportWrappedDeclaration(node, ctx);
   return {
     kind: 'ExportDecl',
     range,
     source: node.source?.value ?? null,
+    ...(wrapped !== null ? { declaration: wrapped } : {}),
   };
+}
+
+/**
+ * Extract a wrapped declaration from an SWC export node, if present. Returns
+ * null when the export form carries no wrapped declaration (re-exports, bare
+ * specifier exports, default-expression exports).
+ *
+ * Handled forms:
+ *   - `export const x = 1;` / `export function f() {}` (`ExportDeclaration`)
+ *   - `export default function f() {}` / `export default class C {}`
+ *     (`ExportDefaultDeclaration` with `decl: FunctionExpression | ClassExpression`)
+ *
+ * `FunctionExpression` / `ClassExpression` are remapped to `FunctionDecl` /
+ * `ClassDecl` respectively — they share the same structural shape, and the
+ * visitor surface only cares about the discriminated kind.
+ */
+function exportWrappedDeclaration(node: SwcNode, ctx: SpanContext): Statement | null {
+  // `export const x = 1;` and `export function f() {}` arrive as
+  // `ExportDeclaration { declaration: Declaration }`.
+  const direct = (node as { declaration?: SwcNode }).declaration;
+  if (direct !== undefined && direct !== null) {
+    return classifyStatement(direct, ctx);
+  }
+  // `export default function f() {}` arrives as
+  // `ExportDefaultDeclaration { decl: FunctionExpression | ClassExpression | TsInterfaceDeclaration }`.
+  const decl = (node as { decl?: SwcNode }).decl;
+  if (decl !== undefined && decl !== null) {
+    if (decl.type === 'FunctionExpression') {
+      return classifyFunctionDecl(decl, rangeOf(decl, ctx), ctx);
+    }
+    if (decl.type === 'ClassExpression') {
+      return classifyClassDecl(decl, rangeOf(decl, ctx), ctx);
+    }
+    if (decl.type === 'TsInterfaceDeclaration') {
+      return classifyTypeDecl(decl, rangeOf(decl, ctx));
+    }
+  }
+  return null;
 }
 
 function classifyFunctionDecl(node: SwcNode, range: Range, ctx: SpanContext): FunctionDecl {

@@ -51,3 +51,13 @@ export type {
 export { xxh3 } from './cache/hash.js';
 export { type LockOptions, withLock } from './cache/lock.js';
 export { type DispatchOptions, getCacheable } from './cache/dispatch.js';
+export {
+  buildInventory,
+  type Declaration,
+  type DeclarationKind,
+  type Import,
+  type ImportKind,
+  type Inventory,
+  type Usage,
+  type UsageKind,
+} from './visitor/index.js';
