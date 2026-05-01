@@ -55,10 +55,14 @@ jobs:
       - name: Typecheck (bun)
         if: matrix.runtime == 'bun'
         run: bun run typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Typecheck (node)
         if: matrix.runtime == 'node'
         run: npm run typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Lint (bun)
         if: matrix.runtime == 'bun'
@@ -71,10 +75,14 @@ jobs:
       - name: Test (bun)
         if: matrix.runtime == 'bun'
         run: bun run test
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Test (node)
         if: matrix.runtime == 'node'
         run: npm test
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
       - name: Forbidden strings check
         if: hashFiles('tools/forbidden-strings.ts') != ''
