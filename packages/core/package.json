@@ -1,0 +1,22 @@
+{
+  "name": "@fugazi/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fugazi/types": "workspace:*",
+    "@fugazi/config": "workspace:*",
+    "@fugazi/extract": "workspace:*",
+    "@fugazi/graph": "workspace:*"
+  }
+}

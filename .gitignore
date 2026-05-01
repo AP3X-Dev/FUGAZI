@@ -12,10 +12,15 @@ dist/
 build/
 out/
 *.tsbuildinfo
+.turbo/
 
 # test output
 coverage/
 .nyc_output/
+
+# fugazi local cache (and fallow cache, in case fixtures contain one)
+.fugazi/
+.fallow/
 
 # logs
 *.log

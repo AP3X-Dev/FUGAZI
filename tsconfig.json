@@ -1,0 +1,16 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/config" },
+    { "path": "./packages/extract" },
+    { "path": "./packages/graph" },
+    { "path": "./packages/v8-coverage" },
+    { "path": "./packages/core" },
+    { "path": "./packages/runtime" },
+    { "path": "./packages/node-api" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/lsp" },
+    { "path": "./packages/mcp" }
+  ]
+}

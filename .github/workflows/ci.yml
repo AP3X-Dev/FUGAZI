@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: test (${{ matrix.runtime }} on ${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [bun, node]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        if: matrix.runtime == 'bun'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.2.x'
+
+      - name: Setup Node
+        if: matrix.runtime == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install lefthook (node runtime)
+        if: matrix.runtime == 'node'
+        run: npm install -g lefthook
+
+      - name: Install dependencies (bun)
+        if: matrix.runtime == 'bun'
+        run: bun install --frozen-lockfile
+
+      - name: Install dependencies (node)
+        if: matrix.runtime == 'node'
+        run: npm ci --workspaces --include-workspace-root
+
+      - name: Build (bun)
+        if: matrix.runtime == 'bun'
+        run: bun run build
+
+      - name: Build (node)
+        if: matrix.runtime == 'node'
+        run: npm run build
+
+      - name: Typecheck (bun)
+        if: matrix.runtime == 'bun'
+        run: bun run typecheck
+
+      - name: Typecheck (node)
+        if: matrix.runtime == 'node'
+        run: npm run typecheck
+
+      - name: Lint (bun)
+        if: matrix.runtime == 'bun'
+        run: bun run lint
+
+      - name: Lint (node)
+        if: matrix.runtime == 'node'
+        run: npm run lint
+
+      - name: Test (bun)
+        if: matrix.runtime == 'bun'
+        run: bun run test
+
+      - name: Test (node)
+        if: matrix.runtime == 'node'
+        run: npm test
+
+      - name: Forbidden strings check
+        if: hashFiles('tools/forbidden-strings.ts') != ''
+        run: bun tools/forbidden-strings.ts
+
+      - name: Forbidden FALLOW env check
+        if: hashFiles('tools/forbidden-fallow-env.ts') != ''
+        run: bun tools/forbidden-fallow-env.ts
+
+      - name: Verify WASM pins
+        if: hashFiles('tools/verify-wasm.ts') != ''
+        run: bun tools/verify-wasm.ts
+
+  determinism:
+    name: determinism (byte-diff)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.2.x'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: First build
+        run: bun run build
+
+      - name: Stage first build output
+        run: |
+          mkdir -p .determinism/first
+          for d in packages/*/dist; do
+            pkg=$(basename "$(dirname "$d")")
+            mkdir -p ".determinism/first/$pkg"
+            cp -R "$d/." ".determinism/first/$pkg/"
+          done
+
+      - name: Clean dist before second build
+        run: rm -rf packages/*/dist
+
+      - name: Second build
+        run: bun run build
+
+      - name: Stage second build output
+        run: |
+          mkdir -p .determinism/second
+          for d in packages/*/dist; do
+            pkg=$(basename "$(dirname "$d")")
+            mkdir -p ".determinism/second/$pkg"
+            cp -R "$d/." ".determinism/second/$pkg/"
+          done
+
+      - name: Diff build outputs
+        run: diff -ru .determinism/first .determinism/second

@@ -1,0 +1,115 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/cli
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/config
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/core
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/extract
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/graph
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/lsp
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/mcp
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/node-api
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/runtime
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/types
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /packages/v8-coverage
+    schedule:
+      interval: weekly
+    groups:
+      workspace-deps:
+        patterns:
+          - '*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

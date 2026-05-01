@@ -1,0 +1,41 @@
+{
+  "name": "fugazi-workspace",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Fugazi: codebase intelligence for TypeScript and JavaScript. Workspace root.",
+  "license": "MIT",
+  "packageManager": "bun@1.2.0",
+  "workspaces": ["packages/*"],
+  "engines": {
+    "node": ">=22.0.0",
+    "bun": ">=1.2.0"
+  },
+  "scripts": {
+    "build": "turbo build",
+    "build:watch": "turbo build --watch",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:watch": "vitest",
+    "lint": "turbo lint",
+    "format": "biome format --write .",
+    "clean": "rm -rf packages/*/dist packages/*/.turbo packages/*/*.tsbuildinfo .turbo",
+    "fugazi": "bun packages/cli/src/index.ts",
+    "fugazi:built": "node bin/fugazi.js",
+    "dev:watch": "turbo build --watch",
+    "verify:wasm": "bun tools/verify-wasm.ts",
+    "forbidden:strings": "bun tools/forbidden-strings.ts",
+    "forbidden:env": "bun tools/forbidden-fallow-env.ts",
+    "prepare": "lefthook install",
+    "postinstall": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/node": "22.10.2",
+    "lefthook": "1.9.2",
+    "tsup": "8.3.5",
+    "turbo": "2.3.3",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

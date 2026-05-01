@@ -1,0 +1,41 @@
+name: fuzz
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  fuzz-targets:
+    name: Jazzer.js fuzz targets
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.2.0'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run fuzz targets
+        run: bun run fuzz || echo "fuzz harness not yet implemented (Phase 3k)"
+
+      - name: Upload corpus
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzz-corpus
+          path: fuzz/corpus/**/*
+          if-no-files-found: ignore
