@@ -35,6 +35,8 @@ import type { AnalysisMode } from '../types.js';
 import { createBoundaryViolationsRule } from './boundaries.js';
 import { createCircularDependenciesRule } from './circular-deps.js';
 import { createCodeDuplicationRule } from './code-duplication.js';
+import { createCognitiveComplexityRule } from './cognitive-complexity.js';
+import { createComplexityHotspotRule } from './complexity-hotspot.js';
 import {
   createDuplicateExportsRule,
   createUnlistedDependenciesRule,
@@ -98,6 +100,8 @@ export const RULES: ReadonlyMap<RuleId, RuleFactory> = new Map<RuleId, RuleFacto
   ['boundary-violations', createBoundaryViolationsRule],
   ['circular-dependencies', createCircularDependenciesRule],
   ['code-duplication', createCodeDuplicationRule],
+  ['cognitive-complexity', createCognitiveComplexityRule],
+  ['complexity-hotspot', createComplexityHotspotRule],
   ['duplicate-exports', createDuplicateExportsRule],
   ['private-type-leak', createPrivateTypeLeakRule],
   ['unlisted-dependencies', createUnlistedDependenciesRule],

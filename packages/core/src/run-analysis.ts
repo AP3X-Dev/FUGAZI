@@ -28,9 +28,22 @@ import { createHash } from 'node:crypto';
 import { readFile, readdir } from 'node:fs/promises';
 import { isAbsolute, join, sep } from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { type Inventory, type ParseError, buildInventory, parse } from '@fugazi/extract';
+import {
+  type FileComplexity,
+  type Inventory,
+  type ParseError,
+  buildInventory,
+  computeComplexity,
+  parse,
+} from '@fugazi/extract';
 import { type FileNode, type Graph, buildGraph } from '@fugazi/graph';
-import { type DiscriminatedIssue, FugaziCoreError, type Range, assignFileIds } from '@fugazi/types';
+import {
+  type DiscriminatedIssue,
+  type FileId,
+  FugaziCoreError,
+  type Range,
+  assignFileIds,
+} from '@fugazi/types';
 import { ProgressEmitter } from './progress.js';
 import { listEnabledRules, runEnabledRules } from './rules/registry.js';
 import type { RuleContext } from './rules/types.js';
@@ -63,10 +76,13 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
 
   let graph: Graph;
   let filesScanned: number;
+  let complexityMap: ReadonlyMap<FileId, FileComplexity> = new Map();
 
   if (options.preBuiltGraph !== undefined) {
     // Skip discover + extract + graph-build. Still emit the full event
     // sequence with zero counts so consumers see a consistent life-cycle.
+    // Complexity is unavailable on this fast-path; health rules degrade to
+    // no-emit when the map is empty.
     emitter.emit({ kind: 'discover.start' });
     checkAborted(signal, 'discover');
     emitter.emit({ kind: 'discover.done', fileCount: 0 });
@@ -105,6 +121,15 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     emitter.emit({ kind: 'graph.done', edgeCount: graph.edges.length });
     checkAborted(signal, 'graph');
     filesScanned = inventories.size;
+    // Build the FileId-keyed complexity map after graph assigns ids.
+    const built = new Map<FileId, FileComplexity>();
+    for (const node of graph.files.values()) {
+      const entry = inventories.get(node.path);
+      if (entry !== undefined) {
+        built.set(node.id, entry.complexity);
+      }
+    }
+    complexityMap = built;
   }
 
   // Phase 4: analyze. Dispatch every enabled rule via the registry. The
@@ -119,6 +144,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     projectRoot: options.projectRoot,
     entryPoints,
     config: options.config,
+    complexity: complexityMap,
   };
   const enabled = listEnabledRules(options.kind, options.config);
   emitter.emit({ kind: 'analyze.start', ruleCount: enabled.length });
@@ -269,22 +295,33 @@ function langForExtension(path: string): 'ts' | 'tsx' | 'js' | 'jsx' {
 /* Extract                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Per-file extract output: the shared `Inventory` consumed by the graph
+ * builder plus the `FileComplexity` consumed by the health rules. Computed
+ * together so the program/source pair is only held for one extract loop and
+ * does not need a second parse pass.
+ */
+interface ExtractOutput {
+  readonly inventory: Inventory;
+  readonly complexity: FileComplexity;
+}
+
 async function extractInventories(
   paths: readonly string[],
   emitter: ProgressEmitter,
   signal: AbortSignal | undefined,
-): Promise<ReadonlyMap<string, Inventory>> {
+): Promise<ReadonlyMap<string, ExtractOutput>> {
   const total = paths.length;
-  const out = new Map<string, Inventory>();
+  const out = new Map<string, ExtractOutput>();
   // Throttle: emit ~20 progress ticks across the run, one per `step` files.
   const step = Math.max(1, Math.floor(total / 20));
 
   for (let i = 0; i < total; i++) {
     checkAborted(signal, 'extract');
     const path = paths[i] as string;
-    const inv = await extractOne(path);
-    if (inv !== null) {
-      out.set(path, inv);
+    const result = await extractOne(path);
+    if (result !== null) {
+      out.set(path, result);
     }
     const completed = i + 1;
     if (completed === total || completed % step === 0) {
@@ -295,12 +332,12 @@ async function extractInventories(
   return out;
 }
 
-async function extractOne(path: string): Promise<Inventory | null> {
+async function extractOne(path: string): Promise<ExtractOutput | null> {
   let source: string;
   try {
     source = await readFile(path, 'utf8');
   } catch {
-    return emptyInventory();
+    return emptyExtract();
   }
   let result: {
     readonly program: Awaited<ReturnType<typeof parse>>['program'];
@@ -311,12 +348,14 @@ async function extractOne(path: string): Promise<Inventory | null> {
   } catch {
     // Hard parser failure (e.g. WASM not loaded). Fail-soft per the
     // never-throws contract — represent the file as empty inventory.
-    return emptyInventory();
+    return emptyExtract();
   }
   if (result.program === null) {
-    return emptyInventory();
+    return emptyExtract();
   }
-  return buildInventory(result.program);
+  const inventory = buildInventory(result.program);
+  const complexity = computeComplexity(result.program, source);
+  return { inventory, complexity };
 }
 
 function emptyInventory(): Inventory {
@@ -327,13 +366,29 @@ function emptyInventory(): Inventory {
   });
 }
 
+function emptyComplexity(): FileComplexity {
+  return Object.freeze({
+    functions: Object.freeze([]),
+    aggregate: Object.freeze({
+      cyclomatic: 0,
+      cognitive: 0,
+      maintainabilityIndex: 100,
+      loc: 0,
+    }),
+  });
+}
+
+function emptyExtract(): ExtractOutput {
+  return { inventory: emptyInventory(), complexity: emptyComplexity() };
+}
+
 /* -------------------------------------------------------------------------- */
 /* Graph build                                                                 */
 /* -------------------------------------------------------------------------- */
 
 function buildFileNodes(
   paths: readonly string[],
-  inventories: ReadonlyMap<string, Inventory>,
+  inventories: ReadonlyMap<string, ExtractOutput>,
 ): readonly FileNode[] {
   // Re-sort defensively even though discoverFiles already path-sorts.
   const sorted = [...paths].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
@@ -342,7 +397,8 @@ function buildFileNodes(
   for (const path of sorted) {
     const id = ids.get(path);
     if (id === undefined) continue;
-    const inventory = inventories.get(path) ?? emptyInventory();
+    const entry = inventories.get(path);
+    const inventory = entry !== undefined ? entry.inventory : emptyInventory();
     nodes.push({ id, path, inventory });
   }
   return nodes;

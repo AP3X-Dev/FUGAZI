@@ -15,8 +15,9 @@
  */
 
 import type { FugaziConfig } from '@fugazi/config';
+import type { FileComplexity } from '@fugazi/extract';
 import type { FileNode, Graph } from '@fugazi/graph';
-import type { DiscriminatedIssue } from '@fugazi/types';
+import type { DiscriminatedIssue, FileId } from '@fugazi/types';
 
 /**
  * `RuleContext` — the fully-assembled per-run state every rule sees.
@@ -42,6 +43,14 @@ export interface RuleContext {
   readonly projectRoot: string;
   readonly entryPoints: readonly string[];
   readonly config: FugaziConfig;
+  /**
+   * Per-file complexity computed during the extract phase (Phase 3f.5).
+   * Optional so unrelated rule tests do not need to populate it; the health
+   * rules (`complexity-hotspot`, `cognitive-complexity`) degrade to no-emit
+   * when absent. The driver (`runAnalysis`) always supplies this map keyed
+   * by `FileId`; the LSP `preBuiltGraph` fast-path supplies an empty map.
+   */
+  readonly complexity?: ReadonlyMap<FileId, FileComplexity>;
 }
 
 /**

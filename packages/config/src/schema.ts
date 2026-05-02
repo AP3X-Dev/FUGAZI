@@ -72,6 +72,33 @@ const ZoneSchema = z.object({
 });
 
 /**
+ * Per-rule health knobs used by the `complexity-hotspot` /
+ * `cognitive-complexity` rules and the `--score` CLI flag (Phase 3f.5).
+ *
+ *   - `cyclomaticThreshold` strictly-greater threshold (default 10) above
+ *                           which `complexity-hotspot` fires.
+ *   - `cognitiveThreshold`  strictly-greater threshold (default 15) above
+ *                           which `cognitive-complexity` fires.
+ *   - `weights`             per-metric weights for the file-level score
+ *                           (defaults: cyclomatic=0.3, cognitive=0.3, mi=0.4
+ *                           — applied at the rule layer, not in the schema).
+ *
+ * Defaults are deliberately NOT set in the schema so existing config tests
+ * that load minimal configs do not need to round-trip new fields.
+ */
+const HealthWeightsSchema = z.object({
+  cyclomatic: z.number(),
+  cognitive: z.number(),
+  mi: z.number(),
+});
+
+const HealthSchema = z.object({
+  cyclomaticThreshold: z.number().optional(),
+  cognitiveThreshold: z.number().optional(),
+  weights: HealthWeightsSchema.optional(),
+});
+
+/**
  * Build the shape used by both strict and permissive variants. Defining it
  * once guarantees they stay in lock-step.
  */
@@ -113,6 +140,11 @@ function buildShape() {
      * by zone key (the natural order produced by JSON parse).
      */
     zones: z.record(z.string(), ZoneSchema).optional(),
+    /**
+     * Health-rule knobs (Phase 3f.5). Optional; rule-layer defaults apply
+     * when missing or partially specified.
+     */
+    health: HealthSchema.optional(),
   } as const;
 }
 

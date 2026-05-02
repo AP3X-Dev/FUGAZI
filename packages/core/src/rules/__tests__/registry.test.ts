@@ -133,10 +133,10 @@ describe('runEnabledRules', () => {
     const fix = buildFixture([{ path: '/proj/entry.ts' }]);
     const dupes = runEnabledRules(ctx(fix, configWith()), 'dupes-only', configWith());
     const health = runEnabledRules(ctx(fix, configWith()), 'health-only', configWith());
-    // Wave B (3f.4) registers `code-duplication` for the dupes family. The
-    // health family is still empty until 3f.5.
+    // 3f.4 registers `code-duplication` for the dupes family; 3f.5 registers
+    // `complexity-hotspot` + `cognitive-complexity` for the health family.
     expect(dupes.enabledRules).toEqual(['code-duplication']);
-    expect(health.enabledRules).toEqual([]);
+    expect(health.enabledRules).toEqual(['cognitive-complexity', 'complexity-hotspot']);
   });
 
   it("severity 'off' skips that rule even in full mode; other rules unaffected", () => {

@@ -9,8 +9,19 @@
  * dispatch on top of the same surface.
  */
 
+export {
+  computeFileScore,
+  computeProjectScore,
+  computeRefactorTargets,
+  formatScoreLine,
+  type HealthScore,
+  type RefactorTarget,
+  type ScoreWeights,
+} from './health/index.js';
 export { ProgressEmitter, type ProgressEventBody } from './progress.js';
 export { createCodeDuplicationRule } from './rules/code-duplication.js';
+export { createCognitiveComplexityRule } from './rules/cognitive-complexity.js';
+export { createComplexityHotspotRule } from './rules/complexity-hotspot.js';
 export { runAnalysis } from './run-analysis.js';
 export {
   DEAD_CODE_RULES,
