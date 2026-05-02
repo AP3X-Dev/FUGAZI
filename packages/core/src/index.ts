@@ -10,6 +10,7 @@
  */
 
 export { ProgressEmitter, type ProgressEventBody } from './progress.js';
+export { createCodeDuplicationRule } from './rules/code-duplication.js';
 export { runAnalysis } from './run-analysis.js';
 export {
   DEAD_CODE_RULES,

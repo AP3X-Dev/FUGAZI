@@ -34,6 +34,7 @@ import type { DiscriminatedIssue, Range, RuleId, Severity } from '@fugazi/types'
 import type { AnalysisMode } from '../types.js';
 import { createBoundaryViolationsRule } from './boundaries.js';
 import { createCircularDependenciesRule } from './circular-deps.js';
+import { createCodeDuplicationRule } from './code-duplication.js';
 import {
   createDuplicateExportsRule,
   createUnlistedDependenciesRule,
@@ -96,6 +97,7 @@ export type RuleFactory = (severity: Severity) => RuleHandler;
 export const RULES: ReadonlyMap<RuleId, RuleFactory> = new Map<RuleId, RuleFactory>([
   ['boundary-violations', createBoundaryViolationsRule],
   ['circular-dependencies', createCircularDependenciesRule],
+  ['code-duplication', createCodeDuplicationRule],
   ['duplicate-exports', createDuplicateExportsRule],
   ['private-type-leak', createPrivateTypeLeakRule],
   ['unlisted-dependencies', createUnlistedDependenciesRule],

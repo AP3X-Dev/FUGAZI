@@ -129,11 +129,13 @@ describe('runEnabledRules', () => {
     expect(result.enabledRules).toEqual(expected);
   });
 
-  it('dupes-only / health-only mode: no Wave 1 rule fires', () => {
+  it('dupes-only / health-only mode: only family-specific rules fire', () => {
     const fix = buildFixture([{ path: '/proj/entry.ts' }]);
     const dupes = runEnabledRules(ctx(fix, configWith()), 'dupes-only', configWith());
     const health = runEnabledRules(ctx(fix, configWith()), 'health-only', configWith());
-    expect(dupes.enabledRules).toEqual([]);
+    // Wave B (3f.4) registers `code-duplication` for the dupes family. The
+    // health family is still empty until 3f.5.
+    expect(dupes.enabledRules).toEqual(['code-duplication']);
     expect(health.enabledRules).toEqual([]);
   });
 
