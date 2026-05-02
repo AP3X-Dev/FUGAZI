@@ -42,8 +42,10 @@ import {
   type FileId,
   FugaziCoreError,
   type Range,
+  type RuleId,
   assignFileIds,
 } from '@fugazi/types';
+import { applyCrossReferenceFilter } from './cross-ref.js';
 import { ProgressEmitter } from './progress.js';
 import { listEnabledRules, runEnabledRules } from './rules/registry.js';
 import type { RuleContext } from './rules/types.js';
@@ -152,25 +154,42 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   const dispatch = runEnabledRules(ruleCtx, options.kind, options.config, (rule, n, total) => {
     emitter.emit({ kind: 'analyze.progress', rule, n, total });
   });
-  const issues: readonly DiscriminatedIssue[] = dispatch.issues;
+  const rawIssues: readonly DiscriminatedIssue[] = dispatch.issues;
   const actions: readonly AnalysisAction[] = [];
   emitter.emit({ kind: 'analyze.done' });
   checkAborted(signal, 'analyze');
 
-  // Phase 5: cross-reference. 3f.6 will populate; no-op for now.
+  // Phase 5: cross-reference (3f.6) — files flagged unused-files short-circuit
+  // their per-export / per-type / per-member findings before sort + emit.
+  const crossRef = applyCrossReferenceFilter(rawIssues);
+  const issues = crossRef.issues;
   emitter.emit({ kind: 'crossref.done' });
   checkAborted(signal, 'crossref');
 
-  // Sort issues + actions deterministically. Empty in 3f.1 but the helpers
-  // are wired so the call site doesn't change once rules light up.
+  // Sort issues + actions deterministically.
   const sortedIssues = sortIssues(issues);
   const sortedActions = sortActions(actions);
   const determinismHash = computeDeterminismHash(sortedIssues, sortedActions);
 
+  // Adjust per-rule diagnostic counts so the metrics reflect the post-filter
+  // shape (the value the caller actually receives in `result.issues`).
+  const adjustedByRule: Partial<Record<RuleId, number>> = { ...dispatch.diagnosticsByRule };
+  for (const [rule, removed] of Object.entries(crossRef.filteredByRule)) {
+    if (removed === undefined) continue;
+    const ruleId = rule as RuleId;
+    const before = adjustedByRule[ruleId] ?? 0;
+    const after = before - removed;
+    if (after <= 0) {
+      delete adjustedByRule[ruleId];
+    } else {
+      adjustedByRule[ruleId] = after;
+    }
+  }
+
   const elapsedMs = performance.now() - startedAt;
   const metrics: AnalysisMetrics = {
     filesScanned,
-    diagnosticsByRule: dispatch.diagnosticsByRule,
+    diagnosticsByRule: Object.freeze(adjustedByRule),
     elapsedMs,
     cacheHitRate: 0,
   };

@@ -10,6 +10,10 @@
  */
 
 export {
+  applyCrossReferenceFilter,
+  type CrossReferenceResult,
+} from './cross-ref.js';
+export {
   computeFileScore,
   computeProjectScore,
   computeRefactorTargets,
