@@ -47,6 +47,11 @@ export type McpErrorCode = 'MCP_VALIDATION_ENVELOPE' | 'MCP_TOOL_UNKNOWN' | 'MCP
 
 export type RuntimeErrorCode = 'RUNTIME_COVERAGE_PARSE_FAILED' | 'RUNTIME_PATH_REBASE_AMBIGUOUS';
 
+export type CoverageErrorCode =
+  | 'COVERAGE_PARSE_MALFORMED'
+  | 'COVERAGE_FILE_READ_FAILED'
+  | 'COVERAGE_REBASE_UNMAPPED';
+
 export type FsErrorCode = 'FS_PATH_NOT_FOUND';
 
 export type ErrorCode =
@@ -58,4 +63,5 @@ export type ErrorCode =
   | LspErrorCode
   | McpErrorCode
   | RuntimeErrorCode
+  | CoverageErrorCode
   | FsErrorCode;

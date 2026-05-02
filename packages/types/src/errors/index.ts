@@ -2,6 +2,7 @@ export { FugaziError, type FugaziErrorArgs } from './base.js';
 export { FugaziAnalysisError, type FugaziAnalysisErrorArgs } from './analysis.js';
 export { FugaziCacheError, type FugaziCacheErrorArgs } from './cache.js';
 export { FugaziConfigError, type FugaziConfigErrorArgs } from './config.js';
+export { FugaziCoverageError, type FugaziCoverageErrorArgs } from './coverage.js';
 export { FugaziGraphError, type FugaziGraphErrorArgs } from './graph.js';
 export { FugaziLspError, type FugaziLspErrorArgs } from './lsp.js';
 export { FugaziMcpError, type FugaziMcpErrorArgs } from './mcp.js';
@@ -10,6 +11,7 @@ export type {
   AnalysisErrorCode,
   CacheErrorCode,
   ConfigErrorCode,
+  CoverageErrorCode,
   ErrorCode,
   FsErrorCode,
   GraphErrorCode,
