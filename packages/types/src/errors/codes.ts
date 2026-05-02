@@ -41,6 +41,8 @@ export type AnalysisErrorCode =
   | 'ANALYSIS_INVALID_RULE'
   | 'ANALYSIS_FIXTURE_MISMATCH';
 
+export type CoreErrorCode = 'CORE_ABORTED' | 'CORE_INVALID_OPTIONS';
+
 export type LspErrorCode = 'LSP_REQUEST_CANCELED' | 'LSP_INIT_FAILED';
 
 export type McpErrorCode = 'MCP_VALIDATION_ENVELOPE' | 'MCP_TOOL_UNKNOWN' | 'MCP_TIMEOUT';
@@ -60,6 +62,7 @@ export type ErrorCode =
   | CacheErrorCode
   | GraphErrorCode
   | AnalysisErrorCode
+  | CoreErrorCode
   | LspErrorCode
   | McpErrorCode
   | RuntimeErrorCode
