@@ -32,6 +32,8 @@ import { type Inventory, type ParseError, buildInventory, parse } from '@fugazi/
 import { type FileNode, type Graph, buildGraph } from '@fugazi/graph';
 import { type DiscriminatedIssue, FugaziCoreError, type Range, assignFileIds } from '@fugazi/types';
 import { ProgressEmitter } from './progress.js';
+import { listEnabledRules, runEnabledRules } from './rules/registry.js';
+import type { RuleContext } from './rules/types.js';
 import type {
   AnalysisAction,
   AnalysisMetrics,
@@ -105,11 +107,26 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     filesScanned = inventories.size;
   }
 
-  // Phase 4: analyze. 3f.2..3f.5 will populate rule dispatch; for now the
-  // driver runs zero rules and emits zero diagnostics regardless of mode.
-  emitter.emit({ kind: 'analyze.start', ruleCount: 0 });
+  // Phase 4: analyze. Dispatch every enabled rule via the registry. The
+  // dispatcher pre-computes the deterministic rule list so the
+  // `analyze.start` event carries the accurate `ruleCount` before any rule
+  // fires; each rule then emits an `analyze.progress` event keyed by RuleId.
+  const fileNodesByPath = buildFileNodeIndex(graph);
+  const entryPoints = resolveEntryPoints(options.config, options.projectRoot);
+  const ruleCtx: RuleContext = {
+    graph,
+    fileNodes: fileNodesByPath,
+    projectRoot: options.projectRoot,
+    entryPoints,
+    config: options.config,
+  };
+  const enabled = listEnabledRules(options.kind, options.config);
+  emitter.emit({ kind: 'analyze.start', ruleCount: enabled.length });
   checkAborted(signal, 'analyze');
-  const issues: readonly DiscriminatedIssue[] = [];
+  const dispatch = runEnabledRules(ruleCtx, options.kind, options.config, (rule, n, total) => {
+    emitter.emit({ kind: 'analyze.progress', rule, n, total });
+  });
+  const issues: readonly DiscriminatedIssue[] = dispatch.issues;
   const actions: readonly AnalysisAction[] = [];
   emitter.emit({ kind: 'analyze.done' });
   checkAborted(signal, 'analyze');
@@ -127,14 +144,10 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   const elapsedMs = performance.now() - startedAt;
   const metrics: AnalysisMetrics = {
     filesScanned,
-    diagnosticsByRule: Object.freeze({}),
+    diagnosticsByRule: dispatch.diagnosticsByRule,
     elapsedMs,
     cacheHitRate: 0,
   };
-
-  // Suppress unused warning — graph is part of the contract surface even
-  // when no rules consume it yet (3f.2+ rules pull from it directly).
-  void graph;
 
   return Object.freeze({
     issues: sortedIssues,
@@ -333,6 +346,47 @@ function buildFileNodes(
     nodes.push({ id, path, inventory });
   }
   return nodes;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Rule-context assembly                                                       */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Build the path → FileNode index that every rule consumes. Built once per
+ * run so the dispatcher doesn't re-scan `graph.files` per rule.
+ */
+function buildFileNodeIndex(graph: Graph): ReadonlyMap<string, FileNode> {
+  const out = new Map<string, FileNode>();
+  for (const node of graph.files.values()) {
+    out.set(node.path, node);
+  }
+  return out;
+}
+
+/**
+ * Resolve `config.entrypoints` into absolute POSIX paths. The schema treats
+ * the field as optional and the default is "no entry points declared" — the
+ * unused-* rules early-return in that case.
+ *
+ * 3f.2 Wave 1 only resolves literal paths (no glob expansion). Glob-pattern
+ * support lands when discovery is moved behind `@fugazi/config`'s
+ * file-pattern API in a later phase. Relative paths are joined against
+ * `projectRoot`; paths already absolute are normalised to POSIX-style
+ * separators so they line up with the FileNode key set.
+ */
+function resolveEntryPoints(
+  config: { readonly entrypoints?: readonly string[] | undefined },
+  projectRoot: string,
+): readonly string[] {
+  const raw = config.entrypoints;
+  if (raw === undefined || raw.length === 0) return [];
+  const out: string[] = [];
+  for (const entry of raw) {
+    const abs = isAbsolute(entry) ? entry : join(projectRoot, entry);
+    out.push(toPosix(abs));
+  }
+  return out;
 }
 
 /* -------------------------------------------------------------------------- */

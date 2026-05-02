@@ -148,8 +148,12 @@ describe('runAnalysis', () => {
     expect(result.issues).toEqual([]);
     expect(result.actions).toEqual([]);
     expect(result.metrics.filesScanned).toBe(0);
-    const eventKinds = result.progressEvents.map((e) => e.kind);
-    expect(eventKinds).toEqual([
+    // analyze.progress events fire per enabled rule; strip them so the
+    // canonical phase ordering is testable independently of rule count.
+    const phaseKinds = result.progressEvents
+      .map((e) => e.kind)
+      .filter((k) => k !== 'analyze.progress' && k !== 'extract.progress');
+    expect(phaseKinds).toEqual([
       'discover.start',
       'discover.done',
       'extract.start',
