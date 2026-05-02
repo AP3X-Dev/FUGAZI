@@ -82,6 +82,7 @@ export {
   extractTemplateBlock,
   maskNonBlock,
   parseAstroSFC,
+  parseCss,
   parseMdx,
   parseSvelteSFC,
   parseVueSFC,

@@ -12,7 +12,7 @@
 
 import type { Range } from '@fugazi/types';
 
-export type DeclarationKind = 'function' | 'class' | 'variable' | 'type' | 'enum';
+export type DeclarationKind = 'function' | 'class' | 'variable' | 'type' | 'enum' | 'css-class';
 
 export interface Declaration {
   readonly kind: DeclarationKind;

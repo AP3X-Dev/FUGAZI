@@ -11,6 +11,7 @@ export { parseVueSFC } from './vue.js';
 export { parseSvelteSFC } from './svelte.js';
 export { parseAstroSFC } from './astro.js';
 export { parseMdx } from './mdx.js';
+export { parseCss } from './css.js';
 export {
   type BlockLanguage,
   type ScriptBlock,
