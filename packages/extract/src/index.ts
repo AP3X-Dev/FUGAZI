@@ -81,6 +81,8 @@ export {
   extractStyleBlocks,
   extractTemplateBlock,
   maskNonBlock,
+  parseAstroSFC,
+  parseMdx,
   parseSvelteSFC,
   parseVueSFC,
 } from './sfc/index.js';
