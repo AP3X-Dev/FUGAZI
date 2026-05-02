@@ -10,6 +10,8 @@
     { "path": "../types" },
     { "path": "../config" },
     { "path": "../core" },
+    { "path": "../extract" },
+    { "path": "../graph" },
     { "path": "../runtime" },
     { "path": "../node-api" }
   ]
