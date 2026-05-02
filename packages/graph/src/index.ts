@@ -53,6 +53,9 @@ export {
 export type { EntryStarTargets } from './re-exports/entry-targets.js';
 export { buildEntryStarTargets } from './re-exports/entry-targets.js';
 
+export type { ReverseIndices } from './reverse-index.js';
+export { buildReverseIndices } from './reverse-index.js';
+
 export {
   type DynamicImportSpec,
   type DynamicResolution,
