@@ -92,3 +92,8 @@ export {
   parseSuppressions,
 } from './suppress/parse.js';
 export { warnOncePerFile } from './suppress/dedup.js';
+export {
+  type FileComplexity,
+  type FunctionComplexity,
+  computeComplexity,
+} from './complexity/index.js';
