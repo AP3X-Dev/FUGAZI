@@ -72,3 +72,14 @@ export {
   type DynamicImportShape,
   type TemplatePrefix,
 } from './visitor/dynamic.js';
+export {
+  type BlockLanguage,
+  type ScriptBlock,
+  type StyleBlock,
+  type TemplateBlock,
+  extractScriptBlocks,
+  extractStyleBlocks,
+  extractTemplateBlock,
+  maskNonBlock,
+  parseVueSFC,
+} from './sfc/index.js';

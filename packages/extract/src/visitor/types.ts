@@ -31,7 +31,7 @@ export interface Import {
   readonly range: Range;
 }
 
-export type UsageKind = 'identifier' | 'jsx' | 'member' | 'decorator';
+export type UsageKind = 'identifier' | 'jsx' | 'member' | 'decorator' | 'css-class';
 
 export interface Usage {
   readonly kind: UsageKind;
