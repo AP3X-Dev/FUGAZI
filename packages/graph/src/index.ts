@@ -21,6 +21,11 @@ export {
   compareFileIds,
 } from '@fugazi/types';
 
+export type { Edge, EdgeKind, FileNode, Graph } from './types.js';
+export type { BuildGraphOptions } from './build.js';
+export { buildGraph } from './build.js';
+export { classifyEdgeKind } from './edge-kinds.js';
+
 export {
   type DynamicImportSpec,
   type DynamicResolution,
