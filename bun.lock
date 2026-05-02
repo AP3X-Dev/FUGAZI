@@ -115,9 +115,13 @@
       "name": "@fugazi/node-api",
       "version": "0.0.0",
       "dependencies": {
+        "@fugazi/config": "workspace:*",
         "@fugazi/core": "workspace:*",
+        "@fugazi/extract": "workspace:*",
+        "@fugazi/graph": "workspace:*",
         "@fugazi/runtime": "workspace:*",
         "@fugazi/types": "workspace:*",
+        "@fugazi/v8-coverage": "workspace:*",
       },
     },
     "packages/runtime": {

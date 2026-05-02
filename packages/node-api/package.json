@@ -15,7 +15,11 @@
   },
   "dependencies": {
     "@fugazi/types": "workspace:*",
+    "@fugazi/config": "workspace:*",
+    "@fugazi/extract": "workspace:*",
+    "@fugazi/graph": "workspace:*",
     "@fugazi/core": "workspace:*",
+    "@fugazi/v8-coverage": "workspace:*",
     "@fugazi/runtime": "workspace:*"
   }
 }
