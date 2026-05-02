@@ -5,7 +5,10 @@
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -b",
@@ -14,8 +17,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@fugazi/types": "workspace:*",
+    "@fugazi/config": "workspace:*",
     "@fugazi/core": "workspace:*",
-    "@fugazi/runtime": "workspace:*"
+    "@fugazi/extract": "workspace:*",
+    "@fugazi/graph": "workspace:*",
+    "@fugazi/node-api": "workspace:*",
+    "@fugazi/runtime": "workspace:*",
+    "@fugazi/types": "workspace:*",
+    "@fugazi/v8-coverage": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.2"
   }
 }

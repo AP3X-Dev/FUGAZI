@@ -1,0 +1,321 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`tool args JSON schemas > analyze 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+    "rules": {
+      "anyOf": [
+        {
+          "const": "all",
+          "type": "string",
+        },
+        {
+          "items": {
+            "enum": [
+              "unused-files",
+              "unused-exports",
+              "unused-types",
+              "unused-deps",
+              "unused-dev-deps",
+              "unused-optional-deps",
+              "unused-enum-members",
+              "unused-class-members",
+              "circular-dependencies",
+              "boundary-violations",
+              "unresolved-imports",
+              "unlisted-dependencies",
+              "duplicate-exports",
+              "private-type-leak",
+              "complexity-hotspot",
+              "cognitive-complexity",
+              "code-duplication",
+              "cold-code",
+              "hot-path",
+            ],
+            "type": "string",
+          },
+          "type": "array",
+        },
+      ],
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > audit 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > boundaries 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > coverage_setup 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > dead_code 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > dupes 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "minTokens": {
+      "exclusiveMinimum": 0,
+      "maximum": 9007199254740991,
+      "type": "integer",
+    },
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > explain 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "ruleId": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "ruleId",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > fix_apply 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "dryRun": {
+      "type": "boolean",
+    },
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+    "ruleIds": {
+      "items": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > fix_dry_run 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+    "ruleIds": {
+      "items": {
+        "type": "string",
+      },
+      "type": "array",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > health 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > init 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "force": {
+      "type": "boolean",
+    },
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > runtime_report 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "coveragePath": {
+      "minLength": 1,
+      "type": "string",
+    },
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+    "coveragePath",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > schema 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {},
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > trace_export 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "exportName": {
+      "minLength": 1,
+      "type": "string",
+    },
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+    "exportName",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`tool args JSON schemas > trace_file 1`] = `
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "projectRoot": {
+      "minLength": 1,
+      "type": "string",
+    },
+    "targetFile": {
+      "minLength": 1,
+      "type": "string",
+    },
+  },
+  "required": [
+    "projectRoot",
+    "targetFile",
+  ],
+  "type": "object",
+}
+`;
