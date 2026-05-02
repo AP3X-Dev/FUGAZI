@@ -32,6 +32,7 @@
 import type { FugaziConfig } from '@fugazi/config';
 import type { DiscriminatedIssue, Range, RuleId, Severity } from '@fugazi/types';
 import type { AnalysisMode } from '../types.js';
+import { createBoundaryViolationsRule } from './boundaries.js';
 import { createCircularDependenciesRule } from './circular-deps.js';
 import {
   createDuplicateExportsRule,
@@ -50,7 +51,12 @@ import { createUnusedFilesRule } from './unused-files.js';
 import { createUnusedClassMembersRule, createUnusedEnumMembersRule } from './unused-members.js';
 import { createUnusedTypesRule } from './unused-types.js';
 
-/** Dead-code-family RuleIds — the 13-rule surface dispatched in 'dead-code-only'. */
+/**
+ * Dead-code-family RuleIds — the 14-rule surface dispatched in 'dead-code-only'.
+ * Includes structural-correctness rules (`boundary-violations`) alongside the
+ * pure dead-code rules; together they form the read-and-write fast path that
+ * `dead-code-only` mode targets.
+ */
 export const DEAD_CODE_RULES = new Set<RuleId>([
   'unused-files',
   'unused-exports',
@@ -61,6 +67,7 @@ export const DEAD_CODE_RULES = new Set<RuleId>([
   'unused-enum-members',
   'unused-class-members',
   'circular-dependencies',
+  'boundary-violations',
   'unresolved-imports',
   'unlisted-dependencies',
   'duplicate-exports',
@@ -87,6 +94,7 @@ export type RuleFactory = (severity: Severity) => RuleHandler;
  * load-bearing.
  */
 export const RULES: ReadonlyMap<RuleId, RuleFactory> = new Map<RuleId, RuleFactory>([
+  ['boundary-violations', createBoundaryViolationsRule],
   ['circular-dependencies', createCircularDependenciesRule],
   ['duplicate-exports', createDuplicateExportsRule],
   ['private-type-leak', createPrivateTypeLeakRule],

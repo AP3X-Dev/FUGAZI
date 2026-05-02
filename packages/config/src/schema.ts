@@ -57,6 +57,21 @@ const DEFAULT_INCLUDE = ['**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}'] as const;
 const DEFAULT_EXCLUDE = ['node_modules', 'dist', 'build', 'coverage'] as const;
 
 /**
+ * Per-zone config used by the `boundary-violations` rule (Phase 3f.3 / T151).
+ *
+ *   - `pattern`    glob patterns matching files in this zone (relative to
+ *                  `projectRoot`). First-match wins across zones during
+ *                  classification — the rule iterates zones in insertion
+ *                  order (alphabetical-key after JSON parse).
+ *   - `canImport`  the zone names this zone is permitted to import from.
+ *                  Empty array means "no out-of-zone imports allowed".
+ */
+const ZoneSchema = z.object({
+  pattern: z.array(z.string()),
+  canImport: z.array(z.string()),
+});
+
+/**
  * Build the shape used by both strict and permissive variants. Defining it
  * once guarantees they stay in lock-step.
  */
@@ -91,6 +106,13 @@ function buildShape() {
      * loads only bundled JSON plugins.
      */
     experimentalTsPlugins: z.boolean().default(false),
+    /**
+     * Boundary zones for the `boundary-violations` rule (Phase 3f.3 / T151).
+     * Map of zone-name → `{ pattern, canImport }`. Optional; absence means no
+     * boundary checks. Iteration order at classification time is alphabetical
+     * by zone key (the natural order produced by JSON parse).
+     */
+    zones: z.record(z.string(), ZoneSchema).optional(),
   } as const;
 }
 
