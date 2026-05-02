@@ -87,3 +87,8 @@ export {
   parseSvelteSFC,
   parseVueSFC,
 } from './sfc/index.js';
+export {
+  type Suppression,
+  parseSuppressions,
+} from './suppress/parse.js';
+export { warnOncePerFile } from './suppress/dedup.js';
