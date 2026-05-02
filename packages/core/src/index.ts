@@ -23,6 +23,17 @@ export {
   type ScoreWeights,
 } from './health/index.js';
 export { ProgressEmitter, type ProgressEventBody } from './progress.js';
+export {
+  CodeclimateReporter,
+  CompactReporter,
+  HumanPlainReporter,
+  HumanReporter,
+  JsonReporter,
+  MarkdownReporter,
+  SarifReporter,
+  selectReporter,
+} from './reporter/index.js';
+export type { Reporter, ReporterFormat, ReporterMeta } from './reporter/index.js';
 export { createCodeDuplicationRule } from './rules/code-duplication.js';
 export { createCognitiveComplexityRule } from './rules/cognitive-complexity.js';
 export { createComplexityHotspotRule } from './rules/complexity-hotspot.js';
