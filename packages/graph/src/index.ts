@@ -56,6 +56,11 @@ export { buildEntryStarTargets } from './re-exports/entry-targets.js';
 export type { ReverseIndices } from './reverse-index.js';
 export { buildReverseIndices } from './reverse-index.js';
 
+export { canonicalize } from './canonicalize.js';
+export { getGitToplevel, __resetGitToplevelCacheForTest } from './git-toplevel.js';
+export type { ChangedSinceOptions } from './changed-since.js';
+export { getChangedSince } from './changed-since.js';
+
 export {
   type DynamicImportSpec,
   type DynamicResolution,
