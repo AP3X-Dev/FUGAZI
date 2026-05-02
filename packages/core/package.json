@@ -17,6 +17,7 @@
     "@fugazi/types": "workspace:*",
     "@fugazi/config": "workspace:*",
     "@fugazi/extract": "workspace:*",
-    "@fugazi/graph": "workspace:*"
+    "@fugazi/graph": "workspace:*",
+    "@fugazi/v8-coverage": "workspace:*"
   }
 }

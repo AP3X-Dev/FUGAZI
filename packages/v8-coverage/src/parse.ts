@@ -24,6 +24,16 @@ import type { CoverageInput, FunctionCoverage, ScriptCoverage } from './types.js
 
 const ERR_PREFIX = 'v8-coverage: malformed input — ';
 
+/**
+ * Optional parser-level callbacks. Phase 3g Wave B added `onColumnNull` so the
+ * runtime layer can warn once per file when Vitest emits `column: null` on a
+ * range. The parser does not store the field (offsets are the source of
+ * truth), but it can observe its presence cheaply during validation.
+ */
+export interface ParseCoverageOptions {
+  readonly onColumnNull?: (url: string) => void;
+}
+
 function fail(reason: string, cause?: unknown): never {
   const message = `${ERR_PREFIX}${reason}`;
   throw new FugaziCoverageError({
@@ -83,7 +93,11 @@ function validateFunction(fn: unknown, scriptIdx: number, fnIdx: number): Functi
   };
 }
 
-function validateScript(entry: unknown, idx: number): ScriptCoverage {
+function validateScript(
+  entry: unknown,
+  idx: number,
+  onColumnNull?: (url: string) => void,
+): ScriptCoverage {
   if (!isObject(entry)) {
     return fail(`entry ${idx} not an object`);
   }
@@ -100,13 +114,28 @@ function validateScript(entry: unknown, idx: number): ScriptCoverage {
     return fail(`entry ${idx} missing 'functions' array`);
   }
   const validatedFunctions: FunctionCoverage[] = [];
+  let sawColumnNull = false;
   for (let i = 0; i < functions.length; i++) {
     validatedFunctions.push(validateFunction(functions[i], idx, i));
+    if (!sawColumnNull && onColumnNull !== undefined) {
+      const fnRaw = functions[i];
+      if (isObject(fnRaw) && Array.isArray(fnRaw.ranges)) {
+        for (const r of fnRaw.ranges) {
+          if (isObject(r) && Object.hasOwn(r, 'column') && r.column === null) {
+            sawColumnNull = true;
+            break;
+          }
+        }
+      }
+    }
+  }
+  if (sawColumnNull && onColumnNull !== undefined) {
+    onColumnNull(url);
   }
   return { scriptId, url, functions: validatedFunctions };
 }
 
-function validateInput(value: unknown): CoverageInput {
+function validateInput(value: unknown, onColumnNull?: (url: string) => void): CoverageInput {
   if (!isObject(value)) {
     return fail('top-level not an object');
   }
@@ -116,7 +145,7 @@ function validateInput(value: unknown): CoverageInput {
   }
   const scripts: ScriptCoverage[] = [];
   for (let i = 0; i < result.length; i++) {
-    scripts.push(validateScript(result[i], i));
+    scripts.push(validateScript(result[i], i, onColumnNull));
   }
   const out: { -readonly [K in keyof CoverageInput]: CoverageInput[K] } = { result: scripts };
   if (typeof value.timestamp === 'number') {
@@ -128,7 +157,7 @@ function validateInput(value: unknown): CoverageInput {
   return out;
 }
 
-export function parseCoverage(json: string): CoverageInput {
+export function parseCoverage(json: string, options: ParseCoverageOptions = {}): CoverageInput {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
@@ -138,10 +167,13 @@ export function parseCoverage(json: string): CoverageInput {
       cause,
     );
   }
-  return validateInput(parsed);
+  return validateInput(parsed, options.onColumnNull);
 }
 
-export async function parseCoverageFile(path: string): Promise<CoverageInput> {
+export async function parseCoverageFile(
+  path: string,
+  options: ParseCoverageOptions = {},
+): Promise<CoverageInput> {
   let text: string;
   try {
     text = await readFile(path, 'utf8');
@@ -152,5 +184,5 @@ export async function parseCoverageFile(path: string): Promise<CoverageInput> {
       ...(cause instanceof Error ? { cause } : {}),
     });
   }
-  return parseCoverage(text);
+  return parseCoverage(text, options);
 }

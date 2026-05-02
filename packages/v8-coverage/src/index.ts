@@ -9,7 +9,7 @@ export type {
   FunctionCoverage,
   ScriptCoverage,
 } from './types.js';
-export { parseCoverage, parseCoverageFile } from './parse.js';
+export { parseCoverage, parseCoverageFile, type ParseCoverageOptions } from './parse.js';
 export { buildOffsetMap, type OffsetMap, type Position } from './offset-map.js';
 export { disambiguateScripts } from './script-id.js';
 export {

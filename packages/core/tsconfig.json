@@ -10,6 +10,7 @@
     { "path": "../types" },
     { "path": "../config" },
     { "path": "../extract" },
-    { "path": "../graph" }
+    { "path": "../graph" },
+    { "path": "../v8-coverage" }
   ]
 }

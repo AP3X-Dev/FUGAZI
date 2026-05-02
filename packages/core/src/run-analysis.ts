@@ -49,6 +49,7 @@ import { applyCrossReferenceFilter } from './cross-ref.js';
 import { ProgressEmitter } from './progress.js';
 import { listEnabledRules, runEnabledRules } from './rules/registry.js';
 import type { RuleContext } from './rules/types.js';
+import { type RuntimeReport, runRuntime } from './runtime/index.js';
 import type {
   AnalysisAction,
   AnalysisMetrics,
@@ -60,7 +61,7 @@ import type {
 const CORE_VERSION = '0.0.0';
 
 /** Canonical phase name set, used in abort messages. */
-type PhaseName = 'discover' | 'extract' | 'graph' | 'analyze' | 'crossref';
+type PhaseName = 'discover' | 'extract' | 'graph' | 'analyze' | 'crossref' | 'runtime';
 
 /**
  * Run the full analysis pipeline. Returns a frozen `RunAnalysisResult`.
@@ -79,6 +80,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   let graph: Graph;
   let filesScanned: number;
   let complexityMap: ReadonlyMap<FileId, FileComplexity> = new Map();
+  let complexityByPath: ReadonlyMap<string, FileComplexity> = new Map();
 
   if (options.preBuiltGraph !== undefined) {
     // Skip discover + extract + graph-build. Still emit the full event
@@ -125,13 +127,16 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     filesScanned = inventories.size;
     // Build the FileId-keyed complexity map after graph assigns ids.
     const built = new Map<FileId, FileComplexity>();
+    const builtByPath = new Map<string, FileComplexity>();
     for (const node of graph.files.values()) {
       const entry = inventories.get(node.path);
       if (entry !== undefined) {
         built.set(node.id, entry.complexity);
+        builtByPath.set(node.path, entry.complexity);
       }
     }
     complexityMap = built;
+    complexityByPath = builtByPath;
   }
 
   // Phase 4: analyze. Dispatch every enabled rule via the registry. The
@@ -166,6 +171,27 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   emitter.emit({ kind: 'crossref.done' });
   checkAborted(signal, 'crossref');
 
+  // Phase 6 (Wave B): runtime intelligence — runs only when coverage was
+  // supplied. The runtime layer is independent of the rule registry and
+  // surfaces its findings via `RunAnalysisResult.runtime` rather than the
+  // diagnostic stream.
+  let runtimeReport: RuntimeReport | undefined;
+  if (options.coverage !== undefined) {
+    emitter.emit({ kind: 'runtime.start' });
+    checkAborted(signal, 'runtime');
+    const modulesByPath = new Set<string>();
+    for (const node of graph.files.values()) modulesByPath.add(node.path);
+    runtimeReport = runRuntime({
+      coverage: options.coverage.input,
+      modules: modulesByPath,
+      complexityByPath,
+      projectRoot: options.projectRoot,
+      ...(options.coverage.root !== undefined ? { coverageRoot: options.coverage.root } : {}),
+    });
+    emitter.emit({ kind: 'runtime.done' });
+    checkAborted(signal, 'runtime');
+  }
+
   // Sort issues + actions deterministically.
   const sortedIssues = sortIssues(issues);
   const sortedActions = sortActions(actions);
@@ -199,6 +225,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     actions: sortedActions,
     metrics,
     progressEvents: emitter.collected(),
+    ...(runtimeReport !== undefined ? { runtime: runtimeReport } : {}),
     _meta: Object.freeze({
       version: CORE_VERSION,
       mode: options.kind,

@@ -39,6 +39,33 @@ export {
   type RunEnabledRulesResult,
 } from './rules/registry.js';
 export type { RuleContext, RuleHandler } from './rules/types.js';
+export {
+  buildCoverageIndex,
+  computeWeightedFileScore,
+  emptyRuntimeReport,
+  findColdCode,
+  findHotPaths,
+  rebaseCoverageAuto,
+  runRuntime,
+  validateColumnTolerance,
+} from './runtime/index.js';
+export type {
+  ColdCodeFinding,
+  CoverageByFile,
+  CoverageByFunction,
+  CoverageIndex,
+  FindColdCodeOptions,
+  FindColdCodeResult,
+  FindHotPathsOptions,
+  HotPathFinding,
+  RebaseAutoExplicit,
+  RebaseAutoOptions,
+  RebaseMode,
+  RunRuntimeOptions,
+  RuntimeReport,
+  ValidateColumnToleranceOptions,
+  WeightedScoreOptions,
+} from './runtime/index.js';
 export type {
   AnalysisAction,
   AnalysisMetrics,

@@ -26,7 +26,9 @@ export type ProgressEventBody =
   | Omit<Extract<ProgressEvent, { kind: 'analyze.start' }>, 'seq'>
   | Omit<Extract<ProgressEvent, { kind: 'analyze.progress' }>, 'seq'>
   | Omit<Extract<ProgressEvent, { kind: 'analyze.done' }>, 'seq'>
-  | Omit<Extract<ProgressEvent, { kind: 'crossref.done' }>, 'seq'>;
+  | Omit<Extract<ProgressEvent, { kind: 'crossref.done' }>, 'seq'>
+  | Omit<Extract<ProgressEvent, { kind: 'runtime.start' }>, 'seq'>
+  | Omit<Extract<ProgressEvent, { kind: 'runtime.done' }>, 'seq'>;
 
 export class ProgressEmitter {
   #seq = 0;
@@ -120,5 +122,9 @@ function buildEvent(body: ProgressEventBody, seq: number): ProgressEvent {
       return Object.freeze({ kind: 'analyze.done', seq });
     case 'crossref.done':
       return Object.freeze({ kind: 'crossref.done', seq });
+    case 'runtime.start':
+      return Object.freeze({ kind: 'runtime.start', seq });
+    case 'runtime.done':
+      return Object.freeze({ kind: 'runtime.done', seq });
   }
 }

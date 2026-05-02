@@ -15,6 +15,9 @@
 import type { FugaziConfig } from '@fugazi/config';
 import type { Graph } from '@fugazi/graph';
 import type { DiscriminatedIssue, Range, RuleId } from '@fugazi/types';
+import type { CoverageInput } from '@fugazi/v8-coverage';
+import type { RebaseMode } from './runtime/coverage-rebase.js';
+import type { RuntimeReport } from './runtime/runtime-report.js';
 
 /**
  * AnalysisMode — five closed values controlling which rules dispatch.
@@ -48,6 +51,16 @@ export interface RunAnalysisOptions {
    * zero counts where applicable).
    */
   readonly preBuiltGraph?: Graph;
+  /**
+   * Optional V8 coverage payload. When present the driver runs the runtime
+   * pipeline (`runRuntime`) after the static analyze + crossref passes and
+   * attaches the resulting `RuntimeReport` to `RunAnalysisResult.runtime`.
+   * `root` is the rebase mode — explicit `{ from, to }` or `'auto'`.
+   */
+  readonly coverage?: {
+    readonly input: CoverageInput;
+    readonly root?: RebaseMode;
+  };
 }
 
 /**
@@ -89,7 +102,9 @@ export type ProgressEvent =
       readonly total: number;
     }
   | { readonly seq: number; readonly kind: 'analyze.done' }
-  | { readonly seq: number; readonly kind: 'crossref.done' };
+  | { readonly seq: number; readonly kind: 'crossref.done' }
+  | { readonly seq: number; readonly kind: 'runtime.start' }
+  | { readonly seq: number; readonly kind: 'runtime.done' };
 
 /**
  * `Edit` — a single text replacement scoped to one file and one range.
@@ -153,6 +168,11 @@ export interface RunAnalysisResult {
   readonly actions: readonly AnalysisAction[];
   readonly metrics: AnalysisMetrics;
   readonly progressEvents: readonly ProgressEvent[];
+  /**
+   * Runtime-intelligence report — populated only when `options.coverage` was
+   * supplied. Omitted (per `exactOptionalPropertyTypes`) otherwise.
+   */
+  readonly runtime?: RuntimeReport;
   readonly _meta: {
     readonly version: string;
     readonly mode: AnalysisMode;
