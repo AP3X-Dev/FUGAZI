@@ -26,6 +26,33 @@ export type { BuildGraphOptions } from './build.js';
 export { buildGraph } from './build.js';
 export { classifyEdgeKind } from './edge-kinds.js';
 
+export type {
+  PropagatedExports,
+  PropagationDiagnostic,
+  Provenance,
+} from './re-exports/propagate.js';
+export {
+  CAP_HIT_MESSAGE,
+  MAX_ITERATIONS,
+  describeDiagnostic,
+  isReExportEdge,
+  propagateReExports,
+} from './re-exports/propagate.js';
+export type { Cycle } from './re-exports/cycles.js';
+export { detectReexportCycles } from './re-exports/cycles.js';
+export type {
+  StarAliasOverride,
+  SynthesizedStars,
+  SyntheticStarSymbol,
+} from './re-exports/star.js';
+export {
+  isSyntheticStarSymbol,
+  synthesizeStarExports,
+  synthesizeStarSymbolName,
+} from './re-exports/star.js';
+export type { EntryStarTargets } from './re-exports/entry-targets.js';
+export { buildEntryStarTargets } from './re-exports/entry-targets.js';
+
 export {
   type DynamicImportSpec,
   type DynamicResolution,
