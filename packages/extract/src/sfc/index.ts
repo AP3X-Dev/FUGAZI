@@ -8,6 +8,7 @@
  */
 
 export { parseVueSFC } from './vue.js';
+export { parseSvelteSFC } from './svelte.js';
 export {
   type BlockLanguage,
   type ScriptBlock,
