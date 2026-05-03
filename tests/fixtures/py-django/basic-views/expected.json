@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "mode": "full",
+    "version": "0.0.0"
+  },
+  "actions": [],
+  "activePlugins": [
+    "dataclasses"
+  ],
+  "issues": [],
+  "metrics": {
+    "cacheHitRate": 0,
+    "diagnosticsByRule": {
+      "boundary-violations": 0,
+      "circular-dependencies": 0,
+      "code-duplication": 0,
+      "cognitive-complexity": 0,
+      "complexity-hotspot": 0,
+      "duplicate-exports": 0,
+      "private-type-leak": 0,
+      "unlisted-dependencies": 0,
+      "unresolved-imports": 0,
+      "unused-class-members": 0,
+      "unused-deps": 0,
+      "unused-dev-deps": 0,
+      "unused-enum-members": 0,
+      "unused-exports": 0,
+      "unused-files": 0,
+      "unused-optional-deps": 0,
+      "unused-types": 0
+    },
+    "filesScanned": 3
+  }
+}

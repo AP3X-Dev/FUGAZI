@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-celery-tasks"
+version = "0.0.0"
+dependencies = ["celery>=5.0"]

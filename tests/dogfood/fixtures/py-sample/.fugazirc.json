@@ -1,0 +1,12 @@
+{
+  "$schema": "https://fugazi.dev/schema.json",
+  "entrypoints": [
+    "src/app.py",
+    "tests/test_app.py"
+  ],
+  "exclude": [
+    "**/__pycache__/**",
+    ".venv/**",
+    "**/*.pyc"
+  ]
+}

@@ -1,0 +1,13 @@
+[project]
+name = "fugazi-dogfood-py-sample"
+version = "0.0.0"
+description = "Tiny Flask app used to dogfood the Python pipeline."
+dependencies = [
+    "Flask>=2.3",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]

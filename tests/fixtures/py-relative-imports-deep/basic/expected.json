@@ -1,0 +1,56 @@
+{
+  "_meta": {
+    "mode": "full",
+    "version": "0.0.0"
+  },
+  "actions": [],
+  "activePlugins": [
+    "dataclasses"
+  ],
+  "issues": [
+    {
+      "file": "src/a/__init__.py",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/a/__init__.py is not reachable from any entry point",
+      "path": "src/a/__init__.py",
+      "severity": "error"
+    },
+    {
+      "file": "src/a/b/__init__.py",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/a/b/__init__.py is not reachable from any entry point",
+      "path": "src/a/b/__init__.py",
+      "severity": "error"
+    },
+    {
+      "file": "src/a/b/c/__init__.py",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/a/b/c/__init__.py is not reachable from any entry point",
+      "path": "src/a/b/c/__init__.py",
+      "severity": "error"
+    }
+  ],
+  "metrics": {
+    "cacheHitRate": 0,
+    "diagnosticsByRule": {
+      "boundary-violations": 0,
+      "circular-dependencies": 0,
+      "code-duplication": 0,
+      "cognitive-complexity": 0,
+      "complexity-hotspot": 0,
+      "duplicate-exports": 0,
+      "private-type-leak": 0,
+      "unlisted-dependencies": 0,
+      "unresolved-imports": 0,
+      "unused-class-members": 0,
+      "unused-deps": 0,
+      "unused-dev-deps": 0,
+      "unused-enum-members": 0,
+      "unused-exports": 0,
+      "unused-files": 3,
+      "unused-optional-deps": 0,
+      "unused-types": 0
+    },
+    "filesScanned": 5
+  }
+}

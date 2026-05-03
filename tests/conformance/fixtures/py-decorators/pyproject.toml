@@ -1,0 +1,6 @@
+[project]
+name = "fugazi-conformance-py-decorators"
+version = "0.0.0"
+dependencies = [
+    "Flask>=2.0",
+]

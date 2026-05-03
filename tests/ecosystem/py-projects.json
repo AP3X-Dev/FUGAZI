@@ -1,0 +1,37 @@
+[
+  {
+    "org": "django",
+    "repo": "django",
+    "branch": "main",
+    "subdir": null,
+    "install_command": "pip install -e ."
+  },
+  {
+    "org": "pallets",
+    "repo": "flask",
+    "branch": "main",
+    "subdir": null,
+    "install_command": "pip install -e ."
+  },
+  {
+    "org": "tiangolo",
+    "repo": "fastapi",
+    "branch": "master",
+    "subdir": null,
+    "install_command": "pip install -e ."
+  },
+  {
+    "org": "pytest-dev",
+    "repo": "pytest",
+    "branch": "main",
+    "subdir": null,
+    "install_command": "pip install -e ."
+  },
+  {
+    "org": "encode",
+    "repo": "httpx",
+    "branch": "master",
+    "subdir": null,
+    "install_command": "pip install -e ."
+  }
+]

@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-sqlalchemy-declarative"
+version = "0.0.0"
+dependencies = ["SQLAlchemy>=2.0"]

@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-click-command"
+version = "0.0.0"
+dependencies = ["click>=8.0"]

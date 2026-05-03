@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-flask-blueprint"
+version = "0.0.0"
+dependencies = ["Flask>=2.0"]

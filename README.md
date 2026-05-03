@@ -1,6 +1,8 @@
 # Fugazi
 
-Codebase intelligence for TypeScript and JavaScript. TS/Node port of [fallow](https://github.com/fallow-rs/fallow).
+Codebase intelligence for TypeScript, JavaScript, and Python. TS/Node port of [fallow](https://github.com/fallow-rs/fallow).
+
+**Languages supported:** TypeScript / TSX, JavaScript / JSX, Python (`.py`, `.pyi`). Mixed TS+Python monorepos analyze in a single pass — the dispatcher routes each source file by extension and merges findings into one report. See [`docs/PYTHON.md`](docs/PYTHON.md) for the Python contract.
 
 **Status: in implementation.** The repo is on its Phase 3 foundation pass; build commands run, but feature work is in progress and `bunx fugazi` does not yet produce real findings. Track progress in `docs/superpowers/plans/`.
 
@@ -21,6 +23,20 @@ All features are MIT-licensed.
 bun install
 bun run build
 bunx fugazi --help
+```
+
+Audit a TypeScript project:
+
+```bash
+cd my-ts-app/
+bunx fugazi audit
+```
+
+Audit a Python project (Flask/FastAPI/Django/SQLAlchemy/pytest/Pydantic/Celery/Click and 16 more frameworks ship as built-in plugins):
+
+```bash
+cd my-flask-app/
+bunx fugazi audit
 ```
 
 The `bunx fugazi --help` output is sparse during the foundation phase; it becomes useful as Phase 3c–3f land.

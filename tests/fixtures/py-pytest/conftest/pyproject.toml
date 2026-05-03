@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-pytest-conftest"
+version = "0.0.0"
+dependencies = ["pytest>=7.0"]

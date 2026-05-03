@@ -1,0 +1,86 @@
+{
+  "_meta": {
+    "mode": "full",
+    "version": "0.0.0"
+  },
+  "actions": [],
+  "activePlugins": [
+    "dataclasses"
+  ],
+  "issues": [
+    {
+      "cycle": [
+        "src/a.py",
+        "src/b.py",
+        "src/a.py"
+      ],
+      "file": "src/a.py",
+      "kind": "circular-dependencies",
+      "message": "circular-dependencies: cycle detected: <root>/src/a.py → <root>/src/b.py → <root>/src/a.py",
+      "severity": "error"
+    },
+    {
+      "className": "A",
+      "file": "src/a.py",
+      "kind": "unused-class-members",
+      "memberName": "link",
+      "message": "unused-class-members: A.link in <root>/src/a.py has no consumers",
+      "range": {
+        "end": {
+          "byteOffset": 128,
+          "column": 16,
+          "line": 9
+        },
+        "start": {
+          "byteOffset": 75,
+          "column": 0,
+          "line": 7
+        }
+      },
+      "severity": "error"
+    },
+    {
+      "className": "B",
+      "file": "src/b.py",
+      "kind": "unused-class-members",
+      "memberName": "back",
+      "message": "unused-class-members: B.back in <root>/src/b.py has no consumers",
+      "range": {
+        "end": {
+          "byteOffset": 128,
+          "column": 16,
+          "line": 9
+        },
+        "start": {
+          "byteOffset": 75,
+          "column": 0,
+          "line": 7
+        }
+      },
+      "severity": "error"
+    }
+  ],
+  "metrics": {
+    "cacheHitRate": 0,
+    "diagnosticsByRule": {
+      "boundary-violations": 0,
+      "circular-dependencies": 1,
+      "code-duplication": 0,
+      "cognitive-complexity": 0,
+      "complexity-hotspot": 0,
+      "duplicate-exports": 0,
+      "private-type-leak": 0,
+      "unlisted-dependencies": 0,
+      "unresolved-imports": 0,
+      "unused-class-members": 2,
+      "unused-deps": 0,
+      "unused-dev-deps": 0,
+      "unused-enum-members": 0,
+      "unused-exports": 0,
+      "unused-files": 0,
+      "unused-optional-deps": 0,
+      "unused-types": 0
+    },
+    "filesScanned": 2
+  }
+}

@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-django-basic"
+version = "0.0.0"
+dependencies = ["Django>=4.2"]

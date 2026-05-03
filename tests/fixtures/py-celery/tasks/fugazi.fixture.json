@@ -1,0 +1,3 @@
+{
+  "entrypoints": ["src/tasks.py"]
+}
