@@ -1,0 +1,37 @@
+{
+  "name": "aiohttp",
+  "packageManager": "pip",
+  "enablers": ["aiohttp"],
+  "entryPoints": ["**/app.py", "**/server.py", "**/main.py"],
+  "entryPointRole": "runtime",
+  "toolingDependencies": ["aiohttp"],
+  "usedClassMembers": [
+    {
+      "extends": "View",
+      "members": ["get", "post", "put", "patch", "delete", "head", "options"]
+    },
+    {
+      "extends": "AbstractView",
+      "members": ["get", "post", "put", "patch", "delete", "head", "options"]
+    }
+  ],
+  "usedDecorators": [
+    "routes.get",
+    "routes.post",
+    "routes.put",
+    "routes.patch",
+    "routes.delete",
+    "routes.head",
+    "routes.options",
+    "routes.view",
+    "routes.static",
+    "routes.route",
+    "router.get",
+    "router.post",
+    "router.put",
+    "router.patch",
+    "router.delete",
+    "middleware",
+    "web.middleware"
+  ]
+}

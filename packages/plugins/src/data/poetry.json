@@ -1,0 +1,8 @@
+{
+  "name": "poetry",
+  "packageManager": "auto",
+  "detection": { "type": "fileExists", "pattern": "pyproject.toml" },
+  "enablers": ["poetry"],
+  "configPatterns": ["pyproject.toml"],
+  "toolingDependencies": ["poetry", "poetry-core"]
+}

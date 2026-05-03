@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-aiohttp-basic"
+version = "0.0.0"
+dependencies = ["aiohttp>=3.9"]

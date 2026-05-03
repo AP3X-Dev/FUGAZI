@@ -62,21 +62,22 @@ spellings remain supported for compatibility.
 
 ## Framework plugins
 
-The Python plugin tier ships **24** declarative plugins (target was 30 —
-the remaining 6 are deferred to v1.x; see Limitations). Each plugin can
-contribute `entryPoints`, `alwaysUsed`, `configPatterns`, and
+The Python plugin tier ships **30** declarative plugins — the Phase 4d
+target is fully met. Each plugin can contribute `entryPoints`,
+`alwaysUsed`, `configPatterns`, `usedExports`, `usedClassMembers`, and
 `usedDecorators`.
 
-| Web frameworks | Test runners | Data / ORM | CLI / async / tooling |
-|----------------|--------------|------------|------------------------|
-| flask          | pytest       | sqlalchemy | click                  |
-| fastapi        | unittest     | pydantic   | celery                 |
-| django         | tox          | dataclasses| asyncio                |
-| starlette      | nose2        | attrs      | typer                  |
-| aiohttp        |              | marshmallow| invoke                 |
-| tornado        |              |            | docopt                 |
-| bottle         |              |            | argparse               |
-| sanic          |              |            |                        |
+| Web frameworks | Test runners | Data / ORM   | CLI / tasks / tooling |
+|----------------|--------------|--------------|------------------------|
+| flask          | pytest       | sqlalchemy   | click                  |
+| fastapi        | unittest     | sqlmodel     | typer                  |
+| django         | hypothesis   | tortoise     | celery                 |
+| starlette      |              | pydantic     | rq                     |
+| aiohttp        |              | dataclasses  | dramatiq               |
+| tornado        |              | attrs        | alembic                |
+| pyramid        |              | polars       | black / isort / ruff   |
+|                |              |              | mypy / pyright         |
+|                |              |              | poetry / uv            |
 
 (Names match the JSON files under `packages/plugins/dist/data/`.)
 
@@ -194,8 +195,6 @@ The following are tracked in [`docs/V1_LIMITATIONS.md`](V1_LIMITATIONS.md):
 - PEP 695 `type X = int` partial (regex desugar shipped; full grammar
   support deferred).
 - `.ipynb` notebook parsing deferred.
-- 24 plugins shipping; `sqlmodel`, `polars`, FastAPI extras, and
-  `poetry` / `uv` tooling-only plugins deferred.
 - Cross-file TYPE_CHECKING resolution deferred (the type/runtime
   classification is per-file today).
 - Python version-aware stdlib list (currently fixed to 3.11).

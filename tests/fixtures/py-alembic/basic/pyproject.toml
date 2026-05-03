@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-alembic-basic"
+version = "0.0.0"
+dependencies = ["alembic>=1.12"]

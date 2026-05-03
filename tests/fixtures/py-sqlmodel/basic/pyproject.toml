@@ -1,0 +1,4 @@
+[project]
+name = "fugazi-fx-py-sqlmodel-basic"
+version = "0.0.0"
+dependencies = ["sqlmodel>=0.0.14"]

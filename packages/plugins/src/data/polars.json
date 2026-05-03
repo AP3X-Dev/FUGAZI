@@ -1,0 +1,6 @@
+{
+  "name": "polars",
+  "packageManager": "pip",
+  "enablers": ["polars"],
+  "toolingDependencies": ["polars"]
+}

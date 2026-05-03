@@ -1,0 +1,19 @@
+{
+  "name": "sqlmodel",
+  "packageManager": "pip",
+  "enablers": ["sqlmodel"],
+  "toolingDependencies": ["sqlmodel"],
+  "usedClassMembers": [
+    {
+      "extends": "SQLModel",
+      "members": ["__tablename__", "__table_args__", "Config", "model_config"]
+    }
+  ],
+  "usedDecorators": [
+    "validator",
+    "root_validator",
+    "field_validator",
+    "model_validator",
+    "computed_field"
+  ]
+}

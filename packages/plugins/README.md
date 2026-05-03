@@ -2,9 +2,10 @@
 
 Declarative framework plugin system for Fugazi.
 
-Ships 115 bundled plugins (Next.js, Vite, Vitest, Jest, ESLint, TypeScript,
-Tailwind, Django, Flask, FastAPI, pytest, SQLAlchemy, Pydantic, etc.) as
-JSON data files validated against `PluginDefSchema`. Plugins:
+Ships 121 bundled plugins (Next.js, Vite, Vitest, Jest, ESLint, TypeScript,
+Tailwind, Django, Flask, FastAPI, aiohttp, pytest, SQLAlchemy, SQLModel,
+Alembic, Pydantic, polars, poetry, uv, etc.) as JSON data files validated
+against `PluginDefSchema`. Plugins:
 
 - mark framework convention files as entry points
 - allow-list tooling dependencies (so they don't surface as `unused-deps`)

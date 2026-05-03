@@ -1,0 +1,44 @@
+{
+  "name": "alembic",
+  "packageManager": "pip",
+  "enablers": ["alembic"],
+  "entryPoints": [
+    "**/migrations/env.py",
+    "**/migrations/versions/**.py",
+    "**/alembic/env.py",
+    "**/alembic/versions/**.py"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": ["alembic.ini"],
+  "alwaysUsed": [
+    "**/migrations/env.py",
+    "**/migrations/versions/**.py",
+    "**/alembic/env.py",
+    "**/alembic/versions/**.py"
+  ],
+  "toolingDependencies": ["alembic"],
+  "usedExports": [
+    {
+      "pattern": "**/migrations/versions/**.py",
+      "exports": [
+        "upgrade",
+        "downgrade",
+        "revision",
+        "down_revision",
+        "branch_labels",
+        "depends_on"
+      ]
+    },
+    {
+      "pattern": "**/alembic/versions/**.py",
+      "exports": [
+        "upgrade",
+        "downgrade",
+        "revision",
+        "down_revision",
+        "branch_labels",
+        "depends_on"
+      ]
+    }
+  ]
+}

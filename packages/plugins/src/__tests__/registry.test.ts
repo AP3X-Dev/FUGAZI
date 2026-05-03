@@ -28,8 +28,8 @@ const mkPlugin = (overrides: Partial<PluginDef>): PluginDef =>
   });
 
 describe('getBuiltinPlugins', () => {
-  it('returns 115 bundled plugins', () => {
-    expect(getBuiltinPlugins()).toHaveLength(115);
+  it('returns 121 bundled plugins', () => {
+    expect(getBuiltinPlugins()).toHaveLength(121);
   });
   it('cached on second access', () => {
     const a = getBuiltinPlugins();

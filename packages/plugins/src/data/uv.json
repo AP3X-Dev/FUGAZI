@@ -1,0 +1,8 @@
+{
+  "name": "uv",
+  "packageManager": "auto",
+  "detection": { "type": "fileExists", "pattern": "uv.lock" },
+  "enablers": ["uv"],
+  "configPatterns": ["pyproject.toml", "uv.lock"],
+  "toolingDependencies": ["uv"]
+}

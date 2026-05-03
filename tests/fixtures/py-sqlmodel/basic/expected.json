@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "mode": "full",
+    "version": "0.0.0"
+  },
+  "actions": [],
+  "activePlugins": [
+    "dataclasses"
+  ],
+  "issues": [
+    {
+      "className": "Hero",
+      "file": "src/models.py",
+      "kind": "unused-class-members",
+      "memberName": "__tablename__",
+      "message": "unused-class-members: Hero.__tablename__ in <root>/src/models.py has no consumers",
+      "range": {
+        "end": {
+          "byteOffset": 183,
+          "column": 38,
+          "line": 10
+        },
+        "start": {
+          "byteOffset": 27,
+          "column": 0,
+          "line": 5
+        }
+      },
+      "severity": "error"
+    }
+  ],
+  "metrics": {
+    "cacheHitRate": 0,
+    "diagnosticsByRule": {
+      "boundary-violations": 0,
+      "circular-dependencies": 0,
+      "code-duplication": 0,
+      "cognitive-complexity": 0,
+      "complexity-hotspot": 0,
+      "duplicate-exports": 0,
+      "private-type-leak": 0,
+      "unlisted-dependencies": 0,
+      "unresolved-imports": 0,
+      "unused-class-members": 1,
+      "unused-deps": 0,
+      "unused-dev-deps": 0,
+      "unused-enum-members": 0,
+      "unused-exports": 0,
+      "unused-files": 0,
+      "unused-optional-deps": 0,
+      "unused-types": 0
+    },
+    "filesScanned": 2
+  }
+}

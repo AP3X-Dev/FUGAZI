@@ -482,3 +482,152 @@ describe('Phase 4d T354 — tooling-only Python plugins', () => {
     }
   });
 });
+
+/* ------------------------------------------------------------------------ */
+/* Phase 4d completion (T356-T360) — final 6 Python plugins → 30/30         */
+/* ------------------------------------------------------------------------ */
+
+describe('sqlmodel (Phase 4d T356)', () => {
+  const plugin = getPlugin('sqlmodel');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses pip package manager', () => {
+    expect(plugin?.packageManager).toBe('pip');
+  });
+  it('declares sqlmodel as enabler and tooling', () => {
+    expect(plugin?.enablers).toContain('sqlmodel');
+    expect(plugin?.toolingDependencies).toContain('sqlmodel');
+  });
+  it('exempts SQLModel.__tablename__ and model_config', () => {
+    const rule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'SQLModel',
+    );
+    expect(rule).toBeDefined();
+    if (typeof rule === 'object' && rule !== undefined) {
+      expect(rule.members).toContain('__tablename__');
+      expect(rule.members).toContain('model_config');
+    }
+  });
+  it('declares Pydantic-style validator decorators', () => {
+    expect(plugin?.usedDecorators).toContain('validator');
+    expect(plugin?.usedDecorators).toContain('field_validator');
+    expect(plugin?.usedDecorators).toContain('model_validator');
+  });
+});
+
+describe('polars (Phase 4d T357)', () => {
+  const plugin = getPlugin('polars');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses pip package manager', () => {
+    expect(plugin?.packageManager).toBe('pip');
+  });
+  it('declares polars as enabler and tooling', () => {
+    expect(plugin?.enablers).toContain('polars');
+    expect(plugin?.toolingDependencies).toContain('polars');
+  });
+  it('is tooling-only (no entry points, no decorators)', () => {
+    expect(plugin?.entryPoints).toEqual([]);
+    expect(plugin?.usedDecorators).toEqual([]);
+    expect(plugin?.usedClassMembers).toEqual([]);
+  });
+});
+
+describe('alembic (Phase 4d T358)', () => {
+  const plugin = getPlugin('alembic');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses pip package manager', () => {
+    expect(plugin?.packageManager).toBe('pip');
+  });
+  it('has runtime role', () => {
+    expect(plugin?.entryPointRole).toBe('runtime');
+  });
+  it('treats migrations/env.py and migrations/versions/**.py as always-used', () => {
+    expect(plugin?.alwaysUsed).toContain('**/migrations/env.py');
+    expect(plugin?.alwaysUsed).toContain('**/migrations/versions/**.py');
+  });
+  it('treats alembic/env.py and alembic/versions/**.py as always-used', () => {
+    expect(plugin?.alwaysUsed).toContain('**/alembic/env.py');
+    expect(plugin?.alwaysUsed).toContain('**/alembic/versions/**.py');
+  });
+  it('declares alembic.ini as a config pattern', () => {
+    expect(plugin?.configPatterns).toContain('alembic.ini');
+  });
+  it('exempts upgrade/downgrade/revision in versions files', () => {
+    const rule = plugin?.usedExports.find((u) => u.pattern === '**/migrations/versions/**.py');
+    expect(rule?.exports).toContain('upgrade');
+    expect(rule?.exports).toContain('downgrade');
+    expect(rule?.exports).toContain('revision');
+    expect(rule?.exports).toContain('down_revision');
+  });
+});
+
+describe('aiohttp (Phase 4d T359)', () => {
+  const plugin = getPlugin('aiohttp');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses pip package manager', () => {
+    expect(plugin?.packageManager).toBe('pip');
+  });
+  it('has runtime role', () => {
+    expect(plugin?.entryPointRole).toBe('runtime');
+  });
+  it('declares routes.* HTTP-method decorators', () => {
+    expect(plugin?.usedDecorators).toContain('routes.get');
+    expect(plugin?.usedDecorators).toContain('routes.post');
+    expect(plugin?.usedDecorators).toContain('routes.put');
+    expect(plugin?.usedDecorators).toContain('routes.delete');
+  });
+  it('declares router.* HTTP-method decorators', () => {
+    expect(plugin?.usedDecorators).toContain('router.get');
+    expect(plugin?.usedDecorators).toContain('router.post');
+  });
+  it('declares middleware decorator', () => {
+    expect(plugin?.usedDecorators).toContain('middleware');
+    expect(plugin?.usedDecorators).toContain('web.middleware');
+  });
+  it('exempts View HTTP-method members', () => {
+    const rule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'View',
+    );
+    expect(rule).toBeDefined();
+    if (typeof rule === 'object' && rule !== undefined) {
+      expect(rule.members).toContain('get');
+      expect(rule.members).toContain('post');
+    }
+  });
+});
+
+describe('poetry (Phase 4d T360)', () => {
+  const plugin = getPlugin('poetry');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses fileExists detection on pyproject.toml', () => {
+    expect(plugin?.detection?.type).toBe('fileExists');
+    if (plugin?.detection?.type === 'fileExists') {
+      expect(plugin.detection.pattern).toBe('pyproject.toml');
+    }
+  });
+  it('declares poetry-core as tooling', () => {
+    expect(plugin?.toolingDependencies).toContain('poetry');
+    expect(plugin?.toolingDependencies).toContain('poetry-core');
+  });
+  it('is tooling-only (no entry points, no decorators)', () => {
+    expect(plugin?.entryPoints).toEqual([]);
+    expect(plugin?.usedDecorators).toEqual([]);
+  });
+});
+
+describe('uv (Phase 4d T360)', () => {
+  const plugin = getPlugin('uv');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses fileExists detection on uv.lock', () => {
+    expect(plugin?.detection?.type).toBe('fileExists');
+    if (plugin?.detection?.type === 'fileExists') {
+      expect(plugin.detection.pattern).toBe('uv.lock');
+    }
+  });
+  it('declares uv as tooling', () => {
+    expect(plugin?.toolingDependencies).toContain('uv');
+  });
+  it('declares uv.lock and pyproject.toml as config patterns', () => {
+    expect(plugin?.configPatterns).toContain('uv.lock');
+    expect(plugin?.configPatterns).toContain('pyproject.toml');
+  });
+});
