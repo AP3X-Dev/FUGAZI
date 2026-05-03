@@ -102,6 +102,46 @@ export function buildGraph(options: BuildGraphOptions): Graph {
   const ctx: ResolverContext = fs !== undefined ? { ...resolverContext, fs } : resolverContext;
   const accumulated: Edge[] = [];
 
+  // Phase 4f T381 — synthetic "package-init" edges for Python files.
+  // Python imports run every `__init__.py` in the package chain when any
+  // module inside the package is loaded. Without surfacing this, an empty
+  // `pkg/__init__.py` is flagged as unused-files even when `pkg/main.py`
+  // is the project entrypoint. We emit a synthetic `static` edge from
+  // every Python file to its parent-package `__init__.py` (if present in
+  // the project file set), and recursively to the grandparent's
+  // `__init__.py`, until either the chain breaks (no `__init__.py` in the
+  // ancestor dir) or we exit the project root. The edges are
+  // `resolvable: true` and use the special specifier `'<package-init>'`
+  // so consumers can distinguish them from explicit imports.
+  for (const node of files) {
+    if (!isPythonFilePath(node.path)) continue;
+    let dir = parentDirPosix(node.path);
+    let prevDir: string | null = null;
+    while (dir !== '' && dir !== prevDir) {
+      const initPath = `${dir}/__init__.py`;
+      const initId = pathToFileId.get(initPath);
+      if (initId !== undefined && initId !== node.id) {
+        accumulated.push(
+          Object.freeze({
+            from: node.id,
+            to: initId,
+            kind: 'static' as EdgeKind,
+            specifier: '<package-init>',
+            resolvable: true,
+            loc: node.inventory.imports[0]?.range ?? ZERO_RANGE,
+          }),
+        );
+      } else {
+        // No `__init__.py` in this directory — chain breaks (PEP 420
+        // namespace packages don't carry inits, but for the unused-files
+        // story we only walk while explicit inits are present).
+        break;
+      }
+      prevDir = dir;
+      dir = parentDirPosix(dir);
+    }
+  }
+
   for (const node of files) {
     for (const importRecord of node.inventory.imports) {
       const edgeKind = classify(importRecord);
@@ -116,6 +156,42 @@ export function buildGraph(options: BuildGraphOptions): Graph {
           loc: importRecord.range,
         }),
       );
+
+      // Phase 4f T381 — Python submodule promotion. For
+      // `from X import Y, Z`, additionally probe `X.Y` / `X.Z` as candidate
+      // submodule paths and emit an edge for each that resolves on disk.
+      // Without this, `from .sub import foo` produces only the edge to
+      // `pkg/sub/__init__.py` and `pkg/sub/foo.py` is wrongly flagged as
+      // unused-files even though it's the actual import target. We only
+      // emit when the candidate file exists in the project's FileNode set
+      // — phantom edges for symbol-only imports (`from .util import HELPER`
+      // where HELPER is a name defined in `util.py`'s namespace, not a
+      // submodule) are silently dropped.
+      if (
+        importRecord.names !== undefined &&
+        importRecord.names.length > 0 &&
+        isPythonFilePath(node.path)
+      ) {
+        for (const name of importRecord.names) {
+          const subSpec = importRecord.source === '' ? name : `${importRecord.source}.${name}`;
+          const subTarget = resolveSubmoduleId(subSpec, node.path, ctx, pathToFileId);
+          if (subTarget === null) continue;
+          // Skip when the submodule resolves to the SAME file the primary
+          // edge already points at (keeps determinism — no duplicate edge
+          // with identical `(from, to, kind, specifier)` shape).
+          if (subTarget.id === targetId.id && subSpec === importRecord.source) continue;
+          accumulated.push(
+            Object.freeze({
+              from: node.id,
+              to: subTarget.id,
+              kind: edgeKind,
+              specifier: subSpec,
+              resolvable: subTarget.resolvable,
+              loc: importRecord.range,
+            }),
+          );
+        }
+      }
     }
   }
 
@@ -207,9 +283,79 @@ function resolveTargetId(
       // unused-deps rules don't fire on them.
       return { id: ROOT_FILE_ID, resolvable: true };
     case 'external':
+      // Phase 4f T381. For Python files, the resolver returns `external` ONLY
+      // when the bare package head is declared in the project's manifest
+      // (pyproject.toml etc) OR present in a virtualenv's site-packages. Both
+      // shapes are "resolved as third-party" — parallel to TS resolving a
+      // bare specifier through `node_modules/`. Marking the edge
+      // `resolvable: true` keeps `unresolved-imports` from false-firing on
+      // imports of `flask`, `pydantic`, etc. when those deps are listed in
+      // pyproject. TS keeps the historical `resolvable: false` shape — for
+      // TS, `external` means "looks like a bare module name but absent on
+      // disk", which IS an unresolved-imports candidate.
+      if (isPythonFilePath(fromPath)) {
+        return { id: ROOT_FILE_ID, resolvable: true };
+      }
+      return { id: ROOT_FILE_ID, resolvable: false };
     case 'unresolved':
       return { id: ROOT_FILE_ID, resolvable: false };
   }
+}
+
+/**
+ * Return `true` if `path` is a Python source file (`.py` or `.pyi`).
+ */
+function isPythonFilePath(path: string): boolean {
+  return path.endsWith('.py') || path.endsWith('.pyi');
+}
+
+/**
+ * Return the parent directory of a POSIX-shape path. Pure string op — no
+ * `node:path` dependency so the same logic works on Windows-canonical
+ * inputs (`C:/foo/bar` → `C:/foo`).
+ */
+function parentDirPosix(path: string): string {
+  const slash = path.lastIndexOf('/');
+  if (slash <= 0) return '';
+  return path.slice(0, slash);
+}
+
+/**
+ * Zero range used by synthetic package-init edges. The edge has no source
+ * location (it's not an explicit import statement); we point at the first
+ * import's range when one exists, but fall back to this when the file has
+ * zero imports. The unused-files BFS walks edges by `(from, to)` only and
+ * never inspects `loc`, so the zero-range placeholder is invisible to the
+ * rule layer.
+ */
+const ZERO_RANGE = Object.freeze({
+  start: Object.freeze({ line: 1, column: 0, byteOffset: 0 }),
+  end: Object.freeze({ line: 1, column: 0, byteOffset: 0 }),
+});
+
+/**
+ * Phase 4f T381 — try to resolve a Python `<source>.<name>` candidate as a
+ * submodule file in the project file set. Returns the FileId + resolvable
+ * flag when the candidate resolves to a project file; `null` when the
+ * candidate does not resolve OR resolves to a non-project file (we never
+ * emit phantom edges into ROOT_FILE_ID for the promotion path — those
+ * would over-count the unresolved-imports rule).
+ *
+ * The candidate is run through the SAME resolver dispatch as the primary
+ * import; it's the resolver's job to handle relative-vs-absolute,
+ * `__init__.py` probing, etc.
+ */
+function resolveSubmoduleId(
+  spec: string,
+  fromPath: string,
+  ctx: ResolverContext,
+  pathToFileId: ReadonlyMap<string, FileId>,
+): { readonly id: FileId; readonly resolvable: boolean } | null {
+  const result = resolveSpecifier(spec, fromPath, ctx);
+  if (result.kind !== 'resolved') return null;
+  const id = pathToFileId.get(result.target);
+  if (id === undefined) return null;
+  return { id, resolvable: true };
 }
 
 /**

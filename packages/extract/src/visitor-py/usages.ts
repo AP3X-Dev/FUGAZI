@@ -66,16 +66,34 @@ export function handleName(node: Name, parent: ASTNodePy | null, ctx: PyVisitorC
 }
 
 /**
- * `handleAttribute` — emit a `'member'` usage for an attribute-access chain.
+ * `handleAttribute` — emit `'member'` usages for an attribute-access chain.
  * The emitted name is the BASE of the chain (`a.b.c` → `'a'`); intermediate
  * attribute slots collapse. Mirrors the TS visitor's `MemberExpression`
  * `'member'` emission.
+ *
+ * Phase 4f T381 — additionally emit a `'member'` usage with the rightmost
+ * attribute name (the `attr` field) so chains like
+ * `User(id=1, name="root").display()` register `display` as a member usage.
+ * Without this, methods called only on call-expression / subscript receivers
+ * are never recorded as used and surface as false-positive
+ * `unused-class-members`. The base-name emission stays for backwards-compat
+ * with the existing rule logic; the attr emission is additive.
+ *
+ * Skipped: chains whose rightmost attr is the empty string (defensive — the
+ * adapter never emits empty-string attrs but the type system permits it).
  */
 export function handleAttribute(node: Attribute, ctx: PyVisitorContext): void {
   const base = baseNameOf(node);
-  if (base === '') return;
-  if (ctx.bindings.has(base)) return;
-  ctx.usages.push({ kind: 'member', name: base, range: node.range });
+  if (base !== '' && !ctx.bindings.has(base)) {
+    ctx.usages.push({ kind: 'member', name: base, range: node.range });
+  }
+  // Always-emit the rightmost attribute name as a member usage. This
+  // captures call-chain accesses (`Call(...).method`) where the base of
+  // the chain is not a Name and `baseNameOf` returns empty.
+  const attr = node.attr;
+  if (attr !== '' && !ctx.bindings.has(attr)) {
+    ctx.usages.push({ kind: 'member', name: attr, range: node.range });
+  }
 }
 
 /**

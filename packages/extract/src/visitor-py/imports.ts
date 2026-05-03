@@ -56,11 +56,27 @@ export function handleImport(node: ImportStmt, out: Import[], typeOnly: boolean)
 export function handleImportFrom(node: ImportFromStmt, out: Import[], typeOnly: boolean): void {
   const source = encodeFromSource(node.module, node.level);
   if (source === '' && node.level === 0) return;
+  // Phase 4f T381: surface the imported names so the graph builder can
+  // probe `<source>.<name>` for each as a candidate submodule and emit an
+  // additional edge when the candidate resolves on disk. Star-import
+  // (`from x import *`) is encoded as the singleton `['*']` by the adapter
+  // — drop it here so the graph builder doesn't treat `*` as a submodule
+  // name. The unaliased binding is what gets recorded; aliases (`from x
+  // import a as b`) keep `'a'`.
+  const rawNames = node.names;
+  const names: string[] = [];
+  for (const n of rawNames) {
+    if (n === '' || n === '*') continue;
+    const idx = n.indexOf(' as ');
+    const bare = idx === -1 ? n : n.slice(0, idx);
+    if (bare !== '') names.push(bare);
+  }
   out.push({
     kind: typeOnly ? 'type' : 'static',
     source,
     resolvable: true,
     range: node.range,
+    ...(names.length > 0 ? { names: Object.freeze(names.slice()) } : {}),
   });
 }
 

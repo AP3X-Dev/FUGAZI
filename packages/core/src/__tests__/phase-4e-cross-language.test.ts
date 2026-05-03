@@ -282,6 +282,110 @@ describe('Phase 4e — determinism', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Phase 4f T381 — runAnalysis loads the Python manifest
+// ---------------------------------------------------------------------------
+
+describe('Phase 4f T381 — runAnalysis loads PythonManifest from projectRoot', () => {
+  it('flask import declared in pyproject.toml does NOT surface as unresolved-imports', async () => {
+    const root = await makeTempDir();
+    await writeFile(
+      join(root, 'pyproject.toml'),
+      `[project]
+name = "test"
+version = "0.0.0"
+dependencies = ["Flask>=2.0"]
+`,
+    );
+    await writeFile(join(root, 'app.py'), 'from flask import Flask\napp = Flask(__name__)\n');
+    const result = await runAnalysis(baseOptions(root));
+    const unresolved = result.issues.filter((i) => i.kind === 'unresolved-imports');
+    expect(unresolved).toEqual([]);
+  }, 30_000);
+
+  it('undeclared package import surfaces as unlisted-dependencies (not external)', async () => {
+    const root = await makeTempDir();
+    await writeFile(
+      join(root, 'pyproject.toml'),
+      `[project]
+name = "test"
+version = "0.0.0"
+dependencies = []
+`,
+    );
+    await writeFile(join(root, 'app.py'), 'from random_unknown_pkg import x\n');
+    const result = await runAnalysis(baseOptions(root));
+    // Manifest declares no deps → resolver returns 'unresolved' for the
+    // import → import-hygiene flags it as unlisted-dependencies (Python's
+    // bare-spec equivalent of TS "third-party not declared in manifest").
+    const importHygiene = result.issues.filter(
+      (i) => i.kind === 'unlisted-dependencies' || i.kind === 'unresolved-imports',
+    );
+    expect(importHygiene.length).toBeGreaterThan(0);
+  }, 30_000);
+
+  it('PEP 503 normalization: `Django-REST-Framework` matches dep `djangorestframework`', async () => {
+    const root = await makeTempDir();
+    await writeFile(
+      join(root, 'pyproject.toml'),
+      `[project]
+name = "test"
+version = "0.0.0"
+dependencies = ["djangorestframework>=3.0"]
+`,
+    );
+    await writeFile(join(root, 'app.py'), 'from django_rest_framework import x\n');
+    const result = await runAnalysis(baseOptions(root));
+    const unresolved = result.issues.filter((i) => i.kind === 'unresolved-imports');
+    expect(unresolved).toEqual([]);
+  }, 30_000);
+});
+
+// ---------------------------------------------------------------------------
+// Phase 4f T381 — submodule promotion + package-init traversal
+// ---------------------------------------------------------------------------
+
+describe('Phase 4f T381 — Python submodule promotion through __init__.py', () => {
+  it('from .sub import foo makes foo.py reachable from main.py', async () => {
+    const root = await makeTempDir();
+    await mkdir(join(root, 'pkg', 'sub'), { recursive: true });
+    await writeFile(join(root, 'pkg', '__init__.py'), '');
+    await writeFile(join(root, 'pkg', 'sub', '__init__.py'), '');
+    await writeFile(join(root, 'pkg', 'sub', 'foo.py'), "def run(): return 'ok'\n");
+    await writeFile(
+      join(root, 'pkg', 'main.py'),
+      'from .sub import foo\n\ndef main():\n    return foo.run()\n',
+    );
+    const opts = baseOptions(root);
+    const optsWithEntry: RunAnalysisOptions = {
+      ...opts,
+      config: { ...opts.config, entrypoints: ['pkg/main.py'] },
+    };
+    const result = await runAnalysis(optsWithEntry);
+    const unusedFiles = result.issues.filter((i) => i.kind === 'unused-files');
+    // Both pkg/sub/foo.py AND pkg/__init__.py + pkg/sub/__init__.py should
+    // be reachable. unused-files = 0.
+    expect(unusedFiles).toEqual([]);
+  }, 30_000);
+
+  it('package __init__.py reaches up the chain when any sibling file is reached', async () => {
+    const root = await makeTempDir();
+    await mkdir(join(root, 'pkg'), { recursive: true });
+    await writeFile(join(root, 'pkg', '__init__.py'), '');
+    await writeFile(join(root, 'pkg', 'main.py'), 'x = 1\n');
+    const opts = baseOptions(root);
+    const optsWithEntry: RunAnalysisOptions = {
+      ...opts,
+      config: { ...opts.config, entrypoints: ['pkg/main.py'] },
+    };
+    const result = await runAnalysis(optsWithEntry);
+    const unusedFiles = result.issues.filter((i) => i.kind === 'unused-files');
+    // pkg/__init__.py is reached via the synthetic package-init edge from
+    // pkg/main.py.
+    expect(unusedFiles).toEqual([]);
+  }, 30_000);
+});
+
+// ---------------------------------------------------------------------------
 // Helper to silence "toPosix unused" lint
 // ---------------------------------------------------------------------------
 

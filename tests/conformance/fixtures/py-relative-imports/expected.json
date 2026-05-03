@@ -7,29 +7,7 @@
   "activePlugins": [
     "dataclasses"
   ],
-  "issues": [
-    {
-      "file": "src/pkg/__init__.py",
-      "kind": "unused-files",
-      "message": "unused-files: <root>/src/pkg/__init__.py is not reachable from any entry point",
-      "path": "src/pkg/__init__.py",
-      "severity": "error"
-    },
-    {
-      "file": "src/pkg/sub/bar.py",
-      "kind": "unused-files",
-      "message": "unused-files: <root>/src/pkg/sub/bar.py is not reachable from any entry point",
-      "path": "src/pkg/sub/bar.py",
-      "severity": "error"
-    },
-    {
-      "file": "src/pkg/sub/foo.py",
-      "kind": "unused-files",
-      "message": "unused-files: <root>/src/pkg/sub/foo.py is not reachable from any entry point",
-      "path": "src/pkg/sub/foo.py",
-      "severity": "error"
-    }
-  ],
+  "issues": [],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
@@ -46,7 +24,8 @@
       "unused-deps": 0,
       "unused-dev-deps": 0,
       "unused-enum-members": 0,
-      "unused-files": 3,
+      "unused-exports": 0,
+      "unused-files": 0,
       "unused-optional-deps": 0,
       "unused-types": 0
     },

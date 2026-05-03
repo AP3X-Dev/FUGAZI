@@ -40,7 +40,14 @@ import {
   parse,
   parsePythonAst,
 } from '@fugazi/extract';
-import { type FileNode, type Graph, buildGraph } from '@fugazi/graph';
+import {
+  type FileNode,
+  type Graph,
+  type PythonManifest,
+  buildGraph,
+  loadPythonManifest,
+  nodeFsAdapter,
+} from '@fugazi/graph';
 import {
   type PluginDef,
   detectActivePlugins,
@@ -142,9 +149,20 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     emitter.emit({ kind: 'graph.start' });
     checkAborted(signal, 'graph');
     const fileNodes = buildFileNodes(discovered, inventories);
+    // Phase 4f T381: load the project's Python manifest ONCE per run so the
+    // resolver can classify imports of declared dependencies (`flask`,
+    // `pydantic`, etc.) as `external` rather than `unresolved`. The walk
+    // probes pyproject.toml → setup.cfg → setup.py → requirements*.txt at
+    // the project root (loadPythonManifest handles the fallback chain). When
+    // no Python files exist we still load it once — the cost is one stat and
+    // is amortised across the whole run.
+    const pythonManifest = loadPythonManifestForRun(options.projectRoot, aggregate.filesByLang.py);
     graph = buildGraph({
       files: fileNodes,
-      resolverContext: { projectRoot: options.projectRoot },
+      resolverContext: {
+        projectRoot: options.projectRoot,
+        ...(pythonManifest !== undefined ? { pythonManifest } : {}),
+      },
     });
     emitter.emit({ kind: 'graph.done', edgeCount: graph.edges.length });
     checkAborted(signal, 'graph');
@@ -615,6 +633,34 @@ function emptyComplexity(): FileComplexity {
 
 function emptyExtract(lang: 'ts' | 'py'): ExtractOutput {
   return { inventory: emptyInventory(), complexity: emptyComplexity(), lang, parseErrorCount: 0 };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Python manifest                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Phase 4f T381: load the project's Python manifest at the project root,
+ * once per run. Returns `undefined` when no Python files were discovered AND
+ * no manifest file is present at the root, so the graph builder doesn't pay
+ * for a no-op check on pure-TS projects. When at least one `.py` / `.pyi`
+ * file is present we always load (and the resolver dispatcher consults the
+ * result for every Python import).
+ *
+ * The walk uses `nodeFsAdapter` directly: `loadPythonManifest` is sync, never
+ * throws on parse failure, and reads at most a handful of small files. Mixed
+ * monorepos with multiple manifests keep the existing per-Python-file
+ * resolver behaviour — manifest lookup is rooted at `projectRoot`, mirroring
+ * how the TS rule walks to the nearest `package.json`. Phase 4 ships
+ * project-root only; per-package manifest walks are a v1.x ask.
+ */
+function loadPythonManifestForRun(
+  projectRoot: string,
+  pyFileCount: number,
+): PythonManifest | undefined {
+  if (pyFileCount === 0) return undefined;
+  const manifest = loadPythonManifest(toPosix(projectRoot), nodeFsAdapter);
+  return manifest;
 }
 
 /* -------------------------------------------------------------------------- */

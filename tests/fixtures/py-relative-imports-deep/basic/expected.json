@@ -7,29 +7,7 @@
   "activePlugins": [
     "dataclasses"
   ],
-  "issues": [
-    {
-      "file": "src/a/__init__.py",
-      "kind": "unused-files",
-      "message": "unused-files: <root>/src/a/__init__.py is not reachable from any entry point",
-      "path": "src/a/__init__.py",
-      "severity": "error"
-    },
-    {
-      "file": "src/a/b/__init__.py",
-      "kind": "unused-files",
-      "message": "unused-files: <root>/src/a/b/__init__.py is not reachable from any entry point",
-      "path": "src/a/b/__init__.py",
-      "severity": "error"
-    },
-    {
-      "file": "src/a/b/c/__init__.py",
-      "kind": "unused-files",
-      "message": "unused-files: <root>/src/a/b/c/__init__.py is not reachable from any entry point",
-      "path": "src/a/b/c/__init__.py",
-      "severity": "error"
-    }
-  ],
+  "issues": [],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
@@ -47,7 +25,7 @@
       "unused-dev-deps": 0,
       "unused-enum-members": 0,
       "unused-exports": 0,
-      "unused-files": 3,
+      "unused-files": 0,
       "unused-optional-deps": 0,
       "unused-types": 0
     },

@@ -82,6 +82,22 @@ export interface Declaration {
    * `usedDecorators` allowlists.
    */
   readonly memberDecorations?: readonly MemberDecoration[];
+  /**
+   * Phase 4f T381 — Python-only. The subset of `members` whose declaration
+   * form is `AnnAssign` (annotated class attribute) — the canonical field
+   * shape used by Pydantic (`class User(BaseModel): name: str`),
+   * dataclasses (`@dataclass class User: name: str`), attrs, and
+   * SQLAlchemy declarative bases. The `unused-class-members` rule treats
+   * field-shaped members as framework-presumed-used: the field is
+   * assigned via constructor kwargs (`User(name='x')`) or via ORM
+   * column-binding, neither of which the static analyzer's literal
+   * `.member` access pass can capture. Empty (`undefined`) for TS classes
+   * and for Python classes with no annotated attributes. The list is
+   * exhaustive — every name is also present in `members`; consumers
+   * compute `methods = members \ fieldMembers` when they want only the
+   * function-decl side.
+   */
+  readonly fieldMembers?: readonly string[];
 }
 
 export type ImportKind = 'static' | 'dynamic' | 'reexport' | 'asset' | 'type';
@@ -91,6 +107,24 @@ export interface Import {
   readonly source: string;
   readonly resolvable: boolean;
   readonly range: Range;
+  /**
+   * Phase 4f T381 — Python-only. The list of imported names from a
+   * `from X import Y, Z` statement. Populated by the Python visitor for
+   * every `ImportFromStmt`. Used by the graph builder to emit additional
+   * edges for `X.Y` and `X.Z` when those resolve as submodule files —
+   * Python's `from .pkg import sub` runs `pkg/__init__.py` first AND then
+   * exposes `sub` as either a name in `__init__.py`'s namespace OR a
+   * submodule file at `pkg/sub.py`. Without this, the analyzer flags the
+   * submodule file as unused-files because the only edge points at the
+   * package's `__init__.py`.
+   *
+   * The list excludes the `*` wildcard form (`from x import *` does NOT
+   * populate `names`); it includes the unaliased binding name only —
+   * `from x import a as b` records `'a'`, not `'b'`. The TS visitor never
+   * sets this field; consumers reading TS imports treat its absence as
+   * "no submodule promotion needed".
+   */
+  readonly names?: readonly string[];
 }
 
 export type UsageKind = 'identifier' | 'jsx' | 'member' | 'decorator' | 'css-class';

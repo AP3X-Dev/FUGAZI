@@ -40,6 +40,28 @@ describe('buildPyInventory — declarations (T305)', () => {
     expect(inv.declarations[0]?.members).toEqual(['x', 'bar']);
   });
 
+  it('Phase 4f T381: AnnAssign class fields surface as fieldMembers', async () => {
+    const inv = await build('class User:\n    id: int\n    name: str\n    def hi(self): pass');
+    const userDecl = inv.declarations.find((d) => d.name === 'User');
+    expect(userDecl?.kind).toBe('class');
+    expect(userDecl?.members).toEqual(['id', 'name', 'hi']);
+    expect(userDecl?.fieldMembers).toEqual(['id', 'name']);
+  });
+
+  it('Phase 4f T381: untyped class-level Assign is NOT in fieldMembers', async () => {
+    const inv = await build('class C:\n    x = 1\n    y: int = 2');
+    const decl = inv.declarations.find((d) => d.name === 'C');
+    expect(decl?.members).toEqual(['x', 'y']);
+    // Only `y` (AnnAssign) is a field; `x` (plain Assign) is not.
+    expect(decl?.fieldMembers).toEqual(['y']);
+  });
+
+  it('Phase 4f T381: methods-only class has no fieldMembers', async () => {
+    const inv = await build('class C:\n    def a(self): pass\n    def b(self): pass');
+    const decl = inv.declarations.find((d) => d.name === 'C');
+    expect(decl?.fieldMembers).toBeUndefined();
+  });
+
   it('emits a variable-decl for a module-level assignment', async () => {
     const inv = await build('x = 1');
     expect(inv.declarations.map((d) => d.name)).toEqual(['x']);
@@ -100,6 +122,29 @@ describe('buildPyInventory — imports (T305)', () => {
     expect(inv.imports).toHaveLength(1);
     expect(inv.imports[0]?.source).toBe('foo');
   });
+
+  it('Phase 4f T381: surfaces imported names on `from X import Y, Z`', async () => {
+    const inv = await build('from foo import a, b, c');
+    expect(inv.imports).toHaveLength(1);
+    expect(inv.imports[0]?.names).toEqual(['a', 'b', 'c']);
+  });
+
+  it('Phase 4f T381: imported names use the bare binding (drops `as` alias)', async () => {
+    const inv = await build('from foo import a as A, b');
+    expect(inv.imports[0]?.names).toEqual(['a', 'b']);
+  });
+
+  it('Phase 4f T381: `from foo import *` does NOT populate names (wildcard)', async () => {
+    const inv = await build('from foo import *');
+    expect(inv.imports[0]?.names).toBeUndefined();
+  });
+
+  it('Phase 4f T381: `import x` (non-from) does NOT populate names', async () => {
+    const inv = await build('import os, sys');
+    for (const imp of inv.imports) {
+      expect(imp.names).toBeUndefined();
+    }
+  });
 });
 
 describe('buildPyInventory — usages (T305)', () => {
@@ -112,8 +157,13 @@ describe('buildPyInventory — usages (T305)', () => {
 
   it('emits a member usage for attribute access', async () => {
     const inv = await build('result = obj.method()');
-    const member = inv.usages.find((u) => u.kind === 'member');
-    expect(member?.name).toBe('obj');
+    const memberNames = inv.usages.filter((u) => u.kind === 'member').map((u) => u.name);
+    // Phase 4f T381 — handleAttribute emits BOTH the chain base (`obj`)
+    // and the rightmost attr (`method`) as 'member' usages so call-chain
+    // accesses on non-Name receivers (`Call(...).method()`) are still
+    // recorded. Both names must be present.
+    expect(memberNames).toContain('obj');
+    expect(memberNames).toContain('method');
   });
 
   it('emits a decorator usage for @dataclass', async () => {

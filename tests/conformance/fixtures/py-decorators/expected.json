@@ -7,27 +7,7 @@
   "activePlugins": [
     "dataclasses"
   ],
-  "issues": [
-    {
-      "file": "src/app.py",
-      "kind": "unresolved-imports",
-      "message": "unresolved-imports: cannot resolve flask from <root>/src/app.py",
-      "range": {
-        "end": {
-          "byteOffset": 23,
-          "column": 23,
-          "line": 1
-        },
-        "start": {
-          "byteOffset": 0,
-          "column": 0,
-          "line": 1
-        }
-      },
-      "severity": "error",
-      "specifier": "flask"
-    }
-  ],
+  "issues": [],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
@@ -39,7 +19,7 @@
       "duplicate-exports": 0,
       "private-type-leak": 0,
       "unlisted-dependencies": 0,
-      "unresolved-imports": 1,
+      "unresolved-imports": 0,
       "unused-class-members": 0,
       "unused-deps": 0,
       "unused-dev-deps": 0,

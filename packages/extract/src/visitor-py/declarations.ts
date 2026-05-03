@@ -78,6 +78,15 @@ export function handleClass(
   const bases = collectBaseNames(node.bases);
   const memberDecorations = collectMemberDecorations(node);
   const decoratedMembers = memberDecorations.map((d) => d.name);
+  // Phase 4f T381 — surface AnnAssign-shaped class members as the
+  // `fieldMembers` set. The `unused-class-members` rule treats every name
+  // in this list as framework-presumed-used (Pydantic, dataclasses, attrs,
+  // SQLAlchemy declarative all use the AnnAssign idiom; their fields are
+  // accessed via constructor kwargs / ORM binding, neither of which the
+  // literal `.member` usage pass captures). Methods (FunctionDef /
+  // AsyncFunctionDef) and untyped Assign-form members keep the existing
+  // exemption logic.
+  const fieldMembers = collectAnnAssignFieldNames(node);
   out.push({
     kind: 'class',
     name: node.name,
@@ -87,7 +96,25 @@ export function handleClass(
     ...(bases.length > 0 ? { bases } : {}),
     ...(decoratedMembers.length > 0 ? { decoratedMembers } : {}),
     ...(memberDecorations.length > 0 ? { memberDecorations } : {}),
+    ...(fieldMembers.length > 0 ? { fieldMembers } : {}),
   });
+}
+
+/**
+ * Phase 4f T381. Walk the class body and collect the names of class-level
+ * `AnnAssign` targets (annotated attributes — the field shape used by
+ * Pydantic / dataclasses / attrs / SQLAlchemy declarative). Order is
+ * preserved (source order). Methods, untyped class-level assignments, and
+ * non-binding statements are skipped.
+ */
+function collectAnnAssignFieldNames(node: ClassDef): readonly string[] {
+  const out: string[] = [];
+  for (const stmt of node.body) {
+    if (stmt.kind !== 'AnnAssign') continue;
+    if (stmt.target === '') continue;
+    out.push(stmt.target);
+  }
+  return out;
 }
 
 /**

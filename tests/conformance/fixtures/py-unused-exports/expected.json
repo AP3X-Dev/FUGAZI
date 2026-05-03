@@ -7,68 +7,7 @@
   "activePlugins": [
     "dataclasses"
   ],
-  "issues": [
-    {
-      "className": "UsedConfig",
-      "file": "src/config.py",
-      "kind": "unused-class-members",
-      "memberName": "name",
-      "message": "unused-class-members: UsedConfig.name in <root>/src/config.py has no consumers",
-      "range": {
-        "end": {
-          "byteOffset": 73,
-          "column": 13,
-          "line": 5
-        },
-        "start": {
-          "byteOffset": 31,
-          "column": 0,
-          "line": 4
-        }
-      },
-      "severity": "error"
-    },
-    {
-      "className": "UnusedConfigA",
-      "file": "src/config.py",
-      "kind": "unused-class-members",
-      "memberName": "a",
-      "message": "unused-class-members: UnusedConfigA.a in <root>/src/config.py has no consumers",
-      "range": {
-        "end": {
-          "byteOffset": 118,
-          "column": 10,
-          "line": 9
-        },
-        "start": {
-          "byteOffset": 76,
-          "column": 0,
-          "line": 8
-        }
-      },
-      "severity": "error"
-    },
-    {
-      "className": "UnusedConfigB",
-      "file": "src/config.py",
-      "kind": "unused-class-members",
-      "memberName": "b",
-      "message": "unused-class-members: UnusedConfigB.b in <root>/src/config.py has no consumers",
-      "range": {
-        "end": {
-          "byteOffset": 163,
-          "column": 10,
-          "line": 13
-        },
-        "start": {
-          "byteOffset": 121,
-          "column": 0,
-          "line": 12
-        }
-      },
-      "severity": "error"
-    }
-  ],
+  "issues": [],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
@@ -81,7 +20,7 @@
       "private-type-leak": 0,
       "unlisted-dependencies": 0,
       "unresolved-imports": 0,
-      "unused-class-members": 3,
+      "unused-class-members": 0,
       "unused-deps": 0,
       "unused-dev-deps": 0,
       "unused-enum-members": 0,

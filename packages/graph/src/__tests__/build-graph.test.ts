@@ -392,3 +392,240 @@ describe('buildGraph', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Phase 4f T381 — Python submodule promotion + package-init edges
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a Python-flavored FileNode set. Each node carries lang: 'py' on its
+ * inventory and a single import statement encoded with optional `names`. The
+ * imported file paths are auto-registered in the memory fs adapter so the
+ * resolver finds them.
+ */
+function makePyFileNodes(
+  specs: readonly {
+    path: string;
+    source?: string;
+    names?: readonly string[];
+  }[],
+): readonly FileNode[] {
+  const ids = assignFileIds(specs.map((s) => s.path));
+  const sorted = [...specs].sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  return sorted.map((spec) => {
+    const id = ids.get(spec.path);
+    if (id === undefined) throw new Error(`no id for ${spec.path}`);
+    const imports: Import[] =
+      spec.source === undefined
+        ? []
+        : [
+            {
+              kind: 'static',
+              source: spec.source,
+              resolvable: true,
+              range: ZERO_RANGE,
+              ...(spec.names !== undefined ? { names: spec.names } : {}),
+            },
+          ];
+    return {
+      id,
+      path: spec.path,
+      inventory: {
+        lang: 'py' as const,
+        declarations: [],
+        imports,
+        usages: [],
+      },
+    } satisfies FileNode;
+  });
+}
+
+describe('buildGraph — Python submodule promotion (T381 Bug 1)', () => {
+  it('from .sub import foo emits BOTH the package-init edge AND the submodule edge', () => {
+    const specs = [
+      { path: '/proj/pkg/__init__.py' },
+      { path: '/proj/pkg/sub/__init__.py' },
+      { path: '/proj/pkg/sub/foo.py' },
+      // main.py does `from .sub import foo`
+      { path: '/proj/pkg/main.py', source: '.sub', names: ['foo'] },
+    ];
+    const files = makePyFileNodes(specs);
+    const fs = createMemoryFsAdapter(Object.fromEntries(specs.map((s) => [s.path, ''] as const)));
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const mainId = files.find((f) => f.path === '/proj/pkg/main.py')?.id;
+    const subInitId = files.find((f) => f.path === '/proj/pkg/sub/__init__.py')?.id;
+    const fooId = files.find((f) => f.path === '/proj/pkg/sub/foo.py')?.id;
+    expect(mainId).toBeDefined();
+    expect(subInitId).toBeDefined();
+    expect(fooId).toBeDefined();
+    if (mainId === undefined || subInitId === undefined || fooId === undefined) return;
+    // Primary edge: main.py → sub/__init__.py (specifier `.sub`)
+    const primary = findEdge(graph, mainId, subInitId, '.sub');
+    expect(primary).toBeDefined();
+    expect(primary?.resolvable).toBe(true);
+    // Submodule promotion edge: main.py → sub/foo.py (specifier `.sub.foo`)
+    const submodule = findEdge(graph, mainId, fooId, '.sub.foo');
+    expect(submodule).toBeDefined();
+    expect(submodule?.resolvable).toBe(true);
+  });
+
+  it('symbol-only imports (where <source>.<name> is NOT a file) emit no extra edge', () => {
+    const specs = [
+      { path: '/proj/pkg/__init__.py' },
+      { path: '/proj/pkg/util.py' },
+      // `from .util import HELPER` where HELPER is a name in util.py, not a file.
+      { path: '/proj/pkg/main.py', source: '.util', names: ['HELPER'] },
+    ];
+    const files = makePyFileNodes(specs);
+    const fs = createMemoryFsAdapter(Object.fromEntries(specs.map((s) => [s.path, ''] as const)));
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const mainId = files.find((f) => f.path === '/proj/pkg/main.py')?.id;
+    if (mainId === undefined) return;
+    // Only one explicit-import edge from main.py (specifier `.util`).
+    const explicitFromMain = graph.edges.filter(
+      (e) => e.from === mainId && e.specifier !== '<package-init>',
+    );
+    expect(explicitFromMain.length).toBe(1);
+    expect(explicitFromMain[0]?.specifier).toBe('.util');
+  });
+
+  it('multiple names: each that resolves yields its own submodule edge', () => {
+    const specs = [
+      { path: '/proj/pkg/__init__.py' },
+      { path: '/proj/pkg/sub/__init__.py' },
+      { path: '/proj/pkg/sub/a.py' },
+      { path: '/proj/pkg/sub/b.py' },
+      // `from .sub import a, b, MISSING` — a + b promote, MISSING does not.
+      { path: '/proj/pkg/main.py', source: '.sub', names: ['a', 'b', 'MISSING'] },
+    ];
+    const files = makePyFileNodes(specs);
+    const fs = createMemoryFsAdapter(Object.fromEntries(specs.map((s) => [s.path, ''] as const)));
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const mainId = files.find((f) => f.path === '/proj/pkg/main.py')?.id;
+    if (mainId === undefined) return;
+    const fromMain = graph.edges.filter(
+      (e) => e.from === mainId && e.specifier !== '<package-init>',
+    );
+    const specifiers = new Set(fromMain.map((e) => e.specifier));
+    expect(specifiers.has('.sub')).toBe(true);
+    expect(specifiers.has('.sub.a')).toBe(true);
+    expect(specifiers.has('.sub.b')).toBe(true);
+    expect(specifiers.has('.sub.MISSING')).toBe(false);
+  });
+
+  it('package-init traversal: every Python file emits an edge to its parent __init__.py', () => {
+    const specs = [
+      { path: '/proj/pkg/__init__.py' },
+      { path: '/proj/pkg/sub/__init__.py' },
+      { path: '/proj/pkg/sub/foo.py' },
+    ];
+    const files = makePyFileNodes(specs);
+    const fs = createMemoryFsAdapter(Object.fromEntries(specs.map((s) => [s.path, ''] as const)));
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const fooId = files.find((f) => f.path === '/proj/pkg/sub/foo.py')?.id;
+    const subInitId = files.find((f) => f.path === '/proj/pkg/sub/__init__.py')?.id;
+    const pkgInitId = files.find((f) => f.path === '/proj/pkg/__init__.py')?.id;
+    if (fooId === undefined || subInitId === undefined || pkgInitId === undefined) return;
+    // foo.py → sub/__init__.py (parent package)
+    const fooToSubInit = findEdge(graph, fooId, subInitId, '<package-init>');
+    expect(fooToSubInit).toBeDefined();
+    // foo.py → pkg/__init__.py (grandparent package)
+    const fooToPkgInit = findEdge(graph, fooId, pkgInitId, '<package-init>');
+    expect(fooToPkgInit).toBeDefined();
+  });
+
+  it('package-init traversal stops at the first directory missing __init__.py', () => {
+    const specs = [
+      { path: '/proj/src/pkg/__init__.py' },
+      { path: '/proj/src/pkg/foo.py' },
+      // No /proj/src/__init__.py — chain breaks at /proj/src.
+    ];
+    const files = makePyFileNodes(specs);
+    const fs = createMemoryFsAdapter(Object.fromEntries(specs.map((s) => [s.path, ''] as const)));
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const fooId = files.find((f) => f.path === '/proj/src/pkg/foo.py')?.id;
+    if (fooId === undefined) return;
+    const initEdges = graph.edges.filter(
+      (e) => e.from === fooId && e.specifier === '<package-init>',
+    );
+    // Only the immediate-parent edge (pkg/__init__.py) is emitted.
+    expect(initEdges.length).toBe(1);
+  });
+
+  it('TS files do NOT emit package-init synthetic edges', () => {
+    const specs: FileSpec[] = [
+      { path: '/proj/src/index.ts', imports: ['./util'] },
+      { path: '/proj/src/util.ts', imports: [] },
+    ];
+    const files = makeFileNodes(specs);
+    const fs = memoryFsForFiles(specs);
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const synthetic = graph.edges.filter((e) => e.specifier === '<package-init>');
+    expect(synthetic.length).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 4f T381 — Python external-resolution becomes resolvable: true
+// ---------------------------------------------------------------------------
+
+describe('buildGraph — Python external imports mark resolvable: true (T381 Bug 2)', () => {
+  it('flask import declared in pythonManifest produces an edge with resolvable: true', () => {
+    const specs = [{ path: '/proj/app.py', source: 'flask', names: ['Flask'] }];
+    const files = makePyFileNodes(specs);
+    const fs = createMemoryFsAdapter(Object.fromEntries(specs.map((s) => [s.path, ''] as const)));
+    const graph = buildGraph({
+      files,
+      resolverContext: {
+        projectRoot: '/proj',
+        fs,
+        pythonManifest: {
+          runtime: new Set(['flask']),
+          dev: new Set(),
+          optional: new Set(),
+          all: new Set(['flask']),
+          source: 'pyproject',
+        },
+      },
+    });
+    const appId = files[0]?.id;
+    if (appId === undefined) return;
+    const edge = graph.edges.find((e) => e.from === appId && e.specifier === 'flask');
+    expect(edge).toBeDefined();
+    expect(edge?.to).toBe(ROOT_FILE_ID);
+    expect(edge?.resolvable).toBe(true); // T381: external Python = resolvable
+  });
+
+  it('TS bare-specifier without a node_modules backing stays resolvable: false', () => {
+    const specs: FileSpec[] = [{ path: '/proj/src/index.ts', imports: ['unknown-pkg'] }];
+    const files = makeFileNodes(specs);
+    const fs = memoryFsForFiles(specs);
+    const graph = buildGraph({
+      files,
+      resolverContext: { projectRoot: '/proj', fs },
+    });
+    const indexId = files[0]?.id;
+    if (indexId === undefined) return;
+    const edge = graph.edges.find((e) => e.from === indexId && e.specifier === 'unknown-pkg');
+    expect(edge).toBeDefined();
+    expect(edge?.resolvable).toBe(false);
+  });
+});

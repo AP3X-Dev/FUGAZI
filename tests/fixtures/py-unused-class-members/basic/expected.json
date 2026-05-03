@@ -12,46 +12,6 @@
       "className": "Service",
       "file": "src/svc.py",
       "kind": "unused-class-members",
-      "memberName": "_helper",
-      "message": "unused-class-members: Service._helper in <root>/src/svc.py has no consumers",
-      "range": {
-        "end": {
-          "byteOffset": 249,
-          "column": 24,
-          "line": 15
-        },
-        "start": {
-          "byteOffset": 0,
-          "column": 0,
-          "line": 1
-        }
-      },
-      "severity": "error"
-    },
-    {
-      "className": "Service",
-      "file": "src/svc.py",
-      "kind": "unused-class-members",
-      "memberName": "run",
-      "message": "unused-class-members: Service.run in <root>/src/svc.py has no consumers",
-      "range": {
-        "end": {
-          "byteOffset": 249,
-          "column": 24,
-          "line": 15
-        },
-        "start": {
-          "byteOffset": 0,
-          "column": 0,
-          "line": 1
-        }
-      },
-      "severity": "error"
-    },
-    {
-      "className": "Service",
-      "file": "src/svc.py",
-      "kind": "unused-class-members",
       "memberName": "unused_method",
       "message": "unused-class-members: Service.unused_method in <root>/src/svc.py has no consumers",
       "range": {
@@ -81,7 +41,7 @@
       "private-type-leak": 0,
       "unlisted-dependencies": 0,
       "unresolved-imports": 0,
-      "unused-class-members": 3,
+      "unused-class-members": 1,
       "unused-deps": 0,
       "unused-dev-deps": 0,
       "unused-enum-members": 0,

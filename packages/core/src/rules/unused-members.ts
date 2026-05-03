@@ -208,6 +208,19 @@ function buildPyMemberExemptions(
   for (const m of decl.members) {
     if (PY_DUNDER_LIFECYCLE_METHODS.has(m)) out.add(m);
   }
+  // Phase 4f T381. AnnAssign-shaped class members (annotated class
+  // attributes — `class User(BaseModel): name: str`) are the canonical
+  // field idiom across Pydantic, dataclasses, attrs, and SQLAlchemy
+  // declarative bases. Their consumption shape (constructor kwargs, ORM
+  // binding, model property access) is NOT captured by the literal
+  // `.member` usage pass that drives `isMemberUsed`. Hard-coding the
+  // exemption here for `lang: 'py'` is the correct v1 trade-off: a few
+  // false-negatives on unannotated-class-level constants beats the
+  // false-positive volume from every Pydantic / dataclass field. Plugin-
+  // driven refinement (per-base-class field tracking) is a v1.x ask.
+  if (decl.fieldMembers !== undefined) {
+    for (const m of decl.fieldMembers) out.add(m);
+  }
   // Active-plugin allowlist refinement (T346): exempt only members whose
   // decorators include at least one allowlisted name. Bare-form match: the
   // trailing segment of a dotted decorator is checked against the bare-form

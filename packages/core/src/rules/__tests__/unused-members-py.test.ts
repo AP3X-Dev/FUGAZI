@@ -39,6 +39,7 @@ function pyClassDecl(
   name: string,
   members: readonly string[],
   decoratedMembers?: readonly string[],
+  fieldMembers?: readonly string[],
 ): Declaration {
   return {
     kind: 'class',
@@ -47,6 +48,7 @@ function pyClassDecl(
     range: range(0),
     members,
     ...(decoratedMembers !== undefined ? { decoratedMembers } : {}),
+    ...(fieldMembers !== undefined ? { fieldMembers } : {}),
   };
 }
 
@@ -441,5 +443,116 @@ describe('unused-class-members — Python decorator allowlist (Phase 4d T346)', 
     const fastapi = mkPyPlugin(['router.get']);
     const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, [flask, fastapi]));
     expect(findings).toEqual([]);
+  });
+});
+
+describe('unused-class-members — Python AnnAssign fields (T381 Bug 3)', () => {
+  it('AnnAssign-form members (Pydantic BaseModel fields) are NOT flagged', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/models.py',
+        declarations: [
+          // class User(BaseModel):
+          //   id: int
+          //   name: str
+          //   email: str
+          pyClassDecl('User', ['id', 'name', 'email'], undefined, ['id', 'name', 'email']),
+        ],
+      },
+    ]);
+    expect(createUnusedClassMembersRule('error')(ctx(fix))).toEqual([]);
+  });
+
+  it('mix of AnnAssign fields and undecorated method: only the method flagged', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/models.py',
+        declarations: [
+          // class User(BaseModel):
+          //   id: int
+          //   name: str
+          //   def helper(self): ...  (no caller)
+          pyClassDecl('User', ['id', 'name', 'helper'], undefined, ['id', 'name']),
+        ],
+      },
+    ]);
+    const findings = createUnusedClassMembersRule('error')(ctx(fix));
+    expect(findings.length).toBe(1);
+    const f = findings[0];
+    if (f === undefined || f.kind !== 'unused-class-members') throw new Error('expected');
+    expect(f.memberName).toBe('helper');
+  });
+
+  it('TypedDict-style AnnAssign-only class emits 0 findings', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/types.py',
+        declarations: [
+          // class MyType(TypedDict):
+          //   id: int
+          //   name: str
+          pyClassDecl('MyType', ['id', 'name'], undefined, ['id', 'name']),
+          pyClassDecl('UnusedType', ['value'], undefined, ['value']),
+        ],
+      },
+    ]);
+    expect(createUnusedClassMembersRule('error')(ctx(fix))).toEqual([]);
+  });
+
+  it('field exemption applies even when activePlugins is undefined (no decorator allowlist)', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/models.py',
+        declarations: [pyClassDecl('Order', ['amount'], undefined, ['amount'])],
+      },
+    ]);
+    // ctx() does NOT pass activePlugins — exercises the legacy fallback path.
+    expect(createUnusedClassMembersRule('error')(ctx(fix))).toEqual([]);
+  });
+
+  it('TS class members NEVER pick up Python field exemption (decl.fieldMembers undefined)', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/legacy.ts',
+        declarations: [
+          // Same shape as the Python case but no fieldMembers — TS visitor
+          // never populates the field. The member should still flag.
+          {
+            kind: 'class',
+            name: 'User',
+            exported: true,
+            range: range(0),
+            members: ['id', 'name'],
+          },
+        ],
+      },
+    ]);
+    // Override `lang` to ts so the rule treats it as a TS class.
+    const { graph, fileNodes } = fix;
+    const tsGraph = Object.freeze({
+      ...graph,
+      files: new Map(
+        Array.from(graph.files.entries()).map(([id, node]) => [
+          id,
+          {
+            ...node,
+            inventory: Object.freeze({
+              ...node.inventory,
+              lang: 'ts' as const,
+            }),
+          },
+        ]),
+      ),
+    }) as unknown as Graph;
+    const tsCtx: RuleContext = {
+      graph: tsGraph,
+      fileNodes,
+      projectRoot: '/proj',
+      entryPoints: [],
+      config: emptyConfig(),
+    };
+    const findings = createUnusedClassMembersRule('error')(tsCtx);
+    // TS path: no fieldMembers exemption, both flagged.
+    expect(findings.length).toBe(2);
   });
 });
