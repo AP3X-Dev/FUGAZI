@@ -1,0 +1,96 @@
+{
+  "_meta": {
+    "mode": "full",
+    "version": "0.0.0"
+  },
+  "actions": [],
+  "issues": [
+    {
+      "file": "src/index.ts",
+      "kind": "unresolved-imports",
+      "message": "unresolved-imports: cannot resolve ./utils.js from <root>/src/index.ts",
+      "range": {
+        "end": {
+          "byteOffset": 35,
+          "column": 35,
+          "line": 1
+        },
+        "start": {
+          "byteOffset": 0,
+          "column": 0,
+          "line": 1
+        }
+      },
+      "severity": "error",
+      "specifier": "./utils.js"
+    },
+    {
+      "file": "src/orphan.ts",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/orphan.ts is not reachable from any entry point",
+      "path": "src/orphan.ts",
+      "severity": "error"
+    },
+    {
+      "file": "src/types.ts",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/types.ts is not reachable from any entry point",
+      "path": "src/types.ts",
+      "severity": "error"
+    },
+    {
+      "file": "src/unresolved.ts",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/unresolved.ts is not reachable from any entry point",
+      "path": "src/unresolved.ts",
+      "severity": "error"
+    },
+    {
+      "file": "src/unresolved.ts",
+      "kind": "unlisted-dependencies",
+      "message": "unlisted-dependencies: this-module-does-not-exist is not declared in package.json",
+      "range": {
+        "end": {
+          "byteOffset": 51,
+          "column": 51,
+          "line": 1
+        },
+        "start": {
+          "byteOffset": 0,
+          "column": 0,
+          "line": 1
+        }
+      },
+      "severity": "error",
+      "specifier": "this-module-does-not-exist"
+    },
+    {
+      "file": "src/utils.ts",
+      "kind": "unused-files",
+      "message": "unused-files: <root>/src/utils.ts is not reachable from any entry point",
+      "path": "src/utils.ts",
+      "severity": "error"
+    }
+  ],
+  "metrics": {
+    "cacheHitRate": 0,
+    "diagnosticsByRule": {
+      "boundary-violations": 0,
+      "circular-dependencies": 0,
+      "code-duplication": 0,
+      "cognitive-complexity": 0,
+      "complexity-hotspot": 0,
+      "duplicate-exports": 0,
+      "private-type-leak": 0,
+      "unlisted-dependencies": 1,
+      "unresolved-imports": 1,
+      "unused-class-members": 0,
+      "unused-deps": 0,
+      "unused-dev-deps": 0,
+      "unused-enum-members": 0,
+      "unused-files": 4,
+      "unused-optional-deps": 0
+    },
+    "filesScanned": 5
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "fugazi-fx-frameworks-astro-basic",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "astro": "^4.0.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "entrypoints": [
+    "packages/app/src/index.ts",
+    "packages/lib/src/index.ts"
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "fugazi-conformance-basic-unused-exports",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module"
+}

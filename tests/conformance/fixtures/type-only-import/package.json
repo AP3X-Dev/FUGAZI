@@ -1,0 +1,6 @@
+{
+  "name": "fugazi-conformance-type-only-import",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module"
+}

@@ -6,7 +6,7 @@
   "description": "Fugazi: codebase intelligence for TypeScript and JavaScript. Workspace root.",
   "license": "MIT",
   "packageManager": "bun@1.2.0",
-  "workspaces": ["packages/*"],
+  "workspaces": ["packages/*", "tests"],
   "engines": {
     "node": ">=22.0.0",
     "bun": ">=1.2.0"

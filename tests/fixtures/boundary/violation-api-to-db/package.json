@@ -1,0 +1,6 @@
+{
+  "name": "fugazi-fx-boundary-violation-api-to-db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module"
+}

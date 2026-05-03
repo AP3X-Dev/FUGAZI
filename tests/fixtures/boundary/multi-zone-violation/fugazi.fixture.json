@@ -1,0 +1,25 @@
+{
+  "entrypoints": [
+    "src/api/a.ts"
+  ],
+  "zones": {
+    "api": {
+      "pattern": [
+        "src/api/**"
+      ],
+      "canImport": []
+    },
+    "infra": {
+      "pattern": [
+        "src/infra/**"
+      ],
+      "canImport": []
+    },
+    "db": {
+      "pattern": [
+        "src/db/**"
+      ],
+      "canImport": []
+    }
+  }
+}

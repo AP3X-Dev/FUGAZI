@@ -10,6 +10,9 @@ jobs:
     name: 12-repo ecosystem regression
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      NODE_OPTIONS: --max-old-space-size=8192
+      SKIP_ECOSYSTEM: '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,5 +27,16 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Build
+        run: bun run build
+
       - name: Run ecosystem regression
-        run: bun run test:ecosystem || echo "ecosystem runner not yet implemented (Phase 3k)"
+        run: bun tests/ecosystem/runner.ts
+
+      - name: Upload regression report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecosystem-report
+          path: tests/ecosystem/output/
+          if-no-files-found: ignore

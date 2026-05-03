@@ -1,0 +1,9 @@
+{
+  "name": "fugazi-fx-frameworks-tailwind-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "fugazi-fx-frameworks-vitest-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "vitest": "^2.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "entrypoints": [
+    "src/api/handler.ts"
+  ],
+  "zones": {
+    "api": {
+      "pattern": [
+        "src/api/**"
+      ],
+      "canImport": []
+    },
+    "db": {
+      "pattern": [
+        "src/db/**"
+      ],
+      "canImport": []
+    }
+  }
+}

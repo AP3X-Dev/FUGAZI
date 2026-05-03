@@ -175,6 +175,20 @@
         "fast-check": "^4.7.0",
       },
     },
+    "tests": {
+      "name": "@fugazi/test-corpus",
+      "version": "0.0.0",
+      "dependencies": {
+        "@fugazi/config": "workspace:*",
+        "@fugazi/core": "workspace:*",
+        "@fugazi/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@fast-check/vitest": "0.1.3",
+        "fast-check": "^4.7.0",
+        "vitest": "2.1.8",
+      },
+    },
   },
   "packages": {
     "@biomejs/biome": ["@biomejs/biome@1.9.4", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "1.9.4", "@biomejs/cli-darwin-x64": "1.9.4", "@biomejs/cli-linux-arm64": "1.9.4", "@biomejs/cli-linux-arm64-musl": "1.9.4", "@biomejs/cli-linux-x64": "1.9.4", "@biomejs/cli-linux-x64-musl": "1.9.4", "@biomejs/cli-win32-arm64": "1.9.4", "@biomejs/cli-win32-x64": "1.9.4" }, "bin": { "biome": "bin/biome" } }, "sha512-1rkd7G70+o9KkTn5KLmDYXihGoTaIGO9PIIN2ZB7UJxFrWw04CZHPYiMRjYsaDvVV7hP1dYNRLxSANLaBFGpog=="],
@@ -266,6 +280,8 @@
     "@fugazi/plugins": ["@fugazi/plugins@workspace:packages/plugins"],
 
     "@fugazi/runtime": ["@fugazi/runtime@workspace:packages/runtime"],
+
+    "@fugazi/test-corpus": ["@fugazi/test-corpus@workspace:tests"],
 
     "@fugazi/types": ["@fugazi/types@workspace:packages/types"],
 

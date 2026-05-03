@@ -1,0 +1,10 @@
+{
+  "name": "fugazi-fx-frameworks-next-app-router",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0"
+  }
+}

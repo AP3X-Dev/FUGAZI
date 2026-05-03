@@ -1,0 +1,86 @@
+[
+  {
+    "org": "microsoft",
+    "repo": "TypeScript",
+    "branch": "main",
+    "subdir": null,
+    "install_command": "npm ci"
+  },
+  {
+    "org": "facebook",
+    "repo": "react",
+    "branch": "main",
+    "subdir": null,
+    "install_command": "yarn install --frozen-lockfile"
+  },
+  {
+    "org": "vercel",
+    "repo": "next.js",
+    "branch": "canary",
+    "subdir": "packages/next",
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "vuejs",
+    "repo": "core",
+    "branch": "main",
+    "subdir": null,
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "sveltejs",
+    "repo": "kit",
+    "branch": "main",
+    "subdir": "packages/kit",
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "withastro",
+    "repo": "astro",
+    "branch": "main",
+    "subdir": "packages/astro",
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "nuxt",
+    "repo": "nuxt",
+    "branch": "main",
+    "subdir": "packages/nuxt",
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "withspectrum",
+    "repo": "spectrum",
+    "branch": "alpha",
+    "subdir": null,
+    "install_command": "yarn install --frozen-lockfile"
+  },
+  {
+    "org": "vitejs",
+    "repo": "vite",
+    "branch": "main",
+    "subdir": "packages/vite",
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "nrwl",
+    "repo": "nx",
+    "branch": "master",
+    "subdir": "packages/nx",
+    "install_command": "pnpm install --frozen-lockfile"
+  },
+  {
+    "org": "expo",
+    "repo": "expo",
+    "branch": "main",
+    "subdir": "packages/expo",
+    "install_command": "yarn install --frozen-lockfile"
+  },
+  {
+    "org": "redwoodjs",
+    "repo": "redwood",
+    "branch": "main",
+    "subdir": "packages/web",
+    "install_command": "yarn install --frozen-lockfile"
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "composite": false,
+    "incremental": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "fixture-runner.ts",
+    "conformance/**/*.ts",
+    "fixtures/**/*.ts",
+    "ecosystem/**/*.ts",
+    "property/**/*.ts",
+    "regression/**/*.ts"
+  ],
+  "exclude": [
+    "**/node_modules/**",
+    "conformance/fixtures/**/src/**",
+    "fixtures/**/src/**",
+    "regression/**/src/**",
+    "regression/**/apps/**",
+    "regression/**/packages/**"
+  ]
+}
