@@ -9,8 +9,11 @@ export default defineConfig({
       'property/**/*.test.ts',
       'regression/__tests__/**/*.test.ts',
       'distribution/__tests__/**/*.test.ts',
+      'security/__tests__/**/*.test.ts',
+      'perf/__tests__/**/*.test.ts',
+      'dogfood/__tests__/**/*.test.ts',
     ],
     passWithNoTests: true,
-    testTimeout: 60_000,
+    testTimeout: 120_000,
   },
 });

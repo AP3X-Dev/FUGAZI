@@ -181,7 +181,14 @@
       "dependencies": {
         "@fugazi/config": "workspace:*",
         "@fugazi/core": "workspace:*",
+        "@fugazi/extract": "workspace:*",
+        "@fugazi/graph": "workspace:*",
+        "@fugazi/lsp": "workspace:*",
+        "@fugazi/mcp": "workspace:*",
+        "@fugazi/node-api": "workspace:*",
         "@fugazi/types": "workspace:*",
+        "fugazi": "workspace:*",
+        "vscode-languageserver": "^9.0.1",
       },
       "devDependencies": {
         "@fast-check/vitest": "0.1.3",

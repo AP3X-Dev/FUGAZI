@@ -16,7 +16,10 @@
     "ecosystem/**/*.ts",
     "property/**/*.ts",
     "regression/**/*.ts",
-    "distribution/**/*.ts"
+    "distribution/**/*.ts",
+    "security/**/*.ts",
+    "perf/**/*.ts",
+    "dogfood/**/*.ts"
   ],
   "exclude": [
     "**/node_modules/**",
