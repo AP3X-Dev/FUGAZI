@@ -229,4 +229,61 @@ describe('unused-deps family', () => {
     expect(r1.map((i) => (i.kind === 'unused-deps' ? i.dependency : ''))).toEqual(['a', 'm', 'z']);
     expect(JSON.stringify(r1)).toBe(JSON.stringify(r2));
   });
+
+  describe('@types/* allowlist (ambient TypeScript typings)', () => {
+    it('@types/* in devDependencies is NOT flagged as unused', () => {
+      // `@types/node` is consumed implicitly by TS — the rule never sees an
+      // import edge for it. Without the allowlist it always false-positives.
+      writeManifest({
+        devDependencies: { '@types/node': '^22', '@types/react': '^18' },
+      });
+      const fix = buildFixture([]);
+      expect(createUnusedDevDepsRule('error')(ctx(fix))).toEqual([]);
+    });
+
+    it('@types/* in dependencies is also exempt', () => {
+      // Same rule applies whether `@types/*` lives in `dependencies` or
+      // `devDependencies` — they are still ambient typings.
+      writeManifest({
+        dependencies: { '@types/node': '^22' },
+      });
+      const fix = buildFixture([]);
+      expect(createUnusedDepsRule('error')(ctx(fix))).toEqual([]);
+    });
+
+    it('@types/* in optionalDependencies is also exempt', () => {
+      writeManifest({
+        optionalDependencies: { '@types/foo': '^1' },
+      });
+      const fix = buildFixture([]);
+      expect(createUnusedOptionalDepsRule('error')(ctx(fix))).toEqual([]);
+    });
+
+    it('non-@types unused devDependencies are still flagged alongside @types/*', () => {
+      // Allowlist only filters @types/* — regular unused devDeps still fire.
+      writeManifest({
+        devDependencies: {
+          '@types/node': '^22',
+          eslint: '^9',
+        },
+      });
+      const fix = buildFixture([]);
+      const findings = createUnusedDevDepsRule('error')(ctx(fix));
+      expect(findings.length).toBe(1);
+      const f = findings[0];
+      if (f === undefined || f.kind !== 'unused-dev-deps') throw new Error('x');
+      expect(f.dependency).toBe('eslint');
+    });
+
+    it('package whose name merely starts with "@types-" (no slash) is NOT exempted', () => {
+      // The prefix check is `@types/` — a malformed name like `@typesfoo`
+      // (no slash) must not be treated as a typings package.
+      writeManifest({
+        devDependencies: { '@typesomething': '^1' },
+      });
+      const fix = buildFixture([]);
+      const findings = createUnusedDevDepsRule('error')(ctx(fix));
+      expect(findings.length).toBe(1);
+    });
+  });
 });

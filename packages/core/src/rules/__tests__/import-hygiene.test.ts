@@ -6,7 +6,7 @@
  * unlisted-dependencies and detects duplicate-exports per file.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { FugaziConfig } from '@fugazi/config';
@@ -257,5 +257,74 @@ describe('import-hygiene family', () => {
     __clearImportHygieneCacheForTest(c);
     const r2 = JSON.stringify(createUnresolvedImportsRule('error')(c));
     expect(r1).toBe(r2);
+  });
+
+  describe('nearest-package.json walk (monorepo-aware unlisted-dependencies)', () => {
+    it('package-local dep declared only in nearest package.json is NOT flagged', () => {
+      // Mimic a workspace structure:
+      //   <root>/package.json    (no @scope/bar)
+      //   <root>/packages/foo/package.json  (declares @scope/bar)
+      //   <root>/packages/foo/src/index.ts  (imports @scope/bar)
+      // With the workspace-root-only walk, the rule incorrectly flags the
+      // import as unlisted. The nearest-package.json walk fixes this.
+      writeManifest({});
+      const fooDir = join(projectRoot, 'packages', 'foo');
+      // mkdir -p
+      mkdirSync(fooDir, { recursive: true });
+      writeFileSync(
+        join(fooDir, 'package.json'),
+        JSON.stringify({ dependencies: { '@scope/bar': '^1' } }),
+        'utf8',
+      );
+      const filePath = `${projectRoot}/packages/foo/src/index.ts`.split('\\').join('/');
+      const fix = buildFixture([{ path: filePath, imports: [{ specifier: '@scope/bar' }] }]);
+      const findings = createUnlistedDependenciesRule('error')(ctx(fix));
+      expect(findings).toEqual([]);
+    });
+
+    it('root-only dep is still visible to a deeply-nested package file', () => {
+      // The merged set must be UNION(root, nearest). A dep declared only at
+      // the workspace root (e.g. shared `vitest`) must remain visible to
+      // files under packages/<name>/src/.
+      writeManifest({ devDependencies: { vitest: '^2' } });
+      const fooDir = join(projectRoot, 'packages', 'foo');
+      mkdirSync(fooDir, { recursive: true });
+      writeFileSync(join(fooDir, 'package.json'), JSON.stringify({}), 'utf8');
+      const filePath = `${projectRoot}/packages/foo/src/index.ts`.split('\\').join('/');
+      const fix = buildFixture([{ path: filePath, imports: [{ specifier: 'vitest' }] }]);
+      const findings = createUnlistedDependenciesRule('error')(ctx(fix));
+      expect(findings).toEqual([]);
+    });
+
+    it('package self-import (`@scope/foo` from inside @scope/foo) is NOT flagged', () => {
+      // The package's own `name` field is implicitly part of its declared
+      // set so a self-import via the public name doesn't trip the rule.
+      writeManifest({});
+      const fooDir = join(projectRoot, 'packages', 'foo');
+      mkdirSync(fooDir, { recursive: true });
+      writeFileSync(
+        join(fooDir, 'package.json'),
+        JSON.stringify({ name: '@scope/foo', dependencies: {} }),
+        'utf8',
+      );
+      const filePath = `${projectRoot}/packages/foo/src/index.ts`.split('\\').join('/');
+      const fix = buildFixture([{ path: filePath, imports: [{ specifier: '@scope/foo' }] }]);
+      const findings = createUnlistedDependenciesRule('error')(ctx(fix));
+      expect(findings).toEqual([]);
+    });
+
+    it('dep missing from BOTH root and nearest package.json IS flagged', () => {
+      writeManifest({});
+      const fooDir = join(projectRoot, 'packages', 'foo');
+      mkdirSync(fooDir, { recursive: true });
+      writeFileSync(join(fooDir, 'package.json'), JSON.stringify({}), 'utf8');
+      const filePath = `${projectRoot}/packages/foo/src/index.ts`.split('\\').join('/');
+      const fix = buildFixture([{ path: filePath, imports: [{ specifier: 'lodash' }] }]);
+      const findings = createUnlistedDependenciesRule('error')(ctx(fix));
+      expect(findings.length).toBe(1);
+      const f = findings[0];
+      if (f === undefined || f.kind !== 'unlisted-dependencies') throw new Error('x');
+      expect(f.specifier).toBe('lodash');
+    });
   });
 });

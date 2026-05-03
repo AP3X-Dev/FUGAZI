@@ -96,6 +96,16 @@ function analyzeUnusedDeps(ctx: RuleContext): DepsAnalysis | null {
   const declaredDevDeps = stringRecord(manifest.devDependencies);
   const declaredOptionalDeps = stringRecord(manifest.optionalDependencies);
 
+  // `@types/*` packages are TypeScript ambient typings — they are "used"
+  // implicitly by virtue of TS resolving them when their corresponding
+  // runtime is imported (e.g. `@types/react` is consumed when `react` is
+  // imported). The unused-* rules see no edge for `@types/*` because no
+  // import statement names them, so they would always false-positive. Skip
+  // any package whose name starts with `@types/` from the unused diff.
+  // v1: blanket exemption. A future enhancement could pair `@types/foo`
+  // with `foo` and only flag when `foo` itself is unused.
+  const isTypesPackage = (name: string): boolean => name.startsWith('@types/');
+
   // Build the imported-package set from the graph.
   const imported = new Set<string>();
   for (const edge of ctx.graph.edges) {
@@ -109,6 +119,7 @@ function analyzeUnusedDeps(ctx: RuleContext): DepsAnalysis | null {
   const diff = (declared: readonly string[]): readonly string[] => {
     const out: string[] = [];
     for (const name of declared) {
+      if (isTypesPackage(name)) continue;
       if (!imported.has(name)) out.push(name);
     }
     out.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));

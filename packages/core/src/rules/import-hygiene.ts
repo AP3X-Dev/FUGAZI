@@ -37,8 +37,8 @@
  *   emit time.
  */
 
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import type {
   DiscriminatedIssue,
   DuplicateExportsIssue,
@@ -86,7 +86,40 @@ function collectCandidates(ctx: RuleContext): ImportHygieneCandidates {
   const hit = cache.get(ctx);
   if (hit !== undefined) return hit;
 
-  const declaredPackages = readDeclaredPackages(ctx.projectRoot);
+  // Workspace-root declared packages — every file inherits these. In a
+  // monorepo they include shared root devDependencies (vitest, biome, …).
+  const rootDeclared = readDeclaredPackages(ctx.projectRoot);
+  // Per-directory cache of declared package sets keyed by the package.json
+  // directory. Avoids rereading & reparsing the manifest for every edge in
+  // the same package.
+  const declaredByPkgDir = new Map<string, ReadonlySet<string>>();
+  // Per-file cache: map from importing file path to the merged declared set
+  // (root ∪ nearest package.json). Avoids walking parent directories for
+  // every edge from the same file.
+  const declaredByFile = new Map<string, ReadonlySet<string>>();
+
+  function declaredFor(filePath: string): ReadonlySet<string> {
+    const cached = declaredByFile.get(filePath);
+    if (cached !== undefined) return cached;
+    const nearestDir = findNearestPackageJsonDir(filePath, ctx.projectRoot);
+    let merged: ReadonlySet<string>;
+    if (nearestDir === null || toPosix(nearestDir) === toPosix(ctx.projectRoot)) {
+      // No nearer manifest, or the nearest IS the workspace root — root set
+      // alone is the answer.
+      merged = rootDeclared;
+    } else {
+      let pkgDeclared = declaredByPkgDir.get(nearestDir);
+      if (pkgDeclared === undefined) {
+        pkgDeclared = readDeclaredPackagesFromDir(nearestDir);
+        declaredByPkgDir.set(nearestDir, pkgDeclared);
+      }
+      const union = new Set<string>(rootDeclared);
+      for (const name of pkgDeclared) union.add(name);
+      merged = union;
+    }
+    declaredByFile.set(filePath, merged);
+    return merged;
+  }
 
   const unresolved: UnresolvedCandidate[] = [];
   const unlisted: UnlistedCandidate[] = [];
@@ -103,7 +136,8 @@ function collectCandidates(ctx: RuleContext): ImportHygieneCandidates {
 
     const bare = bareSpecifierToPackageName(edge.specifier);
     if (bare !== undefined) {
-      if (!declaredPackages.has(bare)) {
+      const declared = declaredFor(fromPath);
+      if (!declared.has(bare)) {
         unlisted.push({ file: fromPath, range: edge.loc, specifier: edge.specifier });
       } else {
         unresolved.push({ file: fromPath, range: edge.loc, specifier: edge.specifier });
@@ -165,8 +199,19 @@ function byFileThenOffset(
 }
 
 function readDeclaredPackages(projectRoot: string): ReadonlySet<string> {
+  return readDeclaredPackagesFromDir(projectRoot);
+}
+
+/**
+ * Read the four dep sections from `<dir>/package.json` PLUS the package's
+ * own `name` field. The own name is included so a package can self-import
+ * via its public name (`@scope/foo` from inside `@scope/foo/src/x.ts`)
+ * without the rule reporting it as unlisted. Best-effort: missing file or
+ * parse error returns an empty set.
+ */
+function readDeclaredPackagesFromDir(dir: string): ReadonlySet<string> {
   const out = new Set<string>();
-  const manifestPath = join(projectRoot, 'package.json');
+  const manifestPath = join(dir, 'package.json');
   let raw: string;
   try {
     raw = readFileSync(manifestPath, 'utf8');
@@ -181,6 +226,11 @@ function readDeclaredPackages(projectRoot: string): ReadonlySet<string> {
   }
   if (parsed === null || typeof parsed !== 'object') return out;
   const m = parsed as Record<string, unknown>;
+  // Self-name: a package can always import itself by its public name.
+  const ownName = m.name;
+  if (typeof ownName === 'string' && ownName.length > 0) {
+    out.add(ownName);
+  }
   for (const section of [
     'dependencies',
     'devDependencies',
@@ -193,6 +243,36 @@ function readDeclaredPackages(projectRoot: string): ReadonlySet<string> {
     }
   }
   return out;
+}
+
+/**
+ * Walk parents of `dirname(filePath)` up to (but not past) `projectRoot`,
+ * returning the first directory whose `package.json` exists. Returns the
+ * `projectRoot` itself when no nearer manifest is found AND the root has
+ * one. Returns `null` only when the path is not under `projectRoot`.
+ *
+ * Path comparisons normalize `\\` to `/` so Windows paths walk correctly.
+ */
+function findNearestPackageJsonDir(filePath: string, projectRoot: string): string | null {
+  const root = toPosix(projectRoot);
+  const start = toPosix(dirname(filePath));
+  if (!start.startsWith(root)) return null;
+  let cur = start;
+  // Bound by projectRoot — never escape upward past it.
+  while (cur.length >= root.length) {
+    if (existsSync(join(cur, 'package.json'))) {
+      return cur;
+    }
+    if (cur === root) break;
+    const parent = toPosix(dirname(cur));
+    if (parent === cur) break;
+    cur = parent;
+  }
+  return null;
+}
+
+function toPosix(p: string): string {
+  return p.split('\\').join('/');
 }
 
 function bareSpecifierToPackageName(specifier: string): string | undefined {

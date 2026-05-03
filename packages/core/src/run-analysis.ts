@@ -110,7 +110,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     // Phase 1: discover.
     emitter.emit({ kind: 'discover.start' });
     checkAborted(signal, 'discover');
-    const discovered = await discoverFiles(options.projectRoot);
+    const discovered = await discoverFiles(options.projectRoot, options.config.exclude);
     emitter.emit({ kind: 'discover.done', fileCount: discovered.length });
     checkAborted(signal, 'discover');
 
@@ -322,14 +322,34 @@ const SKIPPED_DIRS = new Set(['node_modules', 'dist', 'build', 'coverage', '.git
  * recognised TS/JS source file. Hidden directories are skipped except for the
  * config-allowlist (Phase 3c.1).
  *
- * 3f.1 scaffolding only — full include/exclude glob handling per
- * `FugaziConfig.include`/`exclude` lands in 3f.2+ when discovery is moved
- * behind `@fugazi/config`'s file-pattern API.
+ * `excludePatterns` (from `config.exclude`) is applied as a glob filter
+ * against each candidate file's project-relative POSIX path. The default
+ * patterns from the schema (`node_modules`, `dist`, `build`, `coverage`) are
+ * already covered by `SKIPPED_DIRS`; this honours user-supplied glob patterns
+ * such as `tests/conformance/fixtures/**` or `**\/dist/**`.
  */
-async function discoverFiles(projectRoot: string): Promise<readonly string[]> {
+async function discoverFiles(
+  projectRoot: string,
+  excludePatterns: readonly string[] | undefined,
+): Promise<readonly string[]> {
   const out: string[] = [];
   await walkDir(projectRoot, out);
-  return out.map(toPosix).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  let result = out.map(toPosix).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  if (excludePatterns !== undefined && excludePatterns.length > 0) {
+    const rootPosix = toPosix(projectRoot);
+    const rootPrefix = rootPosix.endsWith('/') ? rootPosix : `${rootPosix}/`;
+    const globs = excludePatterns.filter(isGlobLike);
+    if (globs.length > 0) {
+      result = result.filter((path) => {
+        const rel = path.startsWith(rootPrefix) ? path.slice(rootPrefix.length) : path;
+        for (const pattern of globs) {
+          if (matchesGlob(pattern, rel)) return false;
+        }
+        return true;
+      });
+    }
+  }
+  return result;
 }
 
 async function walkDir(dir: string, out: string[]): Promise<void> {
@@ -358,6 +378,15 @@ async function walkDir(dir: string, out: string[]): Promise<void> {
 
 function toPosix(p: string): string {
   return sep === '\\' ? p.replaceAll('\\', '/') : p;
+}
+
+/**
+ * A glob-like string contains at least one of the wildcard or set characters
+ * recognised by `matchesGlob`. Used by `resolveEntryPoints` to choose between
+ * literal-path and glob-expansion treatment of a config entry.
+ */
+function isGlobLike(s: string): boolean {
+  return s.includes('*') || s.includes('?') || s.includes('[') || s.includes('{');
 }
 
 function langForExtension(path: string): 'ts' | 'tsx' | 'js' | 'jsx' {
@@ -525,12 +554,27 @@ function resolveEntryPoints(
     }
   };
 
-  // 1. User-declared entry points from config.entrypoints (literal paths).
+  // 1. User-declared entry points from config.entrypoints. Supports both
+  //    literal paths and glob patterns. A "glob-like" entry is one that
+  //    contains `*`, `?`, `[`, or `{` — those are expanded against the
+  //    discovered file set; literal entries are pushed as-is so the
+  //    no-discovery test paths still resolve.
   const raw = config.entrypoints;
   if (raw !== undefined) {
+    const rootPosix = toPosix(projectRoot);
+    const rootPrefix = rootPosix.endsWith('/') ? rootPosix : `${rootPosix}/`;
     for (const entry of raw) {
-      const abs = isAbsolute(entry) ? entry : join(projectRoot, entry);
-      push(abs);
+      if (isGlobLike(entry) && fileNodes.size > 0) {
+        for (const node of fileNodes.values()) {
+          const rel = node.path.startsWith(rootPrefix)
+            ? node.path.slice(rootPrefix.length)
+            : node.path;
+          if (matchesGlob(entry, rel)) push(node.path);
+        }
+      } else {
+        const abs = isAbsolute(entry) ? entry : join(projectRoot, entry);
+        push(abs);
+      }
     }
   }
 
