@@ -25,6 +25,7 @@
  */
 
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { readFile, readdir } from 'node:fs/promises';
 import { isAbsolute, join, sep } from 'node:path';
 import { performance } from 'node:perf_hooks';
@@ -38,6 +39,13 @@ import {
 } from '@fugazi/extract';
 import { type FileNode, type Graph, buildGraph } from '@fugazi/graph';
 import {
+  type PluginDef,
+  detectActivePlugins,
+  getBuiltinPlugins,
+  loadExternalPlugin,
+  matchesGlob,
+} from '@fugazi/plugins';
+import {
   type DiscriminatedIssue,
   type FileId,
   FugaziCoreError,
@@ -45,7 +53,7 @@ import {
   type RuleId,
   assignFileIds,
 } from '@fugazi/types';
-import { applyCrossReferenceFilter } from './cross-ref.js';
+import { type PluginCrossRefFilters, applyCrossReferenceFilter } from './cross-ref.js';
 import { ProgressEmitter } from './progress.js';
 import { listEnabledRules, runEnabledRules } from './rules/registry.js';
 import type { RuleContext } from './rules/types.js';
@@ -144,7 +152,21 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   // `analyze.start` event carries the accurate `ruleCount` before any rule
   // fires; each rule then emits an `analyze.progress` event keyed by RuleId.
   const fileNodesByPath = buildFileNodeIndex(graph);
-  const entryPoints = resolveEntryPoints(options.config, options.projectRoot);
+  // Phase 3i Wave B — detect active plugins before assembling RuleContext
+  // so `entryPoints` already reflects plugin contributions when the rule
+  // dispatcher runs.
+  const activePlugins = detectActivePluginsForRun(
+    options.projectRoot,
+    options.plugins,
+    fileNodesByPath,
+    options.config,
+  );
+  const entryPoints = resolveEntryPoints(
+    options.config,
+    options.projectRoot,
+    activePlugins,
+    fileNodesByPath,
+  );
   const ruleCtx: RuleContext = {
     graph,
     fileNodes: fileNodesByPath,
@@ -152,6 +174,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     entryPoints,
     config: options.config,
     complexity: complexityMap,
+    activePlugins,
   };
   const enabled = listEnabledRules(options.kind, options.config);
   emitter.emit({ kind: 'analyze.start', ruleCount: enabled.length });
@@ -166,7 +189,12 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
 
   // Phase 5: cross-reference (3f.6) — files flagged unused-files short-circuit
   // their per-export / per-type / per-member findings before sort + emit.
-  const crossRef = applyCrossReferenceFilter(rawIssues);
+  // Phase 3i Wave B extends the filter with active-plugin contributions:
+  //  - `alwaysUsed` patterns suppress unused-files for matching paths.
+  //  - `usedExports` rules suppress unused-exports per file pattern.
+  //  - `toolingDependencies` are stripped from unused-deps / unused-dev-deps.
+  const pluginFilters = buildPluginFilters(activePlugins, options.projectRoot);
+  const crossRef = applyCrossReferenceFilter(rawIssues, pluginFilters);
   const issues = crossRef.issues;
   emitter.emit({ kind: 'crossref.done' });
   checkAborted(signal, 'crossref');
@@ -220,12 +248,16 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     cacheHitRate: 0,
   };
 
+  const activePluginNames =
+    activePlugins.length === 0 ? undefined : Object.freeze(activePlugins.map((p) => p.name));
+
   return Object.freeze({
     issues: sortedIssues,
     actions: sortedActions,
     metrics,
     progressEvents: emitter.collected(),
     ...(runtimeReport !== undefined ? { runtime: runtimeReport } : {}),
+    ...(activePluginNames !== undefined ? { activePlugins: activePluginNames } : {}),
     _meta: Object.freeze({
       version: CORE_VERSION,
       mode: options.kind,
@@ -480,15 +512,164 @@ function buildFileNodeIndex(graph: Graph): ReadonlyMap<string, FileNode> {
 function resolveEntryPoints(
   config: { readonly entrypoints?: readonly string[] | undefined },
   projectRoot: string,
+  activePlugins: readonly PluginDef[],
+  fileNodes: ReadonlyMap<string, FileNode>,
 ): readonly string[] {
-  const raw = config.entrypoints;
-  if (raw === undefined || raw.length === 0) return [];
   const out: string[] = [];
-  for (const entry of raw) {
-    const abs = isAbsolute(entry) ? entry : join(projectRoot, entry);
-    out.push(toPosix(abs));
+  const seen = new Set<string>();
+  const push = (abs: string): void => {
+    const norm = toPosix(abs);
+    if (!seen.has(norm)) {
+      seen.add(norm);
+      out.push(norm);
+    }
+  };
+
+  // 1. User-declared entry points from config.entrypoints (literal paths).
+  const raw = config.entrypoints;
+  if (raw !== undefined) {
+    for (const entry of raw) {
+      const abs = isAbsolute(entry) ? entry : join(projectRoot, entry);
+      push(abs);
+    }
   }
+
+  // 2. Plugin-contributed entry points. Each pattern is matched against
+  // every discovered file's project-relative POSIX path. Matches enter the
+  // entry-point set as absolute POSIX paths.
+  if (activePlugins.length > 0 && fileNodes.size > 0) {
+    const rootPosix = toPosix(projectRoot);
+    const rootPrefix = rootPosix.endsWith('/') ? rootPosix : `${rootPosix}/`;
+    for (const plugin of activePlugins) {
+      for (const pattern of plugin.entryPoints) {
+        for (const node of fileNodes.values()) {
+          const rel = node.path.startsWith(rootPrefix)
+            ? node.path.slice(rootPrefix.length)
+            : node.path;
+          if (matchesGlob(pattern, rel)) push(node.path);
+        }
+      }
+    }
+  }
+
   return out;
+}
+
+/**
+ * Build the active-plugin list for this run. Honours the `options.plugins`
+ * override when provided; otherwise loads the bundled set and merges the
+ * config-driven external plugins / disables. Reads `<projectRoot>/package.json`
+ * to assemble the dependency view; missing or malformed manifest activates no
+ * plugins.
+ */
+function detectActivePluginsForRun(
+  projectRoot: string,
+  override: readonly PluginDef[] | undefined,
+  fileNodes: ReadonlyMap<string, FileNode>,
+  config: { readonly plugins?: unknown },
+): readonly PluginDef[] {
+  let plugins: readonly PluginDef[];
+  if (override !== undefined) {
+    plugins = override;
+  } else {
+    const cfgPlugins = config.plugins as
+      | { readonly external?: readonly string[]; readonly disable?: readonly string[] }
+      | undefined;
+    const bundled = getBuiltinPlugins();
+    const externals: PluginDef[] = [];
+    for (const path of cfgPlugins?.external ?? []) {
+      const abs = isAbsolute(path) ? path : join(projectRoot, path);
+      try {
+        externals.push(loadExternalPlugin(abs));
+      } catch {
+        // Skip malformed external plugins silently — the loader's verbatim
+        // error message is logged separately by external tooling. The
+        // analysis pipeline never fails-fast on a bad plugin.
+      }
+    }
+    const disable = new Set(cfgPlugins?.disable ?? []);
+    const merged: PluginDef[] = [];
+    for (const p of bundled) if (!disable.has(p.name)) merged.push(p);
+    for (const p of externals) if (!disable.has(p.name)) merged.push(p);
+    plugins = merged;
+  }
+  const pkg = readPackageJsonForDetection(projectRoot);
+  // The detector matches glob patterns against project-relative POSIX paths.
+  const rootPosix = toPosix(projectRoot);
+  const rootPrefix = rootPosix.endsWith('/') ? rootPosix : `${rootPosix}/`;
+  const files: string[] = [];
+  for (const node of fileNodes.values()) {
+    const rel = node.path.startsWith(rootPrefix) ? node.path.slice(rootPrefix.length) : node.path;
+    files.push(rel);
+  }
+  return detectActivePlugins(plugins, { pkg, files });
+}
+
+interface MinimalPackageJson {
+  readonly dependencies?: Readonly<Record<string, string>>;
+  readonly devDependencies?: Readonly<Record<string, string>>;
+  readonly peerDependencies?: Readonly<Record<string, string>>;
+}
+
+function readPackageJsonForDetection(projectRoot: string): MinimalPackageJson {
+  const path = join(projectRoot, 'package.json');
+  let raw: string;
+  try {
+    // Synchronous read intentionally — plugin activation runs once and the
+    // file is small (median ~2KB).
+    raw = readFileSync(path, 'utf8');
+  } catch {
+    return {};
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return {};
+  }
+  if (parsed === null || typeof parsed !== 'object') return {};
+  const obj = parsed as Record<string, unknown>;
+  const stringRecord = (v: unknown): Readonly<Record<string, string>> => {
+    if (v === null || typeof v !== 'object') return {};
+    const out: Record<string, string> = {};
+    for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+      if (typeof val === 'string') out[k] = val;
+    }
+    return out;
+  };
+  return {
+    dependencies: stringRecord(obj.dependencies),
+    devDependencies: stringRecord(obj.devDependencies),
+    peerDependencies: stringRecord(obj.peerDependencies),
+  };
+}
+
+function buildPluginFilters(
+  plugins: readonly PluginDef[],
+  projectRoot: string,
+): PluginCrossRefFilters {
+  const alwaysUsed: string[] = [];
+  const usedExports: { pattern: string; exports: readonly string[] }[] = [];
+  const tooling = new Set<string>();
+  const memberNames = new Set<string>();
+  for (const plugin of plugins) {
+    for (const pattern of plugin.alwaysUsed) alwaysUsed.push(pattern);
+    for (const rule of plugin.usedExports) {
+      usedExports.push({ pattern: rule.pattern, exports: rule.exports });
+    }
+    for (const dep of plugin.toolingDependencies) tooling.add(dep);
+    for (const m of plugin.usedClassMembers) {
+      if (typeof m === 'string') memberNames.add(m);
+      // Scoped rules deferred — see Phase 3i scope-out note.
+    }
+  }
+  return {
+    alwaysUsedPatterns: Object.freeze(alwaysUsed),
+    usedExportRules: Object.freeze(usedExports),
+    toolingDependencies: tooling,
+    usedClassMemberNames: memberNames,
+    projectRootPosix: toPosix(projectRoot),
+  };
 }
 
 /* -------------------------------------------------------------------------- */

@@ -14,6 +14,7 @@
 
 import type { FugaziConfig } from '@fugazi/config';
 import type { Graph } from '@fugazi/graph';
+import type { PluginDef } from '@fugazi/plugins';
 import type { DiscriminatedIssue, Range, RuleId } from '@fugazi/types';
 import type { CoverageInput } from '@fugazi/v8-coverage';
 import type { RebaseMode } from './runtime/coverage-rebase.js';
@@ -61,6 +62,12 @@ export interface RunAnalysisOptions {
     readonly input: CoverageInput;
     readonly root?: RebaseMode;
   };
+  /**
+   * Override the bundled plugin list (Phase 3i Wave B). When `undefined`
+   * the driver loads `BUILTIN_PLUGINS` from `@fugazi/plugins`. Test
+   * harnesses pass explicit lists to keep activation deterministic.
+   */
+  readonly plugins?: readonly PluginDef[];
 }
 
 /**
@@ -173,6 +180,12 @@ export interface RunAnalysisResult {
    * supplied. Omitted (per `exactOptionalPropertyTypes`) otherwise.
    */
   readonly runtime?: RuntimeReport;
+  /**
+   * Framework plugins activated for this project (Phase 3i Wave B). Names
+   * only — full PluginDef stays internal to keep the surface small.
+   * Empty when no plugin's enablers / detection matched.
+   */
+  readonly activePlugins?: readonly string[];
   readonly _meta: {
     readonly version: string;
     readonly mode: AnalysisMode;

@@ -11,6 +11,7 @@
     { "path": "../config" },
     { "path": "../extract" },
     { "path": "../graph" },
+    { "path": "../plugins" },
     { "path": "../v8-coverage" }
   ]
 }

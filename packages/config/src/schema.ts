@@ -145,6 +145,22 @@ function buildShape() {
      * when missing or partially specified.
      */
     health: HealthSchema.optional(),
+    /**
+     * Plugin overrides (Phase 3i). Optional. Bundled plugins activate by
+     * default when their enablers / detection rules match the project.
+     *
+     *   - `external`  paths to additional plugin JSON files relative to the
+     *                 project root. Loaded and validated at startup.
+     *   - `disable`   plugin names to skip from the bundled set even when
+     *                 their enablers match. Useful for opting out of an
+     *                 over-eager activation in custom projects.
+     */
+    plugins: z
+      .object({
+        external: z.array(z.string()).optional(),
+        disable: z.array(z.string()).optional(),
+      })
+      .optional(),
   } as const;
 }
 

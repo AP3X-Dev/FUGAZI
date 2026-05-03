@@ -17,6 +17,7 @@
 import type { FugaziConfig } from '@fugazi/config';
 import type { FileComplexity } from '@fugazi/extract';
 import type { FileNode, Graph } from '@fugazi/graph';
+import type { PluginDef } from '@fugazi/plugins';
 import type { DiscriminatedIssue, FileId } from '@fugazi/types';
 
 /**
@@ -51,6 +52,17 @@ export interface RuleContext {
    * by `FileId`; the LSP `preBuiltGraph` fast-path supplies an empty map.
    */
   readonly complexity?: ReadonlyMap<FileId, FileComplexity>;
+  /**
+   * Framework plugins active for this project (Phase 3i Wave B). Empty
+   * array when no plugin's enablers / detection matched. Active plugins
+   * contribute:
+   *   - extra entry points (already merged into `entryPoints`)
+   *   - tooling-dependency allowlist (consumed by unused-deps rules)
+   *   - used-export rules per file pattern (consumed by unused-exports)
+   *   - used-class-member name allowlist (consumed by unused-class-members)
+   * The driver freezes the array; rules MUST NOT mutate it.
+   */
+  readonly activePlugins?: readonly PluginDef[];
 }
 
 /**
