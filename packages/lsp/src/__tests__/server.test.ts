@@ -295,9 +295,12 @@ describe('Diagnostics publishing on cold analysis', () => {
       await pair.client.sendRequest(InitializeRequest.type, params);
       pair.client.sendNotification(InitializedNotification.type, {});
 
-      // Wait long enough for the debouncer + cold-analysis to fire and
-      // publishDiagnostics to make the round-trip back. 2s is generous.
-      await new Promise<void>((r) => setTimeout(r, 2000));
+      // Poll until at least one publishDiagnostics notification arrives,
+      // up to 12 seconds. Phase 4e replaced the previous fixed 2-second
+      // sleep with a poll loop because cold-start under parallel turbo
+      // load can run >2s when WASM parsers prewarm. The vitest 15s outer
+      // budget remains the upper bound.
+      await waitFor(async () => received.length > 0, 12_000);
 
       // Assert: at least one publishDiagnostics notification was received.
       // The 2-file fixture has unused exports, so this should always fire.

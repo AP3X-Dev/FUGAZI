@@ -64,6 +64,8 @@ const EMPTY_RESULT: RunAnalysisResult = Object.freeze({
     diagnosticsByRule: {},
     elapsedMs: 0,
     cacheHitRate: 0,
+    filesByLang: { ts: 0, py: 0 },
+    parseErrors: { total: 0, byLang: { ts: 0, py: 0 } },
   },
   progressEvents: [],
   _meta: {
@@ -210,6 +212,99 @@ describe('runWatch', () => {
       });
       // Initial run wrote to stdout.
       expect(stdout.getOutput().length).toBeGreaterThan(0);
+      await handle.stop();
+    });
+  });
+
+  /* -- Phase 4e (T367) — Python file watching -- */
+
+  it('Phase 4e T367: change to a .py file triggers a re-analysis', async () => {
+    await withTempProject(FIXTURE, async (root) => {
+      const stdout = makeStream();
+      const stderr = makeStream();
+      const fake = fakeSubscribe();
+      let runs = 0;
+      const fakeRunAnalysis = async (): Promise<RunAnalysisResult> => {
+        runs += 1;
+        return EMPTY_RESULT;
+      };
+      const handle = await runWatch({
+        projectRoot: root,
+        format: 'json',
+        quiet: true,
+        stdout: stdout.stream,
+        stderr: stderr.stream,
+        subscribe: fake.subscribe,
+        runAnalysisFn: fakeRunAnalysis,
+        debounceMs: 30,
+      });
+      const initial = runs;
+      const sub = fake.subscriptions[0];
+      if (sub === undefined) throw new Error('no subscription');
+      sub.emit([{ path: `${root}/main.py`, type: 'update' }]);
+      await new Promise((r) => setTimeout(r, 80));
+      expect(runs - initial).toBe(1);
+      await handle.stop();
+    });
+  });
+
+  it('Phase 4e T367: change to a .pyi stub triggers a re-analysis', async () => {
+    await withTempProject(FIXTURE, async (root) => {
+      const stdout = makeStream();
+      const stderr = makeStream();
+      const fake = fakeSubscribe();
+      let runs = 0;
+      const fakeRunAnalysis = async (): Promise<RunAnalysisResult> => {
+        runs += 1;
+        return EMPTY_RESULT;
+      };
+      const handle = await runWatch({
+        projectRoot: root,
+        format: 'json',
+        quiet: true,
+        stdout: stdout.stream,
+        stderr: stderr.stream,
+        subscribe: fake.subscribe,
+        runAnalysisFn: fakeRunAnalysis,
+        debounceMs: 30,
+      });
+      const initial = runs;
+      const sub = fake.subscriptions[0];
+      if (sub === undefined) throw new Error('no subscription');
+      sub.emit([{ path: `${root}/types.pyi`, type: 'update' }]);
+      await new Promise((r) => setTimeout(r, 80));
+      expect(runs - initial).toBe(1);
+      await handle.stop();
+    });
+  });
+
+  it('Phase 4e T367: .pyc compiled bytecode does NOT trigger a re-analysis', async () => {
+    await withTempProject(FIXTURE, async (root) => {
+      const stdout = makeStream();
+      const stderr = makeStream();
+      const fake = fakeSubscribe();
+      let runs = 0;
+      const fakeRunAnalysis = async (): Promise<RunAnalysisResult> => {
+        runs += 1;
+        return EMPTY_RESULT;
+      };
+      const handle = await runWatch({
+        projectRoot: root,
+        format: 'json',
+        quiet: true,
+        stdout: stdout.stream,
+        stderr: stderr.stream,
+        subscribe: fake.subscribe,
+        runAnalysisFn: fakeRunAnalysis,
+        debounceMs: 30,
+      });
+      const initial = runs;
+      const sub = fake.subscriptions[0];
+      if (sub === undefined) throw new Error('no subscription');
+      sub.emit([{ path: `${root}/main.cpython-312.pyc`, type: 'update' }]);
+      sub.emit([{ path: `${root}/__pycache__/foo.pyc`, type: 'update' }]);
+      await new Promise((r) => setTimeout(r, 80));
+      expect(runs).toBe(initial);
       await handle.stop();
     });
   });

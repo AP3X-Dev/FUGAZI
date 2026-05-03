@@ -1,0 +1,6 @@
+{
+  "entrypoints": [
+    "src/frontend/App.tsx",
+    "src/backend/manage.py"
+  ]
+}

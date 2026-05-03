@@ -71,6 +71,16 @@ export interface RunAnalysisOptions {
 }
 
 /**
+ * Language tag carried on Phase 4e (T370) extract.* progress events. Optional
+ * — events emitted from a per-language extract loop carry the matching tag so
+ * UI consumers can render "Parsing Python files (50/200)…". Events from
+ * code paths that don't dispatch per-language (`'extract.start'` outer event,
+ * non-extract phases) omit the field. Closed set; v1 supports `'ts'` and
+ * `'py'` only.
+ */
+export type ExtractLang = 'ts' | 'py';
+
+/**
  * ProgressEvent — discriminated union over every life-cycle signal the driver
  * emits. Each event carries a monotonic `seq` so consumers can reorder
  * concurrent emissions deterministically.
@@ -86,18 +96,28 @@ export interface RunAnalysisOptions {
  * `extract.progress` and `analyze.progress` may be emitted zero or more times.
  * The driver throttles `extract.progress` to ~20 ticks per run so very large
  * file sets don't flood the listener.
+ *
+ * Phase 4e (T370): every extract.* event carries an optional `lang` tag
+ * (`'ts'` | `'py'`). Backwards-compat — pre-4e consumers ignore the field;
+ * cross-language UIs use it to label per-language progress.
  */
 export type ProgressEvent =
   | { readonly seq: number; readonly kind: 'discover.start' }
   | { readonly seq: number; readonly kind: 'discover.done'; readonly fileCount: number }
-  | { readonly seq: number; readonly kind: 'extract.start'; readonly total: number }
+  | {
+      readonly seq: number;
+      readonly kind: 'extract.start';
+      readonly total: number;
+      readonly lang?: ExtractLang;
+    }
   | {
       readonly seq: number;
       readonly kind: 'extract.progress';
       readonly n: number;
       readonly total: number;
+      readonly lang?: ExtractLang;
     }
-  | { readonly seq: number; readonly kind: 'extract.done' }
+  | { readonly seq: number; readonly kind: 'extract.done'; readonly lang?: ExtractLang }
   | { readonly seq: number; readonly kind: 'graph.start' }
   | { readonly seq: number; readonly kind: 'graph.done'; readonly edgeCount: number }
   | { readonly seq: number; readonly kind: 'analyze.start'; readonly ruleCount: number }
@@ -139,6 +159,30 @@ export interface AnalysisAction {
 }
 
 /**
+ * Per-language file count surfaced on `AnalysisMetrics.filesByLang`. Phase
+ * 4e (T361) — adds observability for mixed TS+Python projects. Counts mirror
+ * `filesScanned` (post-extract) and sum to it. Languages with zero matches
+ * are still present with a count of `0` so consumers can rely on the keyset.
+ */
+export interface FilesByLang {
+  readonly ts: number;
+  readonly py: number;
+}
+
+/**
+ * Parse-error summary surfaced on `AnalysisMetrics.parseErrors`. Phase 4e
+ * (T361). Each entry is `{ file, lang }` — verbatim per-error messages stay
+ * inside the parser layer; the metrics surface only counts + provenance so
+ * consumers can render `"3 parse errors (2 in Python files)"` without
+ * round-tripping the full error array. `total` is the sum of `byLang`
+ * values.
+ */
+export interface ParseErrorSummary {
+  readonly total: number;
+  readonly byLang: FilesByLang;
+}
+
+/**
  * `AnalysisMetrics` — observability snapshot for the run.
  *
  *   - `filesScanned`        files that produced an inventory (post-extract).
@@ -148,6 +192,8 @@ export interface AnalysisAction {
  *                           determinism hash strips this field before hashing.
  *   - `cacheHitRate`        parse-cache hit ratio in `[0, 1]`. 0 when no cache
  *                           is wired; populated in 3f.2+.
+ *   - `filesByLang`         per-language file count (Phase 4e T361).
+ *   - `parseErrors`         per-run parse error summary (Phase 4e T361).
  */
 export interface AnalysisMetrics {
   readonly filesScanned: number;
@@ -155,6 +201,8 @@ export interface AnalysisMetrics {
   /** Non-deterministic — for human display only. Stripped before hashing. */
   readonly elapsedMs: number;
   readonly cacheHitRate: number;
+  readonly filesByLang: FilesByLang;
+  readonly parseErrors: ParseErrorSummary;
 }
 
 /**

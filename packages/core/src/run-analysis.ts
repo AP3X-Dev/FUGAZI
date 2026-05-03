@@ -92,6 +92,12 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   let filesScanned: number;
   let complexityMap: ReadonlyMap<FileId, FileComplexity> = new Map();
   let complexityByPath: ReadonlyMap<string, FileComplexity> = new Map();
+  // Phase 4e T361: per-run language metrics. Initialised to zero so the
+  // preBuiltGraph fast path (which skips extract) still surfaces a fully
+  // populated `filesByLang` and `parseErrors` block in metrics.
+  let filesByLang: { ts: number; py: number } = { ts: 0, py: 0 };
+  let parseErrorTotal = 0;
+  let parseErrorByLang: { ts: number; py: number } = { ts: 0, py: 0 };
 
   if (options.preBuiltGraph !== undefined) {
     // Skip discover + extract + graph-build. Still emit the full event
@@ -121,7 +127,14 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     // very large file sets don't flood the listener.
     emitter.emit({ kind: 'extract.start', total: discovered.length });
     checkAborted(signal, 'extract');
-    const inventories = await extractInventories(discovered, emitter, signal);
+    const aggregate = await extractInventories(discovered, emitter, signal);
+    const inventories = aggregate.outputs;
+    filesByLang = { ts: aggregate.filesByLang.ts, py: aggregate.filesByLang.py };
+    parseErrorTotal = aggregate.parseErrors.total;
+    parseErrorByLang = {
+      ts: aggregate.parseErrors.byLang.ts,
+      py: aggregate.parseErrors.byLang.py,
+    };
     emitter.emit({ kind: 'extract.done' });
     checkAborted(signal, 'extract');
 
@@ -249,6 +262,14 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     diagnosticsByRule: Object.freeze(adjustedByRule),
     elapsedMs,
     cacheHitRate: 0,
+    // Phase 4e T361: per-language file count and parse-error summary.
+    // `Object.freeze` mirrors the rest of the metrics shape — every nested
+    // object handed to the caller is deeply readonly.
+    filesByLang: Object.freeze({ ts: filesByLang.ts, py: filesByLang.py }),
+    parseErrors: Object.freeze({
+      total: parseErrorTotal,
+      byLang: Object.freeze({ ts: parseErrorByLang.ts, py: parseErrorByLang.py }),
+    }),
   };
 
   const activePluginNames =
@@ -326,12 +347,36 @@ const RECOGNIZED_EXTENSIONS = [
   '.cjs',
   '.mts',
   '.cts',
-  // Phase 4c partial T361: Python files are discovered so the rule layer
-  // can flow Python Inventories. Full per-language dispatch in extractOne
-  // routes `.py` to the Python pipeline.
+  // Phase 4c T361 + Phase 4e T362: Python sources and `.pyi` stub files are
+  // discovered alongside TS/JS sources. extractOne dispatches `.py` / `.pyi`
+  // to the tree-sitter-Python pipeline; everything else flows through SWC.
   '.py',
+  '.pyi',
 ];
-const SKIPPED_DIRS = new Set(['node_modules', 'dist', 'build', 'coverage', '.git', '.turbo']);
+
+/**
+ * Phase 4e T362: directories under which we never traverse for source files.
+ * Extends Phase 3 default set with Python virtualenv conventions
+ * (`.venv`, `venv`, `__pycache__`) and Python build artifacts so a Django or
+ * FastAPI project's repo root doesn't pull every `site-packages/` file into
+ * the discovery set.
+ */
+const SKIPPED_DIRS = new Set([
+  'node_modules',
+  'dist',
+  'build',
+  'coverage',
+  '.git',
+  '.turbo',
+  // Python virtualenvs + bytecode + build artifacts (Phase 4e T362).
+  '.venv',
+  'venv',
+  '__pycache__',
+  '.tox',
+  '.pytest_cache',
+  '.mypy_cache',
+  '.ruff_cache',
+]);
 
 /**
  * Recursively walk `projectRoot` and return absolute POSIX paths to every
@@ -414,6 +459,17 @@ function langForExtension(path: string): 'ts' | 'tsx' | 'js' | 'jsx' {
   return 'js';
 }
 
+/**
+ * Phase 4e (T361/T370): coarse language bucket used by the per-language
+ * dispatch in `extractOne` and the language-aware progress events. Every
+ * recognised extension maps to either `'ts'` (the SWC pipeline; covers JS,
+ * JSX, TS, TSX, .mts, .cts, .mjs, .cjs) or `'py'` (the tree-sitter-Python
+ * pipeline; covers `.py` and `.pyi` stubs).
+ */
+function fileLang(path: string): 'ts' | 'py' {
+  return path.endsWith('.py') || path.endsWith('.pyi') ? 'py' : 'ts';
+}
+
 /* -------------------------------------------------------------------------- */
 /* Extract                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -422,20 +478,35 @@ function langForExtension(path: string): 'ts' | 'tsx' | 'js' | 'jsx' {
  * Per-file extract output: the shared `Inventory` consumed by the graph
  * builder plus the `FileComplexity` consumed by the health rules. Computed
  * together so the program/source pair is only held for one extract loop and
- * does not need a second parse pass.
+ * does not need a second parse pass. Phase 4e T361 adds:
+ *   - `lang` — coarse language bucket (`'ts'` | `'py'`) for metrics.
+ *   - `parseErrorCount` — the number of `ParseError` records emitted by the
+ *     parser; soft-collected so the analysis pipeline never aborts.
  */
 interface ExtractOutput {
   readonly inventory: Inventory;
   readonly complexity: FileComplexity;
+  readonly lang: 'ts' | 'py';
+  readonly parseErrorCount: number;
+}
+
+interface ExtractAggregate {
+  readonly outputs: ReadonlyMap<string, ExtractOutput>;
+  readonly filesByLang: { readonly ts: number; readonly py: number };
+  readonly parseErrors: { readonly total: number; readonly byLang: { ts: number; py: number } };
 }
 
 async function extractInventories(
   paths: readonly string[],
   emitter: ProgressEmitter,
   signal: AbortSignal | undefined,
-): Promise<ReadonlyMap<string, ExtractOutput>> {
+): Promise<ExtractAggregate> {
   const total = paths.length;
   const out = new Map<string, ExtractOutput>();
+  let tsCount = 0;
+  let pyCount = 0;
+  let tsErrors = 0;
+  let pyErrors = 0;
   // Throttle: emit ~20 progress ticks across the run, one per `step` files.
   const step = Math.max(1, Math.floor(total / 20));
 
@@ -445,6 +516,13 @@ async function extractInventories(
     const result = await extractOne(path);
     if (result !== null) {
       out.set(path, result);
+      if (result.lang === 'py') {
+        pyCount += 1;
+        pyErrors += result.parseErrorCount;
+      } else {
+        tsCount += 1;
+        tsErrors += result.parseErrorCount;
+      }
     }
     const completed = i + 1;
     if (completed === total || completed % step === 0) {
@@ -452,7 +530,14 @@ async function extractInventories(
     }
   }
 
-  return out;
+  return {
+    outputs: out,
+    filesByLang: { ts: tsCount, py: pyCount },
+    parseErrors: {
+      total: tsErrors + pyErrors,
+      byLang: { ts: tsErrors, py: pyErrors },
+    },
+  };
 }
 
 async function extractOne(path: string): Promise<ExtractOutput | null> {
@@ -460,14 +545,16 @@ async function extractOne(path: string): Promise<ExtractOutput | null> {
   try {
     source = await readFile(path, 'utf8');
   } catch {
-    return emptyExtract();
+    return emptyExtract(fileLang(path));
   }
-  // Phase 4c partial T361: dispatch by file extension. `.py` files route
-  // through the Python pipeline (tree-sitter parser → Python visitor →
-  // Python complexity); everything else uses the TS/JS pipeline. Full
-  // per-language driver dispatch (cache-key namespacing, plugin routing,
-  // parse-error reporters) lands in Phase 4e T361.
-  if (path.endsWith('.py')) {
+  // Phase 4e T361: full per-language dispatch. `.py` / `.pyi` route through
+  // the tree-sitter-Python pipeline (parser → Python visitor → Python
+  // complexity). Everything else flows through the SWC pipeline. Parse
+  // errors are soft-collected per IMP-CORRECT-09 — the count surfaces in
+  // `RunAnalysisResult.metrics.parseErrors` so consumers can render
+  // "3 parse errors (2 in Python files)" without round-tripping the full
+  // error array.
+  if (path.endsWith('.py') || path.endsWith('.pyi')) {
     return extractOnePython(path, source);
   }
   let result: {
@@ -479,14 +566,19 @@ async function extractOne(path: string): Promise<ExtractOutput | null> {
   } catch {
     // Hard parser failure (e.g. WASM not loaded). Fail-soft per the
     // never-throws contract — represent the file as empty inventory.
-    return emptyExtract();
+    return emptyExtract('ts');
   }
   if (result.program === null) {
-    return emptyExtract();
+    return {
+      inventory: emptyInventory(),
+      complexity: emptyComplexity(),
+      lang: 'ts',
+      parseErrorCount: result.errors.length,
+    };
   }
   const inventory = buildInventory(result.program);
   const complexity = computeComplexity(result.program, source);
-  return { inventory, complexity };
+  return { inventory, complexity, lang: 'ts', parseErrorCount: result.errors.length };
 }
 
 async function extractOnePython(path: string, source: string): Promise<ExtractOutput> {
@@ -494,10 +586,10 @@ async function extractOnePython(path: string, source: string): Promise<ExtractOu
     const result = await parsePythonAst(source, path);
     const inventory = buildPyInventory(result.program, source, path);
     const complexity = computeComplexityPy(result.program, source);
-    return { inventory, complexity };
+    return { inventory, complexity, lang: 'py', parseErrorCount: result.errors.length };
   } catch {
     // Fail-soft on hard parser failure (e.g. WASM not loaded).
-    return emptyExtract();
+    return emptyExtract('py');
   }
 }
 
@@ -521,8 +613,8 @@ function emptyComplexity(): FileComplexity {
   });
 }
 
-function emptyExtract(): ExtractOutput {
-  return { inventory: emptyInventory(), complexity: emptyComplexity() };
+function emptyExtract(lang: 'ts' | 'py'): ExtractOutput {
+  return { inventory: emptyInventory(), complexity: emptyComplexity(), lang, parseErrorCount: 0 };
 }
 
 /* -------------------------------------------------------------------------- */

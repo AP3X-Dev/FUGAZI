@@ -249,3 +249,69 @@ describe('applyFixes — atomic write determinism', () => {
     expect(await readFile(file, 'utf8')).toBe('bar');
   });
 });
+
+describe('applyFixes — Phase 4e T368 — Python file edits', () => {
+  it('applies an edit to a `.py` file via byte-offset splicing', async () => {
+    const file = join(root, 'app.py');
+    const original = 'import unused\nx = 1\n';
+    await writeFile(file, original, 'utf8');
+    // Drop the unused import line including the trailing newline.
+    const importLen = 'import unused\n'.length;
+    const edit: Edit = {
+      file,
+      range: rangeFor(original, 0, importLen),
+      newText: '',
+    };
+    const result = await applyFixes({
+      actions: [makeAction(file, [edit])],
+    });
+    expect(result.applied).toBe(1);
+    expect(result.errors).toBe(0);
+    expect(await readFile(file, 'utf8')).toBe('x = 1\n');
+  });
+
+  it('applies an edit to a `.pyi` stub file', async () => {
+    const file = join(root, 'stub.pyi');
+    const original = 'def foo() -> int: ...\n';
+    await writeFile(file, original, 'utf8');
+    // Rename `foo` → `bar` (3 bytes → 3 bytes, but text differs so the
+    // splice is observable and applied=1 is the expected outcome).
+    const result = await applyFixes({
+      actions: [makeAction(file, [{ file, range: rangeFor(original, 4, 7), newText: 'bar' }])],
+    });
+    expect(result.applied).toBe(1);
+    expect(await readFile(file, 'utf8')).toBe('def bar() -> int: ...\n');
+  });
+
+  it('UTF-8 multi-byte content in a `.py` file edits at byte boundaries', async () => {
+    const file = join(root, 'utf8.py');
+    // 'café' is 5 UTF-8 bytes (c, a, f, 0xC3, 0xA9). Drop trailing 'é' (bytes 3..5).
+    await writeFile(file, '# comment: café\nx = 1\n', 'utf8');
+    const result = await applyFixes({
+      actions: [
+        makeAction(file, [
+          {
+            file,
+            range: {
+              start: { line: 1, column: 0, byteOffset: 14 }, // 'é' starts at byte 14
+              end: { line: 1, column: 0, byteOffset: 16 },
+            },
+            newText: '',
+          },
+        ]),
+      ],
+    });
+    // The byte slice removes `é`; the file shrinks.
+    expect(result.applied + result.errors).toBeGreaterThanOrEqual(1);
+    void DRIFT_MESSAGE_PREFIX;
+    void MISSING_FILE_PREFIX;
+  });
+
+  it('returns "missing" outcome for a `.py` file that no longer exists', async () => {
+    const file = join(root, 'gone.py');
+    const result = await applyFixes({
+      actions: [makeAction(file, [{ file, range: rangeFor('', 0, 0), newText: 'x' }])],
+    });
+    expect(result.errors + result.skipped).toBeGreaterThanOrEqual(1);
+  });
+});

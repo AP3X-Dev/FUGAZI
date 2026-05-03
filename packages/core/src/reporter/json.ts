@@ -60,15 +60,33 @@ export class JsonReporter extends ReporterBase {
   protected override serialize(meta: ReporterMeta | undefined): string {
     const sorted = sortIssues(this.issues);
     const root = meta?.projectRoot;
+    // Phase 4e T369: when the driver supplies `filesByLang`/`parseErrors`,
+    // surface them in the JSON payload's `metrics` block. Both fields are
+    // additive — older consumers that don't read them stay byte-identical
+    // to the pre-4e shape (the keys appear after the existing two so the
+    // ordering is canonical, deterministic, and JSON-tooling-friendly).
+    const baseMetrics: Record<string, unknown> = {
+      issueCount: sorted.length,
+      fileCount: distinctFileCount(sorted),
+    };
+    if (meta?.filesByLang !== undefined) {
+      baseMetrics.filesByLang = { ts: meta.filesByLang.ts, py: meta.filesByLang.py };
+    }
+    if (meta?.parseErrors !== undefined) {
+      baseMetrics.parseErrors = {
+        total: meta.parseErrors.total,
+        byLang: {
+          ts: meta.parseErrors.byLang.ts,
+          py: meta.parseErrors.byLang.py,
+        },
+      };
+    }
     const payload = {
       $schema: 'https://fugazi.dev/schemas/report-v1.json',
       version: meta?.version ?? '0.0.0',
       mode: meta?.mode ?? 'full',
       issues: sorted.map((i) => toJsonIssue(i, root)),
-      metrics: {
-        issueCount: sorted.length,
-        fileCount: distinctFileCount(sorted),
-      },
+      metrics: baseMetrics,
       runtime: null,
       _meta: {
         projectRoot: meta?.projectRoot ?? '',

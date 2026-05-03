@@ -55,7 +55,7 @@ describe('fugazi coverage setup', () => {
           const code = await runCli(['coverage', 'setup'], ctx);
           expect(code).toBe(2);
           expect(ctx.getStderr()).toBe(
-            'coverage-setup: no supported test runner detected (looked for vitest, jest, playwright)\n',
+            'coverage-setup: no supported test runner detected (looked for vitest, jest, playwright, pytest)\n',
           );
         } finally {
           process.chdir(cwd);

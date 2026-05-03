@@ -94,16 +94,32 @@ function buildEvent(body: ProgressEventBody, seq: number): ProgressEvent {
     case 'discover.done':
       return Object.freeze({ kind: 'discover.done', seq, fileCount: body.fileCount });
     case 'extract.start':
-      return Object.freeze({ kind: 'extract.start', seq, total: body.total });
+      // Phase 4e T370: include `lang` only when the caller supplied it. The
+      // omit-on-undefined branch keeps the resulting event narrow under
+      // `exactOptionalPropertyTypes` so downstream byte-equality tests don't
+      // see a phantom `lang: undefined` field.
+      return body.lang === undefined
+        ? Object.freeze({ kind: 'extract.start', seq, total: body.total })
+        : Object.freeze({ kind: 'extract.start', seq, total: body.total, lang: body.lang });
     case 'extract.progress':
-      return Object.freeze({
-        kind: 'extract.progress',
-        seq,
-        n: body.n,
-        total: body.total,
-      });
+      return body.lang === undefined
+        ? Object.freeze({
+            kind: 'extract.progress',
+            seq,
+            n: body.n,
+            total: body.total,
+          })
+        : Object.freeze({
+            kind: 'extract.progress',
+            seq,
+            n: body.n,
+            total: body.total,
+            lang: body.lang,
+          });
     case 'extract.done':
-      return Object.freeze({ kind: 'extract.done', seq });
+      return body.lang === undefined
+        ? Object.freeze({ kind: 'extract.done', seq })
+        : Object.freeze({ kind: 'extract.done', seq, lang: body.lang });
     case 'graph.start':
       return Object.freeze({ kind: 'graph.start', seq });
     case 'graph.done':

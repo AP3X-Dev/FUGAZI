@@ -130,6 +130,24 @@ export async function runAndReport(opts: RunOptions): Promise<number> {
     reporter.emit(issue);
   }
 
+  // Phase 4e (T369): hand the reporter the post-analysis cross-language
+  // metrics so the JSON serializer can surface `metrics.filesByLang` and
+  // `metrics.parseErrors`. Other reporters ignore the patch (no behaviour
+  // change for human / sarif / compact / markdown).
+  reporter.updateMeta({
+    filesByLang: {
+      ts: result.metrics.filesByLang.ts,
+      py: result.metrics.filesByLang.py,
+    },
+    parseErrors: {
+      total: result.metrics.parseErrors.total,
+      byLang: {
+        ts: result.metrics.parseErrors.byLang.ts,
+        py: result.metrics.parseErrors.byLang.py,
+      },
+    },
+  });
+
   const payload = reporter.end();
   if (typeof payload === 'string') {
     opts.stdout.write(payload);

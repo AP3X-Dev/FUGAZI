@@ -20,6 +20,12 @@ import type { ProgressEvent, RunAnalysisResult } from '../types.js';
  * run. Carries the analysis mode, target project root, schema version, and
  * tool version so format-specific headers (SARIF tool node, JSON schemaUrl)
  * can populate without touching the issue stream.
+ *
+ * Phase 4e (T369): optional `filesByLang` and `parseErrors` surface the
+ * cross-language metrics the JSON / Markdown reporters expose so consumers
+ * can report "200 TS files, 50 Python files" without round-tripping the
+ * full result. Both are optional — pre-4e callers still construct
+ * ReporterMeta without them.
  */
 export interface ReporterMeta {
   readonly mode: RunAnalysisResult['_meta']['mode'];
@@ -27,6 +33,11 @@ export interface ReporterMeta {
   readonly projectRoot: string;
   readonly schemaUrl?: string;
   readonly determinismHash?: string;
+  readonly filesByLang?: { readonly ts: number; readonly py: number };
+  readonly parseErrors?: {
+    readonly total: number;
+    readonly byLang: { readonly ts: number; readonly py: number };
+  };
 }
 
 /**
@@ -49,6 +60,14 @@ export interface Reporter {
   emit(issue: DiscriminatedIssue): void;
   /** Emit a progress event. May be called zero or more times. */
   emitProgress(event: ProgressEvent): void;
+  /**
+   * Phase 4e (T369): merge a partial `ReporterMeta` patch into the running
+   * meta after `begin`. Used by callers that compute post-analysis metrics
+   * (`filesByLang`, `parseErrors`) and need to surface them in the final
+   * serialized payload. Implementations MUST treat this as a last-write-wins
+   * shallow merge; calling outside the begin → end window throws.
+   */
+  updateMeta(patch: Partial<ReporterMeta>): void;
   /**
    * End the run and return the final serialized payload. Called exactly
    * once. After end(), no further emit/emitProgress are accepted.

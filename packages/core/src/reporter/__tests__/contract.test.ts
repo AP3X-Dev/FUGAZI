@@ -42,6 +42,7 @@ type CallLog =
   | { kind: 'begin'; meta: ReporterMeta }
   | { kind: 'emit'; issue: DiscriminatedIssue }
   | { kind: 'emitProgress'; event: ProgressEvent }
+  | { kind: 'updateMeta'; patch: Partial<ReporterMeta> }
   | { kind: 'end' };
 
 class MockReporter implements Reporter {
@@ -55,6 +56,9 @@ class MockReporter implements Reporter {
   }
   emitProgress(event: ProgressEvent): void {
     this.log.push({ kind: 'emitProgress', event });
+  }
+  updateMeta(patch: Partial<ReporterMeta>): void {
+    this.log.push({ kind: 'updateMeta', patch });
   }
   end(): string {
     this.log.push({ kind: 'end' });

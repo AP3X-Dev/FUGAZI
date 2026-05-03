@@ -38,6 +38,21 @@ export abstract class ReporterBase implements Reporter {
     this.#state = 'begun';
   }
 
+  /**
+   * Phase 4e (T369): merge post-analysis metrics into the recorded `meta`.
+   * Called by the driver after `runAnalysis` resolves so per-language file
+   * counts and parse-error summaries are available to `serialize`. Safe to
+   * invoke multiple times — last write wins. Throws if called outside the
+   * begin → end window so misuse surfaces deterministically.
+   */
+  updateMeta(patch: Partial<ReporterMeta>): void {
+    if (this.#state !== 'begun') {
+      throw new Error('reporter: updateMeta called out of sequence');
+    }
+    if (this.#meta === undefined) return;
+    this.#meta = { ...this.#meta, ...patch };
+  }
+
   emit(issue: DiscriminatedIssue): void {
     if (this.#state === 'pending') {
       throw new Error('reporter: emit called before begin');

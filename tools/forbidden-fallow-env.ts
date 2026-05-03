@@ -17,14 +17,25 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = resolve(fileURLToPath(import.meta.url), '..', '..');
 
-const PATTERNS: ReadonlyArray<RegExp> = [/\bprocess\.env\.FALLOW_/, /\bimport\.meta\.env\.FALLOW_/];
+// Phase 4e (T362): mirror the TS/JS env-read patterns onto the Python
+// equivalents so a Python fixture or test plugin can't smuggle a FALLOW_*
+// env read past the SC-18 gate. `os.environ['FALLOW_…']` and
+// `os.getenv('FALLOW_…')` cover the two idiomatic forms.
+const PATTERNS: ReadonlyArray<RegExp> = [
+  /\bprocess\.env\.FALLOW_/,
+  /\bimport\.meta\.env\.FALLOW_/,
+  /\bos\.environ\[\s*['"]FALLOW_/,
+  /\bos\.getenv\(\s*['"]FALLOW_/,
+];
 
 const ALLOWLISTED_PATHS = new Set([
   'docs/decisions/QUESTIONNAIRE.md',
   'tools/forbidden-fallow-env.ts',
 ]);
 
-const EXTENSIONS = new Set(['.ts', '.js']);
+// Phase 4e (T362): scan Python source + stub files alongside TS/JS so the
+// scanner catches a stray `os.environ['FALLOW_…']` in a fixture.
+const EXTENSIONS = new Set(['.ts', '.js', '.py', '.pyi']);
 
 function toRepoRel(absolute: string): string {
   return relative(REPO_ROOT, absolute).split(sep).join('/');

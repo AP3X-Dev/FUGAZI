@@ -95,7 +95,7 @@ describe('coverage_setup tool', () => {
     expect(result.error).toBe(true);
     if (result.error === true) {
       expect(result.message).toBe(
-        'coverage-setup: no supported test runner detected (looked for vitest, jest, playwright)',
+        'coverage-setup: no supported test runner detected (looked for vitest, jest, playwright, pytest)',
       );
     }
   });

@@ -48,6 +48,11 @@ const RECOGNISED_EXTENSIONS = new Set<string>([
   '.astro',
   '.mdx',
   '.css',
+  // Phase 4e (T367): Python source + stub files. `.pyc` is intentionally
+  // excluded — those are bytecode artifacts and would cause every Python
+  // import to retrigger analysis when the interpreter caches them.
+  '.py',
+  '.pyi',
 ]);
 
 const DEFAULT_DEBOUNCE_MS = 300;
@@ -276,6 +281,22 @@ async function runAndRender(opts: RunAndRenderOptions): Promise<void> {
   });
 
   for (const issue of result.issues) reporter.emit(issue);
+  // Phase 4e (T369): surface cross-language metrics in the watch loop's
+  // reporter output. Mirror the run-helpers wiring exactly so the watch +
+  // one-shot paths produce byte-identical JSON for the same project.
+  reporter.updateMeta({
+    filesByLang: {
+      ts: result.metrics.filesByLang.ts,
+      py: result.metrics.filesByLang.py,
+    },
+    parseErrors: {
+      total: result.metrics.parseErrors.total,
+      byLang: {
+        ts: result.metrics.parseErrors.byLang.ts,
+        py: result.metrics.parseErrors.byLang.py,
+      },
+    },
+  });
   const payload = reporter.end();
   if (typeof payload === 'string') {
     opts.stdout.write(payload);

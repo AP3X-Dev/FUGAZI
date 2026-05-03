@@ -1,0 +1,9 @@
+[project]
+name = "fugazi-fx-mixed-py-ts-backend"
+version = "0.0.0"
+dependencies = [
+    "Django>=4.2",
+]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"

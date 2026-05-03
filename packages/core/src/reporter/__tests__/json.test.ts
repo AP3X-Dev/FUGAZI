@@ -150,4 +150,72 @@ describe('JsonReporter', () => {
     expect(out).toMatch(/^\{\n {2}"\$schema":/u);
     expect(out.endsWith('\n')).toBe(true);
   });
+
+  it('10. Phase 4e T369 — surfaces metrics.filesByLang when meta supplies it', () => {
+    const r = new JsonReporter();
+    r.begin({ ...SAMPLE_META, filesByLang: { ts: 12, py: 3 } });
+    const out = r.end();
+    if (typeof out !== 'string') throw new Error('expected string');
+    const parsed = JSON.parse(out) as { metrics: { filesByLang?: { ts: number; py: number } } };
+    expect(parsed.metrics.filesByLang).toEqual({ ts: 12, py: 3 });
+  });
+
+  it('11. Phase 4e T369 — surfaces metrics.parseErrors when meta supplies it', () => {
+    const r = new JsonReporter();
+    r.begin({
+      ...SAMPLE_META,
+      parseErrors: { total: 5, byLang: { ts: 2, py: 3 } },
+    });
+    const out = r.end();
+    if (typeof out !== 'string') throw new Error('expected string');
+    const parsed = JSON.parse(out) as {
+      metrics: { parseErrors?: { total: number; byLang: { ts: number; py: number } } };
+    };
+    expect(parsed.metrics.parseErrors).toEqual({
+      total: 5,
+      byLang: { ts: 2, py: 3 },
+    });
+  });
+
+  it('12. Phase 4e T369 — backwards-compat: no filesByLang/parseErrors when meta omits them', () => {
+    const r = new JsonReporter();
+    const out = runReporter(r, SAMPLE_META, [], []);
+    const parsed = JSON.parse(out) as { metrics: Record<string, unknown> };
+    expect(parsed.metrics.filesByLang).toBeUndefined();
+    expect(parsed.metrics.parseErrors).toBeUndefined();
+  });
+
+  it('13. Phase 4e T369 — updateMeta merges patch into the recorded meta before serialize', () => {
+    const r = new JsonReporter();
+    r.begin(SAMPLE_META);
+    r.updateMeta({ filesByLang: { ts: 4, py: 7 } });
+    const out = r.end();
+    if (typeof out !== 'string') throw new Error('expected string');
+    const parsed = JSON.parse(out) as { metrics: { filesByLang?: { ts: number; py: number } } };
+    expect(parsed.metrics.filesByLang).toEqual({ ts: 4, py: 7 });
+  });
+
+  it('14. Phase 4e T369 — updateMeta is a shallow merge (does not lose existing fields)', () => {
+    const r = new JsonReporter();
+    r.begin(SAMPLE_META);
+    r.updateMeta({ filesByLang: { ts: 1, py: 2 } });
+    r.updateMeta({ parseErrors: { total: 0, byLang: { ts: 0, py: 0 } } });
+    const out = r.end();
+    if (typeof out !== 'string') throw new Error('expected string');
+    const parsed = JSON.parse(out) as { metrics: Record<string, unknown> };
+    expect(parsed.metrics.filesByLang).toEqual({ ts: 1, py: 2 });
+    expect(parsed.metrics.parseErrors).toEqual({
+      total: 0,
+      byLang: { ts: 0, py: 0 },
+    });
+  });
+
+  it('15. Phase 4e T369 — updateMeta after end() throws verbatim contract', () => {
+    const r = new JsonReporter();
+    r.begin(SAMPLE_META);
+    r.end();
+    expect(() => r.updateMeta({ filesByLang: { ts: 0, py: 0 } })).toThrowError(
+      'reporter: updateMeta called out of sequence',
+    );
+  });
 });

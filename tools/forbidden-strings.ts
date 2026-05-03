@@ -41,7 +41,9 @@ const ALLOWLISTED_PATHS = new Set([
   'tools/forbidden-strings.ts',
 ]);
 
-const EXTENSIONS = new Set(['.ts', '.js', '.json']);
+// Phase 4e (T362): also scan Python source + stub files so a stray
+// `# fallow-*` reference can't sneak into a Python test fixture.
+const EXTENSIONS = new Set(['.ts', '.js', '.json', '.py', '.pyi']);
 
 function toRepoRel(absolute: string): string {
   return relative(REPO_ROOT, absolute).split(sep).join('/');

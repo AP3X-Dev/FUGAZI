@@ -52,6 +52,15 @@ function snippetFor(projectRoot: string, runner: SupportedRunner): RunnerSnippet
         configPath: join(projectRoot, 'playwright.config.ts'),
         snippet: PLAYWRIGHT_SNIPPET,
       }) satisfies RunnerSnippet;
+    case 'pytest':
+      // Phase 4e T366: pytest's coverage story is `pytest-cov`. The snippet
+      // shows the install + invocation; the conventional config home is
+      // `pyproject.toml` (table `[tool.coverage.run]`).
+      return Object.freeze({
+        runner,
+        configPath: join(projectRoot, 'pyproject.toml'),
+        snippet: PYTEST_SNIPPET,
+      }) satisfies RunnerSnippet;
   }
 }
 
@@ -75,6 +84,26 @@ module.exports = {
   coverageReporters: ['json'],
   coverageDirectory: './.fugazi-coverage',
 };
+`;
+
+const PYTEST_SNIPPET = `# Install pytest-cov:
+#   pip install pytest-cov
+#
+# Run tests with JSON coverage output (Fugazi's runtime layer parses the
+# coverage.json shape via Istanbul-equivalent normalisation):
+#
+#   pytest --cov=. --cov-report=json:./.fugazi-coverage/coverage.json --cov-report=term
+#
+# Add to pyproject.toml:
+[tool.coverage.run]
+branch = true
+data_file = "./.fugazi-coverage/.coverage"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.json]
+output = "./.fugazi-coverage/coverage.json"
 `;
 
 const PLAYWRIGHT_SNIPPET = `// Playwright doesn't expose V8 coverage directly via config — wire it
