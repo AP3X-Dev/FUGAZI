@@ -1,3 +1,4 @@
 {
-  "packages/extract/node_modules/@swc/wasm/wasm_bg.wasm": "a400243367e0731a958f97e4cafd76b7282bd361c6a13e65d1d177d32ee125ec"
+  "packages/extract/node_modules/@swc/wasm/wasm_bg.wasm": "a400243367e0731a958f97e4cafd76b7282bd361c6a13e65d1d177d32ee125ec",
+  "packages/extract/wasm/tree-sitter-python.wasm": "9056d0fb0c337810d019fae350e8167786119da98f0f282aceae7ab89ee8253b"
 }
