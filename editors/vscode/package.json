@@ -1,0 +1,93 @@
+{
+  "name": "fugazi-vscode",
+  "displayName": "Fugazi",
+  "description": "Codebase intelligence for TypeScript and JavaScript: dead code, duplication, complexity, architecture drift.",
+  "version": "0.1.0",
+  "publisher": "fugazi",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Linters", "Programming Languages", "Other"],
+  "keywords": ["typescript", "javascript", "dead-code", "duplication", "code-quality"],
+  "main": "./dist/extension.js",
+  "icon": "icons/icon.png",
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onLanguage:javascript",
+    "onLanguage:javascriptreact",
+    "onCommand:fugazi.runAnalysis"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "fugazi.runAnalysis",
+        "title": "Fugazi: Run Analysis",
+        "category": "Fugazi"
+      },
+      {
+        "command": "fugazi.applyFix",
+        "title": "Fugazi: Apply Fix",
+        "category": "Fugazi"
+      },
+      {
+        "command": "fugazi.openIssue",
+        "title": "Fugazi: Open Issue",
+        "category": "Fugazi"
+      },
+      {
+        "command": "fugazi.toggleHotPaths",
+        "title": "Fugazi: Toggle Hot Paths",
+        "category": "Fugazi"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Fugazi",
+      "properties": {
+        "fugazi.preset": {
+          "type": "string",
+          "enum": ["default", "ci", "strict"],
+          "default": "default",
+          "description": "Analysis preset bundle."
+        },
+        "fugazi.format": {
+          "type": "string",
+          "enum": ["human", "human-plain", "json", "sarif", "compact", "markdown", "codeclimate"],
+          "default": "human",
+          "description": "Default output format for the run-analysis command."
+        },
+        "fugazi.severityOverrides": {
+          "type": "object",
+          "default": {},
+          "description": "Per-rule severity overrides. Keys are rule IDs; values are 'error' | 'warn' | 'off'.",
+          "additionalProperties": {
+            "type": "string",
+            "enum": ["error", "warn", "off"]
+          }
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        { "id": "fugaziIssues", "name": "Fugazi Issues" },
+        { "id": "fugaziDuplicates", "name": "Fugazi Duplicates" },
+        { "id": "fugaziHealth", "name": "Fugazi Health" }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "bun build.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check src/"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  }
+}
