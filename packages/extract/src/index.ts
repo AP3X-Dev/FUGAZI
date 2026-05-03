@@ -68,6 +68,8 @@ export type {
   PyStatement,
 } from './ast/kinds-py.js';
 export { childrenOfPy, type PyVisitor, walkPy } from './ast/visit-py.js';
+export { parsePythonAst, type PyParseResult } from './parsers-py/adapter.js';
+export { buildPyInventory } from './visitor-py/index.js';
 export {
   type AssetUrlMatch,
   isImportMetaUrl,

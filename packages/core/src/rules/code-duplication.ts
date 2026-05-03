@@ -25,6 +25,7 @@ import {
   type FindAllClonesOptions,
   findAllClones,
   tokenize,
+  tokenizePython,
 } from '../dupes/index.js';
 import type { RuleHandler } from './types.js';
 
@@ -54,7 +55,12 @@ export function createCodeDuplicationRule(severity: Severity): RuleHandler {
         continue;
       }
       sourceByFile.set(node.path, src);
-      streams.push(tokenize(node.path, src));
+      // Phase 4c T336: dispatch by file extension. `.py` files use the
+      // Python tokenizer; everything else falls through to the TS/JS one.
+      const stream = node.path.endsWith('.py')
+        ? tokenizePython(node.path, src)
+        : tokenize(node.path, src);
+      streams.push(stream);
     }
     if (streams.length === 0) return [];
 

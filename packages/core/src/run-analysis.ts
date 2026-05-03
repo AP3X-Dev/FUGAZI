@@ -34,8 +34,11 @@ import {
   type Inventory,
   type ParseError,
   buildInventory,
+  buildPyInventory,
   computeComplexity,
+  computeComplexityPy,
   parse,
+  parsePythonAst,
 } from '@fugazi/extract';
 import { type FileNode, type Graph, buildGraph } from '@fugazi/graph';
 import {
@@ -314,7 +317,20 @@ function checkAborted(signal: AbortSignal | undefined, phase: PhaseName): void {
 /* Discovery                                                                   */
 /* -------------------------------------------------------------------------- */
 
-const RECOGNIZED_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.mts', '.cts'];
+const RECOGNIZED_EXTENSIONS = [
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.mts',
+  '.cts',
+  // Phase 4c partial T361: Python files are discovered so the rule layer
+  // can flow Python Inventories. Full per-language dispatch in extractOne
+  // routes `.py` to the Python pipeline.
+  '.py',
+];
 const SKIPPED_DIRS = new Set(['node_modules', 'dist', 'build', 'coverage', '.git', '.turbo']);
 
 /**
@@ -446,6 +462,14 @@ async function extractOne(path: string): Promise<ExtractOutput | null> {
   } catch {
     return emptyExtract();
   }
+  // Phase 4c partial T361: dispatch by file extension. `.py` files route
+  // through the Python pipeline (tree-sitter parser → Python visitor →
+  // Python complexity); everything else uses the TS/JS pipeline. Full
+  // per-language driver dispatch (cache-key namespacing, plugin routing,
+  // parse-error reporters) lands in Phase 4e T361.
+  if (path.endsWith('.py')) {
+    return extractOnePython(path, source);
+  }
   let result: {
     readonly program: Awaited<ReturnType<typeof parse>>['program'];
     readonly errors: readonly ParseError[];
@@ -463,6 +487,18 @@ async function extractOne(path: string): Promise<ExtractOutput | null> {
   const inventory = buildInventory(result.program);
   const complexity = computeComplexity(result.program, source);
   return { inventory, complexity };
+}
+
+async function extractOnePython(path: string, source: string): Promise<ExtractOutput> {
+  try {
+    const result = await parsePythonAst(source, path);
+    const inventory = buildPyInventory(result.program, source, path);
+    const complexity = computeComplexityPy(result.program, source);
+    return { inventory, complexity };
+  } catch {
+    // Fail-soft on hard parser failure (e.g. WASM not loaded).
+    return emptyExtract();
+  }
 }
 
 function emptyInventory(): Inventory {

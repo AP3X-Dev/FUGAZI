@@ -23,12 +23,39 @@ import type { Range } from '@fugazi/types';
 
 export type DeclarationKind = 'function' | 'class' | 'variable' | 'type' | 'enum' | 'css-class';
 
+/**
+ * Optional Python-only enrichments (Phase 4c T331 + T333). The TS visitor
+ * never populates these fields. The Python visitor sets:
+ *
+ *   - `bases`      — base-class identifier names from `class X(Base1, Base2):`,
+ *                    used by the rule layer to detect TypedDict / Protocol
+ *                    / Generic subclasses without re-walking the AST.
+ *   - `annotation` — the annotation expression text for `AnnAssign` targets,
+ *                    used to detect `X: TypeAlias = ...` forms. Best-effort:
+ *                    the visitor surfaces only the leading identifier (e.g.
+ *                    `'TypeAlias'` for `X: TypeAlias = int`) since the full
+ *                    expression is not preserved as a string in the AST.
+ *   - `valueCallee` — when the assignment value is a Call (e.g.
+ *                    `Foo = NewType('Foo', int)`), the callee identifier
+ *                    name (`'NewType'`). `undefined` for non-call values.
+ *   - `decoratedMembers` — names of class members (methods + attribute
+ *                    declarations) that carry at least one decorator. Used
+ *                    by `unused-class-members` to suppress framework-driven
+ *                    invocations (e.g. `@app.route`, `@pytest.fixture`).
+ *
+ * All four fields stay `undefined` for TS and JS, preserving the historical
+ * TS shape. Consumers that don't care simply ignore them.
+ */
 export interface Declaration {
   readonly kind: DeclarationKind;
   readonly name: string;
   readonly exported: boolean;
   readonly range: Range;
   readonly members: readonly string[];
+  readonly bases?: readonly string[];
+  readonly annotation?: string;
+  readonly valueCallee?: string;
+  readonly decoratedMembers?: readonly string[];
 }
 
 export type ImportKind = 'static' | 'dynamic' | 'reexport' | 'asset' | 'type';

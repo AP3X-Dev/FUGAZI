@@ -9,6 +9,7 @@
  */
 
 export { tokenize, type Token, type TokenStream } from './tokenize.js';
+export { tokenizePython } from './tokenize-py.js';
 export { buildSuffixArray, computeLCP, type SuffixArrayResult } from './suffix-array.js';
 export { findType1Clones, type CloneFamily, type CloneOccurrence } from './type1.js';
 export { normalizeForType2, normalizeForType3, normalizeForType4 } from './normalize.js';

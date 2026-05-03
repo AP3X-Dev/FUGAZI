@@ -56,6 +56,12 @@ export function createPrivateTypeLeakRule(severity: Severity): RuleHandler {
     const out: PrivateTypeLeakIssue[] = [];
 
     for (const node of ctx.graph.files.values()) {
+      // Phase 4c T338: Python doesn't have an enforced public/private type
+      // distinction (leading underscore is convention, not language-level).
+      // Skip `.py` files entirely for v1 — the rule emits zero issues on
+      // Python sources, in line with the v1.x carry decision in the plan.
+      if (node.path.endsWith('.py') || node.inventory.lang === 'py') continue;
+
       const privateTypes = new Set<string>();
       const publicSymbols: { readonly name: string; readonly range: Range }[] = [];
 

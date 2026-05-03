@@ -43,6 +43,7 @@
  * slice with its own configured severity.
  */
 
+import type { Declaration } from '@fugazi/extract';
 import type { Graph } from '@fugazi/graph';
 import type {
   DiscriminatedIssue,
@@ -55,6 +56,157 @@ import type { RuleContext, RuleHandler } from './types.js';
 
 const ENUM_KIND = 'unused-enum-members' as const;
 const CLASS_KIND = 'unused-class-members' as const;
+
+/**
+ * Phase 4c T333. Python "dunder" (double-underscore) lifecycle methods that
+ * runtime / language semantics invoke on the user's behalf. A class member
+ * matching any of these is presumed-used regardless of intra-project
+ * references. Includes operator overloads + the `r`/`i` reflected/in-place
+ * variants. ~50 names total — chosen for v1 coverage; the plugin layer
+ * (Phase 4d) refines via per-framework `usedClassMembers` rules.
+ */
+const PY_DUNDER_LIFECYCLE_METHODS: ReadonlySet<string> = new Set([
+  // Construction / destruction
+  '__init__',
+  '__init_subclass__',
+  '__new__',
+  '__del__',
+  // Conversion / representation
+  '__repr__',
+  '__str__',
+  '__bytes__',
+  '__format__',
+  '__hash__',
+  '__bool__',
+  // Class / attribute access
+  '__class_getitem__',
+  '__getattr__',
+  '__setattr__',
+  '__delattr__',
+  '__getattribute__',
+  '__dir__',
+  // Container protocol
+  '__call__',
+  '__len__',
+  '__length_hint__',
+  '__iter__',
+  '__next__',
+  '__reversed__',
+  '__contains__',
+  '__getitem__',
+  '__setitem__',
+  '__delitem__',
+  '__missing__',
+  // Context-manager protocol
+  '__enter__',
+  '__exit__',
+  '__aenter__',
+  '__aexit__',
+  // Async
+  '__await__',
+  '__aiter__',
+  '__anext__',
+  // Comparison
+  '__eq__',
+  '__ne__',
+  '__lt__',
+  '__le__',
+  '__gt__',
+  '__ge__',
+  // Arithmetic + reflected + in-place
+  '__add__',
+  '__radd__',
+  '__iadd__',
+  '__sub__',
+  '__rsub__',
+  '__isub__',
+  '__mul__',
+  '__rmul__',
+  '__imul__',
+  '__truediv__',
+  '__rtruediv__',
+  '__itruediv__',
+  '__floordiv__',
+  '__rfloordiv__',
+  '__ifloordiv__',
+  '__mod__',
+  '__rmod__',
+  '__imod__',
+  '__pow__',
+  '__rpow__',
+  '__ipow__',
+  '__matmul__',
+  '__rmatmul__',
+  '__imatmul__',
+  // Bitwise
+  '__and__',
+  '__rand__',
+  '__iand__',
+  '__or__',
+  '__ror__',
+  '__ior__',
+  '__xor__',
+  '__rxor__',
+  '__ixor__',
+  '__lshift__',
+  '__rlshift__',
+  '__ilshift__',
+  '__rshift__',
+  '__rrshift__',
+  '__irshift__',
+  // Unary
+  '__neg__',
+  '__pos__',
+  '__abs__',
+  '__invert__',
+  // Numeric coercions
+  '__int__',
+  '__float__',
+  '__complex__',
+  '__round__',
+  '__index__',
+  // Pickle / copy
+  '__reduce__',
+  '__reduce_ex__',
+  '__getstate__',
+  '__setstate__',
+  '__copy__',
+  '__deepcopy__',
+  // Descriptor protocol
+  '__get__',
+  '__set__',
+  '__delete__',
+  '__set_name__',
+  // Class machinery
+  '__instancecheck__',
+  '__subclasscheck__',
+  '__subclasshook__',
+  // Frozen-set / mapping
+  '__weakref__',
+]);
+
+/**
+ * Phase 4c T333. Build the per-class set of member names that should NOT
+ * be flagged as unused. Returns null for non-Python classes (caller skips
+ * the lookup). Includes:
+ *   - All dunder lifecycle methods that the class actually defines.
+ *   - All decorated methods (the visitor surfaces these via
+ *     `decoratedMembers`).
+ *
+ * Plugin-layer refinement (Phase 4d) extends this with per-framework
+ * `usedClassMembers` rules (e.g. `setUp` for unittest, `dispatch` for
+ * Django views).
+ */
+function buildPyMemberExemptions(decl: Declaration): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (const m of decl.members) {
+    if (PY_DUNDER_LIFECYCLE_METHODS.has(m)) out.add(m);
+  }
+  if (decl.decoratedMembers !== undefined) {
+    for (const m of decl.decoratedMembers) out.add(m);
+  }
+  return out;
+}
 
 /**
  * Severity-free finding shape — the cache stores these and each rule wraps
@@ -90,12 +242,19 @@ function collectCandidates(ctx: RuleContext): readonly MemberCandidate[] {
 
   const candidates: MemberCandidate[] = [];
   for (const node of ctx.graph.files.values()) {
+    const isPy = node.path.endsWith('.py') || node.inventory.lang === 'py';
     for (const decl of node.inventory.declarations) {
       if (decl.kind !== 'enum' && decl.kind !== 'class') continue;
       if (!decl.exported) continue;
       if (decl.members.length === 0) continue;
 
+      // Phase 4c T333: build the per-class Python exemption set. Members
+      // matching the dunder allowlist OR carrying at least one decorator
+      // are framework-presumed-used and skipped.
+      const pyExempt = isPy ? buildPyMemberExemptions(decl) : null;
+
       for (const member of decl.members) {
+        if (pyExempt?.has(member)) continue;
         if (isMemberUsed(member, decl.name, node.id as unknown as number, ctx.graph, outgoing)) {
           continue;
         }

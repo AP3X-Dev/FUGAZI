@@ -1,6 +1,6 @@
 /**
- * declarations.ts — Phase 4a T305 + T306 — declaration handlers for the
- * Python visitor pass.
+ * declarations.ts — Phase 4a T305 + T306 + Phase 4c T331 — declaration
+ * handlers for the Python visitor pass.
  *
  * Recognises module-level function / class / variable shapes and appends
  * `Declaration` entries to the orchestrator's accumulator. Class-body
@@ -18,6 +18,14 @@
  *
  * The `__all__` Set is computed once at the top of `index.ts::buildPyInventory`
  * and threaded through every handler — handlers themselves do not re-walk.
+ *
+ * Phase 4c T331 enrichments (Python-only): `class-decl` carries `bases`
+ * (the base-class identifier names) so the rule layer can detect TypedDict
+ * / Protocol subclasses; `variable-decl` from `AnnAssign` carries
+ * `annotation` (the leading identifier of the annotation expression, e.g.
+ * `'TypeAlias'` for `X: TypeAlias = int`) and `valueCallee` (the callee
+ * identifier when the RHS is a Call, e.g. `'NewType'` for
+ * `Foo = NewType('Foo', int)`). All three fields stay `undefined` for TS.
  */
 
 import type {
@@ -27,6 +35,7 @@ import type {
   AsyncFunctionDef,
   ClassDef,
   FunctionDef,
+  PyExpression,
 } from '../ast/kinds-py.js';
 import type { Declaration } from '../visitor/types.js';
 import { isExportedName } from './all-list.js';
@@ -65,13 +74,40 @@ export function handleClass(
 ): void {
   if (!isModuleLevel(parent)) return;
   if (node.name === '') return;
+  const bases = collectBaseNames(node.bases);
+  const decoratedMembers = collectDecoratedMemberNames(node);
   out.push({
     kind: 'class',
     name: node.name,
     exported: isExportedName(node.name, allList),
     range: node.range,
     members: node.members.filter((n) => n !== ''),
+    ...(bases.length > 0 ? { bases } : {}),
+    ...(decoratedMembers.length > 0 ? { decoratedMembers } : {}),
   });
+}
+
+/**
+ * Walk the class body and collect names of methods (FunctionDef /
+ * AsyncFunctionDef) that carry at least one decorator. Used by
+ * `unused-class-members` (T333) to suppress framework-driven invocations.
+ *
+ * Module-level. Nested-class handling is recursive: if the class contains
+ * a nested class, decorated methods of that nested class are NOT included
+ * here — they're owned by the nested class's own ClassDef Declaration when
+ * it's emitted at module level (which it isn't currently — nested classes
+ * don't surface as Declarations). Sufficient for v1.
+ */
+function collectDecoratedMemberNames(node: ClassDef): readonly string[] {
+  const out: string[] = [];
+  for (const stmt of node.body) {
+    if (stmt.kind === 'FunctionDef' || stmt.kind === 'AsyncFunctionDef') {
+      if (stmt.name === '') continue;
+      if (stmt.decorators.length === 0) continue;
+      out.push(stmt.name);
+    }
+  }
+  return out;
 }
 
 export function handleAssign(
@@ -81,6 +117,10 @@ export function handleAssign(
   allList: ReadonlySet<string> | null,
 ): void {
   if (!isModuleLevel(parent)) return;
+  // T331: detect `Foo = NewType('Foo', int)` so the rule layer can flag
+  // unused `NewType` aliases as types. `valueCallee` is the callee's
+  // identifier name when the RHS is a Call, undefined otherwise.
+  const callee = calleeIdentifier(node.value);
   for (const target of node.targets) {
     if (target === '') continue;
     // The `__all__` assignment itself is not surfaced as a declaration —
@@ -92,6 +132,7 @@ export function handleAssign(
       exported: isExportedName(target, allList),
       range: node.range,
       members: [],
+      ...(callee !== undefined ? { valueCallee: callee } : {}),
     });
   }
 }
@@ -104,13 +145,75 @@ export function handleAnnAssign(
 ): void {
   if (!isModuleLevel(parent)) return;
   if (node.target === '') return;
-  // T331 (rule layer) refines `TypeAlias` / `TypedDict` / `Protocol`
-  // detection. v1 emits everything as variable-decl.
+  // T331: surface the annotation's leading identifier (e.g. 'TypeAlias',
+  // 'TypedDict', 'Protocol') and the value's callee (e.g. 'NewType') so
+  // the rule layer can classify type-like declarations without re-walking.
+  const annotation = annotationLeadingName(node.annotation);
+  const callee = node.value !== undefined ? calleeIdentifier(node.value) : undefined;
   out.push({
     kind: 'variable',
     name: node.target,
     exported: isExportedName(node.target, allList),
     range: node.range,
     members: [],
+    ...(annotation !== undefined ? { annotation } : {}),
+    ...(callee !== undefined ? { valueCallee: callee } : {}),
   });
+}
+
+/**
+ * Extract base-class identifier names from the `bases` array of a ClassDef.
+ * Skips non-name expressions (e.g. `Generic[T]` surfaces as `Subscript`,
+ * which we resolve to its receiver `Generic`). Order is preserved.
+ */
+function collectBaseNames(bases: readonly PyExpression[]): readonly string[] {
+  const out: string[] = [];
+  for (const b of bases) {
+    const name = expressionLeadingName(b);
+    if (name !== undefined) out.push(name);
+  }
+  return out;
+}
+
+/**
+ * Walk an expression to its leading identifier. Examples:
+ *   - `Foo`              → 'Foo'
+ *   - `mod.Foo`          → 'Foo' (rightmost attribute name)
+ *   - `Generic[T]`       → 'Generic' (subscript receiver)
+ *   - `mod.Foo[T]`       → 'Foo'
+ *   - non-trivial forms  → undefined
+ */
+function expressionLeadingName(expr: PyExpression): string | undefined {
+  switch (expr.kind) {
+    case 'Name':
+      return expr.id !== '' ? expr.id : undefined;
+    case 'Attribute':
+      return expr.attr !== '' ? expr.attr : undefined;
+    case 'Subscript':
+      return expressionLeadingName(expr.value);
+    case 'Call':
+      return expressionLeadingName(expr.func);
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * Annotation extraction for `X: TypeAlias = int` etc. The visitor only
+ * surfaces the LEADING identifier — for `Annotated[int, "info"]` this is
+ * `'Annotated'`. Sufficient for the rule layer's TypeAlias / Final / etc
+ * detection.
+ */
+function annotationLeadingName(expr: PyExpression): string | undefined {
+  return expressionLeadingName(expr);
+}
+
+/**
+ * When the assignment value is a Call expression, return the callee's
+ * leading identifier (`'NewType'` for `NewType('Foo', int)`,
+ * `'TypeVar'` for `T = TypeVar('T')`, etc). Undefined otherwise.
+ */
+function calleeIdentifier(expr: PyExpression): string | undefined {
+  if (expr.kind !== 'Call') return undefined;
+  return expressionLeadingName(expr.func);
 }
