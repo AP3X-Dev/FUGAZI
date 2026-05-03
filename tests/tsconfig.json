@@ -15,7 +15,8 @@
     "fixtures/**/*.ts",
     "ecosystem/**/*.ts",
     "property/**/*.ts",
-    "regression/**/*.ts"
+    "regression/**/*.ts",
+    "distribution/**/*.ts"
   ],
   "exclude": [
     "**/node_modules/**",

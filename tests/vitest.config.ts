@@ -8,6 +8,7 @@ export default defineConfig({
       'ecosystem/__tests__/**/*.test.ts',
       'property/**/*.test.ts',
       'regression/__tests__/**/*.test.ts',
+      'distribution/__tests__/**/*.test.ts',
     ],
     passWithNoTests: true,
     testTimeout: 60_000,

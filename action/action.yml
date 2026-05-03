@@ -1,0 +1,106 @@
+name: 'Fugazi'
+description: 'Run Fugazi codebase intelligence (dead code, duplication, complexity, architecture drift) against a TypeScript or JavaScript project.'
+author: 'Fugazi contributors'
+
+branding:
+  icon: 'search'
+  color: 'gray-dark'
+
+inputs:
+  fugazi-version:
+    description: 'fugazi npm version to install. Use "latest" or a specific version like "0.1.0".'
+    required: false
+    default: 'latest'
+  working-directory:
+    description: 'Project root the analysis runs against.'
+    required: false
+    default: '.'
+  format:
+    description: 'Output format. One of: json, human, human-plain, sarif, compact, markdown, codeclimate.'
+    required: false
+    default: 'json'
+  fail-on-issues:
+    description: 'When "true", the step exits non-zero if Fugazi reports any issue.'
+    required: false
+    default: 'true'
+  comment-on-pr:
+    description: 'When "true" and the trigger is a pull request, post a sticky comment with a Markdown summary.'
+    required: false
+    default: 'true'
+  upload-sarif:
+    description: 'When "true", emit SARIF and upload it to GitHub Code Scanning.'
+    required: false
+    default: 'true'
+  runtime-coverage:
+    description: 'When "true", attach V8 coverage from a previous test run as runtime evidence.'
+    required: false
+    default: 'false'
+
+outputs:
+  results-file:
+    description: 'Path to the JSON results file produced by the analyse step.'
+    value: ${{ steps.analyse.outputs.results-file }}
+  issue-count:
+    description: 'Total number of issues found.'
+    value: ${{ steps.analyse.outputs.issue-count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Fugazi
+      shell: bash
+      env:
+        FUGAZI_VERSION: ${{ inputs.fugazi-version }}
+      run: ${{ github.action_path }}/scripts/install.sh
+
+    - name: Analyse
+      id: analyse
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        FUGAZI_FORMAT: ${{ inputs.format }}
+        FUGAZI_FAIL_ON_ISSUES: ${{ inputs.fail-on-issues }}
+        FUGAZI_RUNTIME_COVERAGE: ${{ inputs.runtime-coverage }}
+      run: ${{ github.action_path }}/scripts/analyse.sh
+
+    - name: Annotate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        FUGAZI_RESULTS_FILE: ${{ steps.analyse.outputs.results-file }}
+      run: ${{ github.action_path }}/scripts/annotate.sh
+
+    - name: PR comment
+      if: ${{ github.event_name == 'pull_request' && inputs.comment-on-pr == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        FUGAZI_RESULTS_FILE: ${{ steps.analyse.outputs.results-file }}
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        GH_PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: ${{ github.action_path }}/scripts/pr-comment.sh
+
+    - name: PR review
+      if: ${{ github.event_name == 'pull_request' && inputs.comment-on-pr == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        FUGAZI_RESULTS_FILE: ${{ steps.analyse.outputs.results-file }}
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        GH_PR_NUMBER: ${{ github.event.pull_request.number }}
+        GH_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      run: ${{ github.action_path }}/scripts/pr-review.sh
+
+    - name: Emit SARIF
+      if: ${{ inputs.upload-sarif == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: ${{ github.action_path }}/scripts/upload-sarif.sh
+
+    - name: Upload SARIF to Code Scanning
+      if: ${{ inputs.upload-sarif == 'true' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.working-directory }}/fugazi.sarif

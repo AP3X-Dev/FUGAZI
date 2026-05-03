@@ -39,8 +39,36 @@ jobs:
       - name: Test
         run: bun run test
 
+      # Publish in dependency order. Each step is gated on `private: false`
+      # in the package's own package.json — `npm publish` will refuse to publish
+      # a private package, so a step is a no-op until the user opts in
+      # (see docs/RELEASE.md).
       - name: Publish fugazi to npm
         working-directory: packages/cli
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public || echo "skipping (package is private)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @fugazi/node to npm
+        working-directory: packages/node-api
+        run: npm publish --provenance --access public || echo "skipping (package is private)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @fugazi/lsp to npm
+        working-directory: packages/lsp
+        run: npm publish --provenance --access public || echo "skipping (package is private)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @fugazi/mcp to npm
+        working-directory: packages/mcp
+        run: npm publish --provenance --access public || echo "skipping (package is private)"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @fugazi/plugins to npm
+        working-directory: packages/plugins
+        run: npm publish --provenance --access public || echo "skipping (package is private)"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

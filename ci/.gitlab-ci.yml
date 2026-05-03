@@ -1,0 +1,35 @@
+# Fugazi GitLab CI include template.
+#
+# Usage:
+#   include:
+#     - remote: 'https://raw.githubusercontent.com/fugazi/fugazi/main/ci/.gitlab-ci.yml'
+#
+# Variables (override at the project / pipeline level):
+#   FUGAZI_VERSION         npm version to install (default: latest)
+#   FUGAZI_FORMAT          output format (default: codeclimate)
+#   FUGAZI_FAIL_ON_ISSUES  "true" to exit non-zero on findings (default: true)
+
+variables:
+  FUGAZI_VERSION: 'latest'
+  FUGAZI_FORMAT: 'codeclimate'
+  FUGAZI_FAIL_ON_ISSUES: 'true'
+
+fugazi-audit:
+  stage: test
+  image: node:22
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  before_script:
+    - bash ci/scripts/install.sh
+  script:
+    - bash ci/scripts/analyse.sh
+  after_script:
+    - if [ "$CI_PIPELINE_SOURCE" = "merge_request_event" ]; then bash ci/scripts/mr-review.sh || true; fi
+  artifacts:
+    when: always
+    reports:
+      codequality: gl-code-quality-report.json
+    paths:
+      - gl-code-quality-report.json
+    expire_in: '1 week'

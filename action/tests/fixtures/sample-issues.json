@@ -1,0 +1,46 @@
+{
+  "issues": [
+    {
+      "ruleId": "unused-export",
+      "category": "check",
+      "severity": "error",
+      "message": "Export 'foo' is never imported",
+      "file": "src/foo.ts",
+      "startLine": 12,
+      "startColumn": 14,
+      "fixable": true
+    },
+    {
+      "ruleId": "complexity",
+      "category": "health",
+      "severity": "warn",
+      "message": "Cyclomatic complexity 24 exceeds threshold 20",
+      "file": "src/bar.ts",
+      "startLine": 1,
+      "startColumn": 1,
+      "metric": "cyclomatic",
+      "value": 24,
+      "fixable": false
+    },
+    {
+      "ruleId": "unused-deps",
+      "category": "check",
+      "severity": "warn",
+      "message": "Dependency 'lodash' is declared but unused",
+      "file": "package.json",
+      "startLine": 8,
+      "startColumn": 5,
+      "fixable": true
+    }
+  ],
+  "duplicates": [
+    {
+      "id": "F1",
+      "similarity": 0.97,
+      "instances": [
+        { "uri": "file:///src/a.ts", "startLine": 10, "endLine": 30 },
+        { "uri": "file:///src/b.ts", "startLine": 50, "endLine": 70 }
+      ]
+    }
+  ]
+}
