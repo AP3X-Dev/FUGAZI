@@ -1,17 +1,23 @@
 /**
- * declarations.ts — Phase 4a T305 — declaration handlers for the Python
- * visitor pass.
+ * declarations.ts — Phase 4a T305 + T306 — declaration handlers for the
+ * Python visitor pass.
  *
  * Recognises module-level function / class / variable shapes and appends
  * `Declaration` entries to the orchestrator's accumulator. Class-body
  * declarations are folded into `members` (parallel to the TS visitor's
  * ClassDecl handling).
  *
- * Export-flag heuristic (v1, refined by T306): module-level declarations are
- * `exported: true` UNLESS the binding name starts with `_`. T306 will
- * re-fence this against `__all__ = [...]` extraction. Underscore-leading
- * names (`_priv`, `__dunder`) emit `exported: false` regardless of `__all__`
- * — Python's de-facto privacy convention is name-prefix.
+ * Export-flag heuristic (T306):
+ *   - When the orchestrator passes a non-null `allList` (extracted from a
+ *     resolvable `__all__ = [...]` / `__all__ = (...)`), a declaration is
+ *     `exported: true` IFF its name appears in the Set. An empty `__all__`
+ *     means nothing is exported.
+ *   - When `allList` is null (no `__all__`, or non-literal forms like
+ *     `__all__ = a + b`), fall back to the underscore-heuristic: names not
+ *     starting with `_` are public.
+ *
+ * The `__all__` Set is computed once at the top of `index.ts::buildPyInventory`
+ * and threaded through every handler — handlers themselves do not re-walk.
  */
 
 import type {
@@ -23,6 +29,7 @@ import type {
   FunctionDef,
 } from '../ast/kinds-py.js';
 import type { Declaration } from '../visitor/types.js';
+import { isExportedName } from './all-list.js';
 
 /**
  * `isModuleLevel` — true when the declaration's parent is the top-level
@@ -33,51 +40,56 @@ export function isModuleLevel(parent: ASTNodePy | null): boolean {
   return parent !== null && parent.kind === 'PyProgram';
 }
 
-/**
- * Underscore-leading names are private by convention (Python's de-facto
- * non-public marker). T306 adds `__all__` precedence; this is the v1
- * heuristic.
- */
-function isPublicName(name: string): boolean {
-  return name !== '' && !name.startsWith('_');
-}
-
 export function handleFunction(
   node: FunctionDef | AsyncFunctionDef,
   parent: ASTNodePy | null,
   out: Declaration[],
+  allList: ReadonlySet<string> | null,
 ): void {
   if (!isModuleLevel(parent)) return;
   if (node.name === '') return;
   out.push({
     kind: 'function',
     name: node.name,
-    exported: isPublicName(node.name),
+    exported: isExportedName(node.name, allList),
     range: node.range,
     members: [],
   });
 }
 
-export function handleClass(node: ClassDef, parent: ASTNodePy | null, out: Declaration[]): void {
+export function handleClass(
+  node: ClassDef,
+  parent: ASTNodePy | null,
+  out: Declaration[],
+  allList: ReadonlySet<string> | null,
+): void {
   if (!isModuleLevel(parent)) return;
   if (node.name === '') return;
   out.push({
     kind: 'class',
     name: node.name,
-    exported: isPublicName(node.name),
+    exported: isExportedName(node.name, allList),
     range: node.range,
     members: node.members.filter((n) => n !== ''),
   });
 }
 
-export function handleAssign(node: Assign, parent: ASTNodePy | null, out: Declaration[]): void {
+export function handleAssign(
+  node: Assign,
+  parent: ASTNodePy | null,
+  out: Declaration[],
+  allList: ReadonlySet<string> | null,
+): void {
   if (!isModuleLevel(parent)) return;
   for (const target of node.targets) {
     if (target === '') continue;
+    // The `__all__` assignment itself is not surfaced as a declaration —
+    // it's metadata, not an exported binding.
+    if (target === '__all__') continue;
     out.push({
       kind: 'variable',
       name: target,
-      exported: isPublicName(target),
+      exported: isExportedName(target, allList),
       range: node.range,
       members: [],
     });
@@ -88,6 +100,7 @@ export function handleAnnAssign(
   node: AnnAssign,
   parent: ASTNodePy | null,
   out: Declaration[],
+  allList: ReadonlySet<string> | null,
 ): void {
   if (!isModuleLevel(parent)) return;
   if (node.target === '') return;
@@ -96,7 +109,7 @@ export function handleAnnAssign(
   out.push({
     kind: 'variable',
     name: node.target,
-    exported: isPublicName(node.target),
+    exported: isExportedName(node.target, allList),
     range: node.range,
     members: [],
   });

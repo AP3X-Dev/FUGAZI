@@ -37,7 +37,7 @@
 import type { ImportFromStmt, ImportStmt } from '../ast/kinds-py.js';
 import type { Import } from '../visitor/types.js';
 
-export function handleImport(node: ImportStmt, out: Import[]): void {
+export function handleImport(node: ImportStmt, out: Import[], typeOnly: boolean): void {
   // `import a, b` produces ONE Import per dotted spec. Each name in the
   // ImportStmt's `names` array is `<dotted>` or `<dotted> as <alias>` per
   // the adapter's encoding.
@@ -45,7 +45,7 @@ export function handleImport(node: ImportStmt, out: Import[]): void {
     const source = parseImportSpec(spec).module;
     if (source === '') continue;
     out.push({
-      kind: 'static',
+      kind: typeOnly ? 'type' : 'static',
       source,
       resolvable: true,
       range: node.range,
@@ -53,11 +53,11 @@ export function handleImport(node: ImportStmt, out: Import[]): void {
   }
 }
 
-export function handleImportFrom(node: ImportFromStmt, out: Import[]): void {
+export function handleImportFrom(node: ImportFromStmt, out: Import[], typeOnly: boolean): void {
   const source = encodeFromSource(node.module, node.level);
   if (source === '' && node.level === 0) return;
   out.push({
-    kind: 'static',
+    kind: typeOnly ? 'type' : 'static',
     source,
     resolvable: true,
     range: node.range,

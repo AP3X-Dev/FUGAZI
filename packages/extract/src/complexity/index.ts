@@ -43,9 +43,13 @@
  */
 
 import type { Range } from '@fugazi/types';
+import type { AsyncFunctionDef, FunctionDef, PyProgram } from '../ast/kinds-py.js';
 import type { FunctionDecl, Program } from '../ast/kinds.js';
+import { walkPy } from '../ast/visit-py.js';
 import { walk } from '../ast/visit.js';
+import { computeCognitivePy } from './cognitive-py.js';
 import { computeCognitive } from './cognitive.js';
+import { computeCyclomaticPy } from './cyclomatic-py.js';
 import { computeCyclomatic } from './cyclomatic.js';
 import { approximateHalsteadVolume, computeMi, countNonBlankLines } from './mi.js';
 
@@ -207,7 +211,96 @@ function computeAggregate(fns: readonly FunctionComplexity[]): FileComplexityAgg
   };
 }
 
+/**
+ * Compute file-level complexity for a parsed `PyProgram` plus its source text.
+ * Walks every reachable `FunctionDef` / `AsyncFunctionDef` (including
+ * class-method bodies) and emits one `FunctionComplexity` per function.
+ *
+ * Class methods are surfaced with the qualified name `<class>.<method>` so
+ * downstream reporters can show them under their parent in tree views,
+ * matching the TS variant's behaviour. Unlike TS (where the parser does not
+ * expose class-method bodies), tree-sitter-python DOES expose method bodies
+ * as walkable `FunctionDef` nodes, so cyclomatic + cognitive scores reflect
+ * the real method contents.
+ *
+ * Determinism (NFR-1 / SC-15): output sorted by `range.start.byteOffset`,
+ * then by `name`; deeply frozen.
+ */
+export function computeComplexityPy(program: PyProgram, source: string): FileComplexity {
+  const collected: FunctionComplexity[] = [];
+  let truncated = false;
+  const classStack: string[] = [];
+
+  walkPy(program, {
+    onEnter: (node) => {
+      if (truncated) return;
+      if (node.kind === 'ClassDef') {
+        classStack.push(node.name);
+        return;
+      }
+      if (node.kind === 'FunctionDef' || node.kind === 'AsyncFunctionDef') {
+        if (collected.length >= MAX_FUNCTIONS_PER_FILE) {
+          truncated = true;
+          return;
+        }
+        const baseName = node.name === '' ? ANONYMOUS_NAME : node.name;
+        const qualified =
+          classStack.length > 0 ? `${classStack[classStack.length - 1]}.${baseName}` : baseName;
+        collected.push(emitFunctionPy(node, qualified, source));
+      }
+    },
+    onLeave: (node) => {
+      if (node.kind === 'ClassDef') {
+        classStack.pop();
+      }
+    },
+  });
+
+  const sorted = collected
+    .slice()
+    .sort((a, b) => {
+      const offsetDelta = a.range.start.byteOffset - b.range.start.byteOffset;
+      if (offsetDelta !== 0) return offsetDelta;
+      return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+    })
+    .map((f) => Object.freeze(f));
+
+  const aggregate = computeAggregate(sorted);
+  const base: FileComplexity = {
+    functions: Object.freeze(sorted),
+    aggregate: Object.freeze(aggregate),
+  };
+  return Object.freeze(truncated ? { ...base, truncated: true } : base) satisfies FileComplexity;
+}
+
+function emitFunctionPy(
+  node: FunctionDef | AsyncFunctionDef,
+  qualifiedName: string,
+  source: string,
+): FunctionComplexity {
+  const cyclomatic = computeCyclomaticPy(node, source);
+  const cognitive = computeCognitivePy(node, source);
+  const slice = source.slice(
+    Math.max(0, node.range.start.byteOffset),
+    Math.min(source.length, node.range.end.byteOffset),
+  );
+  const loc = countNonBlankLines(source, node.range.start.line, node.range.end.line);
+  const rawVolume = approximateHalsteadVolume(slice);
+  const volume = rawVolume > 0 ? rawVolume : Math.max(1, loc * 4);
+  const maintainabilityIndex = computeMi(volume, cyclomatic, loc);
+  return {
+    name: qualifiedName,
+    cyclomatic,
+    cognitive,
+    maintainabilityIndex,
+    loc,
+    range: node.range,
+  };
+}
+
 // Re-exports so callers can pull the per-metric helpers from a single import.
 export { computeCognitive } from './cognitive.js';
 export { computeCyclomatic } from './cyclomatic.js';
+export { computeCognitivePy } from './cognitive-py.js';
+export { computeCyclomaticPy } from './cyclomatic-py.js';
 export { computeMi } from './mi.js';

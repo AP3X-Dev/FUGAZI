@@ -97,10 +97,13 @@ export {
 export {
   type Suppression,
   parseSuppressions,
-} from './suppress/parse.js';
-export { warnOncePerFile } from './suppress/dedup.js';
+  parseSuppressionsPy,
+  parseSuppressionsByLang,
+  warnOncePerFile,
+} from './suppress/index.js';
 export {
   type FileComplexity,
   type FunctionComplexity,
   computeComplexity,
+  computeComplexityPy,
 } from './complexity/index.js';

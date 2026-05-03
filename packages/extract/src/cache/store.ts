@@ -44,20 +44,28 @@ const isFileNotFound = (err: unknown): boolean => {
 };
 
 /**
- * The three components that uniquely identify a cache entry. `filePath` is
- * the absolute (canonicalised by the caller) path of the source file;
+ * The components that uniquely identify a cache entry. `filePath` is the
+ * absolute (canonicalised by the caller) path of the source file;
  * `parserId` is a stable identifier for the parser engine (e.g. `'swc-wasm'`);
- * `parserVersion` is the engine's reported version string. Any change in any
- * of the three invalidates the cache entry deterministically.
+ * `parserVersion` is the engine's reported version string. `lang` (T310) is
+ * an optional language discriminator that namespaces the key — `'ts'` /
+ * `'py'` — so a TS file and a Python file with identical filenames cannot
+ * collide on the same key. When omitted, defaults to `'ts'` to preserve
+ * backwards-compat with cache entries written before T310.
+ *
+ * Any change in any of these components invalidates the cache entry
+ * deterministically.
  */
 export interface CacheKeyParts {
   readonly filePath: string;
   readonly parserId: string;
   readonly parserVersion: string;
+  /** Optional language tag — `'ts'` (default) or `'py'`. */
+  readonly lang?: 'ts' | 'py';
 }
 
 /**
- * Derive the on-disk cache key (hex SHA-256) for a triple of identifying
+ * Derive the on-disk cache key (hex SHA-256) for a tuple of identifying
  * parts. Each component is preceded by a 4-byte big-endian uint32 of its
  * UTF-8 byte length, then a NUL terminator. The length prefix makes the
  * encoding UNAMBIGUOUS even when components themselves contain NUL: the
@@ -67,13 +75,26 @@ export interface CacheKeyParts {
  * collisions are already prevented by the length prefix alone, but having
  * both keeps the format easy to debug if we ever inspect a raw key input.
  *
+ * T310 ordering: the language tag is hashed FIRST as `'lang:ts'` /
+ * `'lang:py'`. Existing pre-T310 entries (which were hashed without a lang
+ * component) cleanly miss against new readers — the cache miss is a no-op
+ * (read returns null on missing blobs) and the next write populates a
+ * properly-namespaced entry. No data corruption, no migration step.
+ *
  * Synchronous SHA-256 is fine here: input is < 1KB, Promise overhead would
  * dominate any async hashing cost.
  */
 export function deriveKey(parts: CacheKeyParts): string {
   const hash = createHash('sha256');
   const lenBuf = Buffer.alloc(4);
-  for (const component of [parts.filePath, parts.parserId, parts.parserVersion]) {
+  const lang = parts.lang ?? 'ts';
+  const components: readonly string[] = [
+    `lang:${lang}`,
+    parts.filePath,
+    parts.parserId,
+    parts.parserVersion,
+  ];
+  for (const component of components) {
     const bytes = Buffer.from(component, 'utf8');
     lenBuf.writeUInt32BE(bytes.length, 0);
     hash.update(lenBuf);

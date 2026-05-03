@@ -30,8 +30,10 @@
 import type { ASTNodePy, Comprehension, PyProgram, Walrus } from '../ast/kinds-py.js';
 import { walkPy } from '../ast/visit-py.js';
 import type { Declaration, Import, Inventory, Usage } from '../visitor/types.js';
+import { extractAllList } from './all-list.js';
 import { handleAnnAssign, handleAssign, handleClass, handleFunction } from './declarations.js';
 import { handleImport, handleImportFrom } from './imports.js';
+import { collectTypeCheckingScope, isInsideTypeCheckingThen } from './type-checking.js';
 import type { PyVisitorContext } from './types.js';
 import {
   collectParameterBindings,
@@ -63,6 +65,17 @@ export function buildPyInventory(
   };
   const onEnterHook = options?.onEnter;
 
+  // T306: extract `__all__` once before the walk. When non-null, it overrides
+  // the underscore-heuristic for the `exported` flag on declarations.
+  const allList = extractAllList(program);
+
+  // T307: detect symbols that resolve to `typing.TYPE_CHECKING` so we can mark
+  // imports inside `if TYPE_CHECKING:` blocks as `kind: 'type'`. The scope is a
+  // module-wide set populated by walking `from typing import TYPE_CHECKING`
+  // and `import typing` aliases up front.
+  const typeCheckingScope = collectTypeCheckingScope(program);
+  const typeCheckingThenStack: ASTNodePy[] = [];
+
   // Each scope-introducing node pushes a "scope frame" — the list of names
   // it added to `ctx.bindings` so we can reverse the addition on `onLeave`.
   const scopeFrames = new Map<ASTNodePy, readonly string[]>();
@@ -72,26 +85,32 @@ export function buildPyInventory(
       if (onEnterHook !== undefined) onEnterHook(node, parent);
       ctx.stack.push(node);
       enterScopeIfNeeded(node, ctx, scopeFrames);
+      // T307: when this is an `IfStmt` whose test is `TYPE_CHECKING` (or
+      // `typing.TYPE_CHECKING`), record the IfStmt so any imports inside its
+      // `then` branch (which the adapter folds into `body`) emit kind 'type'.
+      if (node.kind === 'IfStmt' && isInsideTypeCheckingThen(node, typeCheckingScope)) {
+        typeCheckingThenStack.push(node);
+      }
       switch (node.kind) {
         case 'FunctionDef':
         case 'AsyncFunctionDef':
-          handleFunction(node, parent, declarations);
+          handleFunction(node, parent, declarations, allList);
           // Function/method names never emit a Usage themselves.
           return;
         case 'ClassDef':
-          handleClass(node, parent, declarations);
+          handleClass(node, parent, declarations, allList);
           return;
         case 'Assign':
-          handleAssign(node, parent, declarations);
+          handleAssign(node, parent, declarations, allList);
           return;
         case 'AnnAssign':
-          handleAnnAssign(node, parent, declarations);
+          handleAnnAssign(node, parent, declarations, allList);
           return;
         case 'ImportStmt':
-          handleImport(node, imports);
+          handleImport(node, imports, typeCheckingThenStack.length > 0);
           return;
         case 'ImportFromStmt':
-          handleImportFrom(node, imports);
+          handleImportFrom(node, imports, typeCheckingThenStack.length > 0);
           return;
         case 'Decorator':
           handleDecorator(node, ctx);
@@ -112,6 +131,10 @@ export function buildPyInventory(
       if (frame !== undefined) {
         for (const name of frame) ctx.bindings.delete(name);
         scopeFrames.delete(node);
+      }
+      const top = typeCheckingThenStack[typeCheckingThenStack.length - 1];
+      if (top === node) {
+        typeCheckingThenStack.pop();
       }
     },
   });
