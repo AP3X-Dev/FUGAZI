@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "drizzle",
+  "enablers": [
+    "drizzle-orm"
+  ],
+  "entryPoints": [
+    "drizzle/**/*.{ts,js}"
+  ],
+  "configPatterns": [
+    "drizzle.config.{ts,js,mjs}"
+  ],
+  "alwaysUsed": [
+    "drizzle.config.{ts,js,mjs}"
+  ],
+  "toolingDependencies": [
+    "drizzle-orm",
+    "drizzle-kit"
+  ]
+}

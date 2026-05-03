@@ -1,0 +1,98 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "tanstack-router",
+  "enablers": [
+    "@tanstack/react-router",
+    "@tanstack/solid-router",
+    "@tanstack/start",
+    "@tanstack/react-start",
+    "@tanstack/solid-start",
+    "@tanstack/virtual-file-routes"
+  ],
+  "entryPoints": [
+    "src/routes/**/*.{ts,tsx,js,jsx}",
+    "app/routes/**/*.{ts,tsx,js,jsx}",
+    "src/server.{ts,tsx,js,jsx}",
+    "src/client.{ts,tsx,js,jsx}",
+    "src/router.{ts,tsx,js,jsx}",
+    "src/routeTree.gen.ts",
+    "src/routeTree.gen.js"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "tsr.config.json",
+    "vite.config.{ts,js,mts,mjs}",
+    "rsbuild.config.{ts,js,mts,mjs}",
+    "rspack.config.{ts,js,mts,mjs}",
+    "webpack.config.{ts,js,mts,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "tsr.config.json",
+    "app.config.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "@tanstack/react-router",
+    "@tanstack/react-router-devtools",
+    "@tanstack/solid-router",
+    "@tanstack/solid-router-devtools",
+    "@tanstack/start",
+    "@tanstack/react-start",
+    "@tanstack/solid-start",
+    "@tanstack/router-cli",
+    "@tanstack/router-plugin",
+    "@tanstack/router-vite-plugin",
+    "@tanstack/virtual-file-routes"
+  ],
+  "usedExports": [
+    {
+      "pattern": "src/routes/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "Route",
+        "loader",
+        "action",
+        "component",
+        "errorComponent",
+        "pendingComponent",
+        "notFoundComponent",
+        "beforeLoad",
+        "ServerRoute"
+      ]
+    },
+    {
+      "pattern": "app/routes/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "Route",
+        "loader",
+        "action",
+        "component",
+        "errorComponent",
+        "pendingComponent",
+        "notFoundComponent",
+        "beforeLoad",
+        "ServerRoute"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/*.lazy.{ts,tsx,js,jsx}",
+      "exports": [
+        "Route",
+        "component",
+        "errorComponent",
+        "pendingComponent",
+        "notFoundComponent"
+      ]
+    },
+    {
+      "pattern": "app/routes/**/*.lazy.{ts,tsx,js,jsx}",
+      "exports": [
+        "Route",
+        "component",
+        "errorComponent",
+        "pendingComponent",
+        "notFoundComponent"
+      ]
+    }
+  ]
+}

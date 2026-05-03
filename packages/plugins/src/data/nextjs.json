@@ -1,0 +1,537 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "nextjs",
+  "enablers": [
+    "next"
+  ],
+  "entryPoints": [
+    "app/**/page.{ts,tsx,js,jsx}",
+    "app/**/layout.{ts,tsx,js,jsx}",
+    "app/**/loading.{ts,tsx,js,jsx}",
+    "app/**/error.{ts,tsx,js,jsx}",
+    "app/**/not-found.{ts,tsx,js,jsx}",
+    "app/**/template.{ts,tsx,js,jsx}",
+    "app/**/default.{ts,tsx,js,jsx}",
+    "app/**/route.{ts,tsx,js,jsx}",
+    "app/**/global-error.{ts,tsx,js,jsx}",
+    "app/**/forbidden.{ts,tsx,js,jsx}",
+    "app/**/unauthorized.{ts,tsx,js,jsx}",
+    "app/global-not-found.{ts,tsx,js,jsx}",
+    "app/**/opengraph-image.{ts,tsx,js,jsx}",
+    "app/**/twitter-image.{ts,tsx,js,jsx}",
+    "app/**/icon.{ts,tsx,js,jsx}",
+    "app/**/apple-icon.{ts,tsx,js,jsx}",
+    "app/**/manifest.{ts,tsx,js,jsx}",
+    "app/**/sitemap.{ts,tsx,js,jsx}",
+    "app/**/robots.{ts,tsx,js,jsx}",
+    "pages/**/*.{ts,tsx,js,jsx}",
+    "src/app/**/page.{ts,tsx,js,jsx}",
+    "src/app/**/layout.{ts,tsx,js,jsx}",
+    "src/app/**/loading.{ts,tsx,js,jsx}",
+    "src/app/**/error.{ts,tsx,js,jsx}",
+    "src/app/**/not-found.{ts,tsx,js,jsx}",
+    "src/app/**/template.{ts,tsx,js,jsx}",
+    "src/app/**/default.{ts,tsx,js,jsx}",
+    "src/app/**/route.{ts,tsx,js,jsx}",
+    "src/app/**/global-error.{ts,tsx,js,jsx}",
+    "src/app/**/forbidden.{ts,tsx,js,jsx}",
+    "src/app/**/unauthorized.{ts,tsx,js,jsx}",
+    "src/app/global-not-found.{ts,tsx,js,jsx}",
+    "src/app/**/opengraph-image.{ts,tsx,js,jsx}",
+    "src/app/**/twitter-image.{ts,tsx,js,jsx}",
+    "src/app/**/icon.{ts,tsx,js,jsx}",
+    "src/app/**/apple-icon.{ts,tsx,js,jsx}",
+    "src/app/**/manifest.{ts,tsx,js,jsx}",
+    "src/app/**/sitemap.{ts,tsx,js,jsx}",
+    "src/app/**/robots.{ts,tsx,js,jsx}",
+    "src/pages/**/*.{ts,tsx,js,jsx}",
+    "middleware.{ts,js}",
+    "src/middleware.{ts,js}",
+    "proxy.{ts,js}",
+    "src/proxy.{ts,js}",
+    "instrumentation.{ts,js}",
+    "instrumentation-client.{ts,js}",
+    "src/instrumentation.{ts,js}",
+    "src/instrumentation-client.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "next.config.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "next.config.{ts,js,mjs,cjs}",
+    "next-env.d.ts",
+    "favicon.ico",
+    "mdx-components.{ts,tsx,js,jsx}",
+    "src/mdx-components.{ts,tsx,js,jsx}",
+    "src/i18n/request.{ts,js}",
+    "src/i18n/routing.{ts,js}",
+    "i18n/request.{ts,js}",
+    "i18n/routing.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "next",
+    "@next/font",
+    "@next/mdx",
+    "@next/bundle-analyzer",
+    "@next/env",
+    "server-only",
+    "client-only"
+  ],
+  "usedExports": [
+    {
+      "pattern": "app/**/page.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "metadata",
+        "generateMetadata",
+        "viewport",
+        "generateViewport",
+        "generateStaticParams",
+        "dynamic",
+        "dynamicParams",
+        "revalidate",
+        "fetchCache",
+        "runtime",
+        "preferredRegion",
+        "maxDuration"
+      ]
+    },
+    {
+      "pattern": "app/**/layout.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "metadata",
+        "generateMetadata",
+        "viewport",
+        "generateViewport",
+        "generateStaticParams",
+        "dynamic",
+        "dynamicParams",
+        "revalidate",
+        "fetchCache",
+        "runtime",
+        "preferredRegion",
+        "maxDuration"
+      ]
+    },
+    {
+      "pattern": "app/**/loading.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/error.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/not-found.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/template.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/default.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/route.{ts,tsx,js,jsx}",
+      "exports": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS",
+        "dynamic",
+        "dynamicParams",
+        "revalidate",
+        "fetchCache",
+        "runtime",
+        "preferredRegion",
+        "maxDuration"
+      ]
+    },
+    {
+      "pattern": "app/**/global-error.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/forbidden.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/unauthorized.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/global-not-found.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "metadata",
+        "generateMetadata"
+      ]
+    },
+    {
+      "pattern": "pages/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "getStaticProps",
+        "getStaticPaths",
+        "getServerSideProps",
+        "config"
+      ]
+    },
+    {
+      "pattern": "pages/_app.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "reportWebVitals"
+      ]
+    },
+    {
+      "pattern": "pages/api/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "config"
+      ]
+    },
+    {
+      "pattern": "src/app/**/page.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "metadata",
+        "generateMetadata",
+        "viewport",
+        "generateViewport",
+        "generateStaticParams",
+        "dynamic",
+        "dynamicParams",
+        "revalidate",
+        "fetchCache",
+        "runtime",
+        "preferredRegion",
+        "maxDuration"
+      ]
+    },
+    {
+      "pattern": "src/app/**/layout.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "metadata",
+        "generateMetadata",
+        "viewport",
+        "generateViewport",
+        "generateStaticParams",
+        "dynamic",
+        "dynamicParams",
+        "revalidate",
+        "fetchCache",
+        "runtime",
+        "preferredRegion",
+        "maxDuration"
+      ]
+    },
+    {
+      "pattern": "src/app/**/loading.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/error.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/not-found.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/template.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/default.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/route.{ts,tsx,js,jsx}",
+      "exports": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS",
+        "dynamic",
+        "dynamicParams",
+        "revalidate",
+        "fetchCache",
+        "runtime",
+        "preferredRegion",
+        "maxDuration"
+      ]
+    },
+    {
+      "pattern": "src/app/**/global-error.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/forbidden.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/unauthorized.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/global-not-found.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "metadata",
+        "generateMetadata"
+      ]
+    },
+    {
+      "pattern": "src/pages/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "getStaticProps",
+        "getStaticPaths",
+        "getServerSideProps",
+        "config"
+      ]
+    },
+    {
+      "pattern": "src/pages/_app.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "reportWebVitals"
+      ]
+    },
+    {
+      "pattern": "src/pages/api/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "config"
+      ]
+    },
+    {
+      "pattern": "middleware.{ts,js}",
+      "exports": [
+        "default",
+        "middleware",
+        "config"
+      ]
+    },
+    {
+      "pattern": "src/middleware.{ts,js}",
+      "exports": [
+        "default",
+        "middleware",
+        "config"
+      ]
+    },
+    {
+      "pattern": "proxy.{ts,js}",
+      "exports": [
+        "default",
+        "proxy",
+        "config"
+      ]
+    },
+    {
+      "pattern": "src/proxy.{ts,js}",
+      "exports": [
+        "default",
+        "proxy",
+        "config"
+      ]
+    },
+    {
+      "pattern": "instrumentation.{ts,js}",
+      "exports": [
+        "register",
+        "onRequestError"
+      ]
+    },
+    {
+      "pattern": "src/instrumentation.{ts,js}",
+      "exports": [
+        "register",
+        "onRequestError"
+      ]
+    },
+    {
+      "pattern": "instrumentation-client.{ts,js}",
+      "exports": [
+        "onRouterTransitionStart"
+      ]
+    },
+    {
+      "pattern": "src/instrumentation-client.{ts,js}",
+      "exports": [
+        "onRouterTransitionStart"
+      ]
+    },
+    {
+      "pattern": "mdx-components.{ts,tsx,js,jsx}",
+      "exports": [
+        "useMDXComponents"
+      ]
+    },
+    {
+      "pattern": "src/mdx-components.{ts,tsx,js,jsx}",
+      "exports": [
+        "useMDXComponents"
+      ]
+    },
+    {
+      "pattern": "app/**/icon.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata"
+      ]
+    },
+    {
+      "pattern": "app/**/apple-icon.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata"
+      ]
+    },
+    {
+      "pattern": "app/**/opengraph-image.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata",
+        "alt"
+      ]
+    },
+    {
+      "pattern": "app/**/twitter-image.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata",
+        "alt"
+      ]
+    },
+    {
+      "pattern": "app/**/manifest.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "app/**/sitemap.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "generateSitemaps"
+      ]
+    },
+    {
+      "pattern": "app/**/robots.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/icon.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata"
+      ]
+    },
+    {
+      "pattern": "src/app/**/apple-icon.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata"
+      ]
+    },
+    {
+      "pattern": "src/app/**/opengraph-image.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata",
+        "alt"
+      ]
+    },
+    {
+      "pattern": "src/app/**/twitter-image.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "size",
+        "contentType",
+        "generateImageMetadata",
+        "alt"
+      ]
+    },
+    {
+      "pattern": "src/app/**/manifest.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/app/**/sitemap.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "generateSitemaps"
+      ]
+    },
+    {
+      "pattern": "src/app/**/robots.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    }
+  ]
+}

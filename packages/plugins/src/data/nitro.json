@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "nitro",
+  "enablers": [
+    "nitropack"
+  ],
+  "entryPoints": [
+    "server/**/*.{ts,js}",
+    "routes/**/*.{ts,js}",
+    "api/**/*.{ts,js}",
+    "middleware/**/*.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "nitro.config.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "nitropack"
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "nx",
+  "enablers": [
+    "nx"
+  ],
+  "configPatterns": [
+    "**/project.json"
+  ],
+  "alwaysUsed": [
+    "nx.json",
+    "**/project.json"
+  ],
+  "toolingDependencies": [
+    "nx",
+    "@nx/workspace",
+    "@nx/js",
+    "@nx/react",
+    "@nx/next",
+    "@nx/node",
+    "@nx/web",
+    "@nx/vite",
+    "@nx/jest",
+    "@nx/eslint",
+    "@nx/angular",
+    "@nx/storybook",
+    "@nx/webpack",
+    "@nx/cypress",
+    "@nx/playwright",
+    "@nx/rollup",
+    "@nx/esbuild",
+    "@nx/rspack",
+    "@nx/express",
+    "@nx/nest"
+  ]
+}

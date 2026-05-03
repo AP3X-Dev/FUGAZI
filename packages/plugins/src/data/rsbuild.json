@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "rsbuild",
+  "enablers": [
+    "@rsbuild/core"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "rsbuild.config.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "rsbuild.config.{ts,js,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "@rsbuild/core"
+  ]
+}

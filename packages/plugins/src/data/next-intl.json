@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "next-intl",
+  "enablers": [
+    "next-intl"
+  ],
+  "entryPoints": [
+    "src/i18n.{ts,js}",
+    "src/i18n/request.{ts,js}",
+    "i18n.{ts,js}",
+    "i18n/request.{ts,js}",
+    "messages/**/*.json"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "messages/**/*.json"
+  ],
+  "toolingDependencies": [
+    "next-intl"
+  ]
+}

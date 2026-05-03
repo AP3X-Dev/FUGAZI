@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "openapi-ts",
+  "enablers": [
+    "openapi-typescript"
+  ],
+  "alwaysUsed": [
+    "openapi-ts.config.{ts,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "openapi-typescript",
+    "openapi-typescript-codegen"
+  ]
+}

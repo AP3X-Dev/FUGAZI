@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "parcel",
+  "enablers": [
+    "parcel",
+    "@parcel/"
+  ],
+  "entryPoints": [
+    "index.html"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    ".parcelrc"
+  ],
+  "toolingDependencies": [
+    "parcel"
+  ]
+}

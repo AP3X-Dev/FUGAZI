@@ -1,0 +1,53 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "angular",
+  "enablers": [
+    "@angular/core"
+  ],
+  "entryPoints": [
+    "src/main.ts",
+    "src/app/**/*.component.ts",
+    "src/app/**/*.module.ts",
+    "src/app/**/*.service.ts",
+    "src/app/**/*.guard.ts",
+    "src/app/**/*.pipe.ts",
+    "src/app/**/*.directive.ts",
+    "src/app/**/*.resolver.ts",
+    "src/app/**/*.interceptor.ts",
+    "**/src/main.ts",
+    "**/src/app/**/*.component.ts",
+    "**/src/app/**/*.module.ts",
+    "**/src/app/**/*.service.ts",
+    "**/src/app/**/*.guard.ts",
+    "**/src/app/**/*.pipe.ts",
+    "**/src/app/**/*.directive.ts",
+    "**/src/app/**/*.resolver.ts",
+    "**/src/app/**/*.interceptor.ts"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "angular.json",
+    ".angular.json"
+  ],
+  "alwaysUsed": [
+    "angular.json",
+    ".angular.json",
+    "src/polyfills.ts",
+    "src/environments/**/*.ts",
+    "src/app/app.config.ts",
+    "src/app/app.config.server.ts"
+  ],
+  "toolingDependencies": [
+    "@angular/cli",
+    "@angular-devkit/build-angular",
+    "@angular/compiler-cli",
+    "@angular/compiler",
+    "@angular/build",
+    "zone.js",
+    "tslib",
+    "rxjs",
+    "@angular/common",
+    "@angular/platform-browser",
+    "@angular/platform-browser-dynamic"
+  ]
+}

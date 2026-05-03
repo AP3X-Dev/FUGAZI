@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "tsdown",
+  "enablers": [
+    "tsdown"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "tsdown.config.{ts,js,cjs,mjs}"
+  ],
+  "alwaysUsed": [
+    "tsdown.config.{ts,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "tsdown"
+  ]
+}

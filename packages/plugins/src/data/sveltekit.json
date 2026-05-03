@@ -1,0 +1,146 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "sveltekit",
+  "enablers": [
+    "@sveltejs/kit"
+  ],
+  "entryPoints": [
+    "src/routes/**/+page.svelte",
+    "src/routes/**/+page.{ts,js}",
+    "src/routes/**/+page.server.{ts,js}",
+    "src/routes/**/+layout.svelte",
+    "src/routes/**/+layout.{ts,js}",
+    "src/routes/**/+layout.server.{ts,js}",
+    "src/routes/**/+server.{ts,js}",
+    "src/routes/**/+error.svelte",
+    "src/hooks.server.{ts,js}",
+    "src/hooks.client.{ts,js}",
+    "src/hooks.{ts,js}",
+    "src/service-worker.{ts,js}",
+    "src/params/**/*.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "svelte.config.{js,cjs,mjs,ts}"
+  ],
+  "alwaysUsed": [
+    "svelte.config.{js,cjs,mjs,ts}",
+    "src/app.html",
+    "src/app.d.ts",
+    "src/app.{css,scss,less}"
+  ],
+  "toolingDependencies": [
+    "svelte",
+    "@sveltejs/kit",
+    "@sveltejs/adapter-auto",
+    "@sveltejs/adapter-node",
+    "@sveltejs/adapter-static",
+    "@sveltejs/adapter-vercel",
+    "@sveltejs/adapter-netlify",
+    "@sveltejs/adapter-cloudflare",
+    "@sveltejs/vite-plugin-svelte",
+    "svelte-check",
+    "svelte-preprocess"
+  ],
+  "usedExports": [
+    {
+      "pattern": "src/routes/**/+page.svelte",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/+page.{ts,js}",
+      "exports": [
+        "load",
+        "prerender",
+        "csr",
+        "ssr",
+        "trailingSlash",
+        "entries"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/+page.server.{ts,js}",
+      "exports": [
+        "load",
+        "prerender",
+        "csr",
+        "ssr",
+        "trailingSlash",
+        "entries",
+        "actions"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/+layout.svelte",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/+layout.{ts,js}",
+      "exports": [
+        "load",
+        "prerender",
+        "csr",
+        "ssr",
+        "trailingSlash"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/+layout.server.{ts,js}",
+      "exports": [
+        "load",
+        "prerender",
+        "csr",
+        "ssr",
+        "trailingSlash"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/+server.{ts,js}",
+      "exports": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS",
+        "fallback"
+      ]
+    },
+    {
+      "pattern": "src/hooks.server.{ts,js}",
+      "exports": [
+        "handle",
+        "handleError",
+        "handleFetch",
+        "init"
+      ]
+    },
+    {
+      "pattern": "src/hooks.client.{ts,js}",
+      "exports": [
+        "handleError",
+        "init"
+      ]
+    },
+    {
+      "pattern": "src/hooks.{ts,js}",
+      "exports": [
+        "reroute",
+        "transport",
+        "handleError",
+        "init"
+      ]
+    },
+    {
+      "pattern": "src/params/**/*.{ts,js}",
+      "exports": [
+        "match"
+      ]
+    }
+  ]
+}

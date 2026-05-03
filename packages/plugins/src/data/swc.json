@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "swc",
+  "enablers": [
+    "@swc/core",
+    "@swc/cli"
+  ],
+  "alwaysUsed": [
+    ".swcrc",
+    "swc.config.{js,cjs,mjs,ts}"
+  ],
+  "toolingDependencies": [
+    "@swc/core",
+    "@swc/cli",
+    "@swc/jest",
+    "@swc/register",
+    "swc-loader"
+  ]
+}

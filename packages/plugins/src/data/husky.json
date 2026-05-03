@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "husky",
+  "enablers": [
+    "husky"
+  ],
+  "alwaysUsed": [
+    ".husky/**/*"
+  ],
+  "toolingDependencies": [
+    "husky"
+  ]
+}

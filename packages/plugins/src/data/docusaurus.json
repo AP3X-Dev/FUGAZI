@@ -1,0 +1,60 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "docusaurus",
+  "enablers": [
+    "@docusaurus/core"
+  ],
+  "entryPoints": [
+    "docs/**/*.{md,mdx}",
+    "blog/**/*.{md,mdx}",
+    "src/pages/**/*.{ts,tsx,js,jsx,md,mdx}",
+    "sidebars.{js,ts}",
+    "src/theme/*.{ts,tsx,js,jsx}",
+    "src/theme/**/index.{ts,tsx,js,jsx}",
+    "versioned_docs/**/*.{md,mdx}",
+    "i18n/*/docusaurus-plugin-content-docs/**/*.{md,mdx}",
+    "i18n/*/docusaurus-plugin-content-blog/**/*.{md,mdx}",
+    "i18n/*/docusaurus-plugin-content-pages/**/*.{md,mdx}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "docusaurus.config.{js,ts,mjs}"
+  ],
+  "alwaysUsed": [
+    "docusaurus.config.{js,ts,mjs}"
+  ],
+  "toolingDependencies": [
+    "@docusaurus/core",
+    "@docusaurus/preset-classic",
+    "@docusaurus/plugin-content-docs",
+    "@docusaurus/plugin-content-blog",
+    "@docusaurus/plugin-content-pages",
+    "@docusaurus/theme-classic"
+  ],
+  "usedExports": [
+    {
+      "pattern": "src/pages/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "sidebars.{js,ts}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/theme/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "src/theme/**/index.{ts,tsx,js,jsx}",
+      "exports": [
+        "default"
+      ]
+    }
+  ]
+}

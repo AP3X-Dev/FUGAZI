@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "oxlint",
+  "enablers": [
+    "oxlint"
+  ],
+  "alwaysUsed": [
+    ".oxlintrc.json"
+  ],
+  "toolingDependencies": [
+    "oxlint"
+  ]
+}

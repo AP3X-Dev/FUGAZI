@@ -6,6 +6,7 @@
     { "path": "./packages/extract" },
     { "path": "./packages/graph" },
     { "path": "./packages/v8-coverage" },
+    { "path": "./packages/plugins" },
     { "path": "./packages/core" },
     { "path": "./packages/runtime" },
     { "path": "./packages/node-api" },

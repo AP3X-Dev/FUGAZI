@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "svgo",
+  "enablers": [
+    "svgo"
+  ],
+  "alwaysUsed": [
+    "svgo.config.{js,cjs,mjs,ts}"
+  ],
+  "toolingDependencies": [
+    "svgo"
+  ]
+}

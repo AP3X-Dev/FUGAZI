@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "markdownlint",
+  "enablers": [
+    "markdownlint",
+    "markdownlint-cli",
+    "markdownlint-cli2"
+  ],
+  "alwaysUsed": [
+    ".markdownlint.{json,jsonc,yml,yaml}",
+    ".markdownlint-cli2.{jsonc,yaml,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "markdownlint",
+    "markdownlint-cli",
+    "markdownlint-cli2"
+  ]
+}

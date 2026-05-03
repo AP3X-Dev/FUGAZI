@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "lefthook",
+  "enablers": [
+    "lefthook",
+    "@evilmartians/lefthook"
+  ],
+  "alwaysUsed": [
+    "lefthook.yml",
+    "lefthook.yaml",
+    ".lefthook.yml",
+    ".lefthook.yaml",
+    "lefthook.toml",
+    ".lefthook.toml",
+    ".lefthook/**/*",
+    ".lefthook-local/**/*"
+  ],
+  "toolingDependencies": [
+    "lefthook",
+    "@evilmartians/lefthook"
+  ]
+}

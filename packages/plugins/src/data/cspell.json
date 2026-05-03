@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "cspell",
+  "enablers": [
+    "cspell"
+  ],
+  "alwaysUsed": [
+    ".cspell.{json,jsonc,yml,yaml}",
+    "cspell.{json,jsonc}",
+    "cspell.config.{js,cjs,mjs,yaml,yml}"
+  ],
+  "toolingDependencies": [
+    "cspell"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "eslint",
+  "enablers": [
+    "eslint",
+    "@eslint/js"
+  ],
+  "configPatterns": [
+    "eslint.config.{js,mjs,cjs,ts,mts,cts}",
+    ".eslintrc.{js,cjs,mjs,json,yaml,yml}"
+  ],
+  "alwaysUsed": [
+    "eslint.config.{js,mjs,cjs,ts,mts,cts}",
+    ".eslintrc.{js,cjs,mjs,json,yaml,yml}",
+    ".prettierrc.{js,cjs,mjs,json,yaml,yml}",
+    "prettier.config.{js,mjs,cjs,ts}",
+    ".lintstagedrc.{js,cjs,mjs,json}",
+    "lint-staged.config.{js,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "eslint"
+  ],
+  "usedExports": [
+    {
+      "pattern": "eslint.config.{js,mjs,cjs,ts,mts,cts}",
+      "exports": [
+        "default"
+      ]
+    }
+  ]
+}

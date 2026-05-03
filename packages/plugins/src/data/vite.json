@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "vite",
+  "enablers": [
+    "vite",
+    "rolldown-vite"
+  ],
+  "entryPoints": [
+    "src/main.{ts,tsx,js,jsx}",
+    "src/index.{ts,tsx,js,jsx}",
+    "index.html"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "vite.config.{ts,js,mts,mjs}"
+  ],
+  "alwaysUsed": [
+    "vite.config.{ts,js,mts,mjs}"
+  ],
+  "toolingDependencies": [
+    "vite",
+    "@vitejs/plugin-react",
+    "@vitejs/plugin-vue"
+  ]
+}

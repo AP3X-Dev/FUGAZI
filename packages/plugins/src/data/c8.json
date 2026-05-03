@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "c8",
+  "enablers": [
+    "c8"
+  ],
+  "alwaysUsed": [
+    ".c8rc",
+    ".c8rc.json"
+  ],
+  "toolingDependencies": [
+    "c8"
+  ]
+}

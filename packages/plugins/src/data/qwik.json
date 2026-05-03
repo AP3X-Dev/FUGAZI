@@ -1,0 +1,65 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "qwik",
+  "enablers": [
+    "@builder.io/qwik",
+    "@builder.io/qwik-city",
+    "@qwik.dev/core",
+    "@qwik.dev/router"
+  ],
+  "entryPoints": [
+    "src/routes/**/index.{ts,tsx,js,jsx,mdx}",
+    "src/routes/**/layout.{ts,tsx,js,jsx}",
+    "src/routes/**/layout!.{ts,tsx,js,jsx}",
+    "src/routes/**/plugin.{ts,js}",
+    "src/routes/**/plugin@*.{ts,js}",
+    "src/routes/**/service-worker.{ts,js}",
+    "src/root.{ts,tsx,js,jsx}",
+    "src/entry.*.{ts,tsx,js,jsx}",
+    "src/global.{css,scss,less}",
+    "adapters/**/vite.config.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "src/entry.*.{ts,tsx,js,jsx}",
+    "src/root.{ts,tsx,js,jsx}"
+  ],
+  "toolingDependencies": [
+    "@builder.io/qwik",
+    "@builder.io/qwik-city",
+    "@qwik.dev/core",
+    "@qwik.dev/router",
+    "@builder.io/qwik-react",
+    "@qwik.dev/react"
+  ],
+  "usedExports": [
+    {
+      "pattern": "src/routes/**/index.{ts,tsx,js,jsx,mdx}",
+      "exports": [
+        "default",
+        "head",
+        "onGet",
+        "onPost",
+        "onPut",
+        "onDelete",
+        "onPatch",
+        "onHead",
+        "onRequest"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/layout.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "head"
+      ]
+    },
+    {
+      "pattern": "src/routes/**/layout!.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "head"
+      ]
+    }
+  ]
+}

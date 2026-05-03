@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "typedoc",
+  "enablers": [
+    "typedoc"
+  ],
+  "alwaysUsed": [
+    "typedoc.{json,jsonc}",
+    "typedoc.config.{js,cjs,mjs,ts}"
+  ],
+  "toolingDependencies": [
+    "typedoc"
+  ]
+}

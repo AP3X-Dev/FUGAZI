@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "electron",
+  "enablers": [
+    "electron",
+    "electron-builder",
+    "@electron-forge/cli",
+    "electron-vite"
+  ],
+  "entryPoints": [
+    "src/main/**/*.{ts,js}",
+    "src/preload/**/*.{ts,js}",
+    "electron/main.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "electron-builder.{yml,yaml,json,json5,toml}",
+    "forge.config.{ts,js,cjs}",
+    "electron.vite.config.{ts,js,mjs}"
+  ],
+  "toolingDependencies": [
+    "electron",
+    "electron-builder",
+    "electron-vite",
+    "@electron/rebuild",
+    "@electron-forge/cli"
+  ]
+}

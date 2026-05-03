@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "commitizen",
+  "enablers": [
+    "commitizen"
+  ],
+  "alwaysUsed": [
+    ".czrc",
+    ".cz.json"
+  ],
+  "toolingDependencies": [
+    "commitizen",
+    "cz-conventional-changelog"
+  ]
+}

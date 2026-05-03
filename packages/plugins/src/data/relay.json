@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "relay",
+  "enablers": [
+    "relay-runtime",
+    "react-relay",
+    "relay-compiler"
+  ],
+  "alwaysUsed": [
+    "relay.config.{js,json}"
+  ],
+  "toolingDependencies": [
+    "relay-runtime",
+    "relay-compiler",
+    "babel-plugin-relay",
+    "react-relay",
+    "relay-test-utils"
+  ]
+}

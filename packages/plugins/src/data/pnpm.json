@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "pnpm",
+  "alwaysUsed": [
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml",
+    ".pnpmfile.cjs",
+    ".pnpmfile.mjs",
+    ".npmrc"
+  ],
+  "toolingDependencies": [
+    "pnpm"
+  ]
+}

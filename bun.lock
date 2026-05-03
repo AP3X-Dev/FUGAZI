@@ -137,6 +137,15 @@
         "@fugazi/v8-coverage": "workspace:*",
       },
     },
+    "packages/plugins": {
+      "name": "@fugazi/plugins",
+      "version": "0.0.0",
+      "dependencies": {
+        "@fugazi/config": "workspace:*",
+        "@fugazi/types": "workspace:*",
+        "zod": "^4.4.2",
+      },
+    },
     "packages/runtime": {
       "name": "@fugazi/runtime",
       "version": "0.0.0",
@@ -252,6 +261,8 @@
     "@fugazi/mcp": ["@fugazi/mcp@workspace:packages/mcp"],
 
     "@fugazi/node-api": ["@fugazi/node-api@workspace:packages/node-api"],
+
+    "@fugazi/plugins": ["@fugazi/plugins@workspace:packages/plugins"],
 
     "@fugazi/runtime": ["@fugazi/runtime@workspace:packages/runtime"],
 

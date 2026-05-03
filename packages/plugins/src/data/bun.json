@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "bun",
+  "enablers": [
+    "bun-types"
+  ],
+  "alwaysUsed": [
+    "bunfig.toml"
+  ],
+  "toolingDependencies": [
+    "bun-types"
+  ]
+}

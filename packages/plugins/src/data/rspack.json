@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "rspack",
+  "enablers": [
+    "@rspack/core",
+    "@rspack/cli"
+  ],
+  "entryPoints": [
+    "src/index.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "rspack.config.{ts,js,mjs,cjs}",
+    "rspack.*.config.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "rspack.config.{ts,js,mjs,cjs}",
+    "rspack.*.config.{ts,js,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "@rspack/core",
+    "@rspack/cli",
+    "@rspack/dev-server",
+    "@rspack/plugin-react-refresh",
+    "@rspack/plugin-minify",
+    "@rspack/plugin-html"
+  ]
+}

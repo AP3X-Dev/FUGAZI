@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "wrangler",
+  "enablers": [
+    "wrangler"
+  ],
+  "entryPoints": [
+    "src/index.{ts,js}",
+    "src/worker.{ts,js}",
+    "functions/**/*.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "wrangler.toml",
+    "wrangler.json",
+    "wrangler.jsonc"
+  ],
+  "toolingDependencies": [
+    "wrangler",
+    "@cloudflare/workers-types"
+  ]
+}

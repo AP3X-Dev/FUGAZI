@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "vitepress",
+  "enablers": [
+    "vitepress"
+  ],
+  "entryPoints": [
+    ".vitepress/theme/index.{ts,js,mts,mjs}",
+    ".vitepress/theme/**/*.{vue,ts,js,mts,mjs}",
+    "docs/.vitepress/theme/index.{ts,js,mts,mjs}",
+    "docs/.vitepress/theme/**/*.{vue,ts,js,mts,mjs}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    ".vitepress/config.{ts,js,mts,mjs}",
+    "docs/.vitepress/config.{ts,js,mts,mjs}"
+  ],
+  "toolingDependencies": [
+    "vitepress"
+  ],
+  "usedExports": [
+    {
+      "pattern": ".vitepress/theme/index.{ts,js,mts,mjs}",
+      "exports": [
+        "default"
+      ]
+    },
+    {
+      "pattern": "docs/.vitepress/theme/index.{ts,js,mts,mjs}",
+      "exports": [
+        "default"
+      ]
+    }
+  ]
+}

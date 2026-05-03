@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "svgr",
+  "enablers": [
+    "@svgr/core",
+    "@svgr/cli",
+    "@svgr/webpack",
+    "@svgr/rollup",
+    "@svgr/vite"
+  ],
+  "alwaysUsed": [
+    ".svgrrc",
+    ".svgrrc.{js,json}",
+    "svgr.config.{js,cjs,mjs,ts}"
+  ],
+  "toolingDependencies": [
+    "@svgr/core",
+    "@svgr/cli",
+    "@svgr/webpack",
+    "@svgr/rollup",
+    "@svgr/vite"
+  ]
+}

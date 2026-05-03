@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "pm2",
+  "enablers": [
+    "pm2"
+  ],
+  "alwaysUsed": [
+    "ecosystem.config.{js,cjs}",
+    "pm2.config.{js,cjs}"
+  ],
+  "toolingDependencies": [
+    "pm2"
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "typeorm",
+  "enablers": [
+    "typeorm"
+  ],
+  "entryPoints": [
+    "src/entity/**/*.{ts,js}",
+    "src/entities/**/*.{ts,js}",
+    "src/migration/**/*.{ts,js}",
+    "src/migrations/**/*.{ts,js}",
+    "src/subscriber/**/*.{ts,js}",
+    "src/subscribers/**/*.{ts,js}",
+    "entity/**/*.{ts,js}",
+    "entities/**/*.{ts,js}",
+    "migration/**/*.{ts,js}",
+    "migrations/**/*.{ts,js}",
+    "subscriber/**/*.{ts,js}",
+    "subscribers/**/*.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "ormconfig.{json,js,ts,yml,yaml}",
+    "data-source.{ts,js}",
+    "src/data-source.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "typeorm"
+  ]
+}

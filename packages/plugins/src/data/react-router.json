@@ -1,0 +1,76 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "react-router",
+  "enablers": [
+    "@react-router/dev"
+  ],
+  "entryPoints": [
+    "app/routes/**/*.{ts,tsx,js,jsx}",
+    "app/root.{ts,tsx,js,jsx}",
+    "app/entry.client.{ts,tsx,js,jsx}",
+    "app/entry.server.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "react-router.config.{ts,js,mjs,cjs}",
+    "app/routes.{ts,js,mts,mjs}",
+    "src/routes.{ts,js,mts,mjs}"
+  ],
+  "alwaysUsed": [
+    "react-router.config.{ts,js,mjs,cjs}",
+    "app/routes.{ts,js,mts,mjs}",
+    "src/routes.{ts,js,mts,mjs}"
+  ],
+  "toolingDependencies": [
+    "@react-router/dev",
+    "@react-router/serve",
+    "@react-router/node"
+  ],
+  "usedExports": [
+    {
+      "pattern": "app/routes/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "loader",
+        "clientLoader",
+        "action",
+        "clientAction",
+        "meta",
+        "links",
+        "headers",
+        "handle",
+        "ErrorBoundary",
+        "HydrateFallback",
+        "shouldRevalidate",
+        "middleware",
+        "clientMiddleware"
+      ]
+    },
+    {
+      "pattern": "app/root.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "loader",
+        "clientLoader",
+        "action",
+        "clientAction",
+        "meta",
+        "links",
+        "headers",
+        "handle",
+        "ErrorBoundary",
+        "HydrateFallback",
+        "shouldRevalidate",
+        "middleware",
+        "clientMiddleware",
+        "Layout"
+      ]
+    },
+    {
+      "pattern": "app/routes.{ts,js,mts,mjs}",
+      "exports": [
+        "default"
+      ]
+    }
+  ]
+}

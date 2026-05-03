@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "react-native",
+  "enablers": [
+    "react-native"
+  ],
+  "entryPoints": [
+    "index.{ts,tsx,js,jsx}",
+    "App.{ts,tsx,js,jsx}",
+    "src/App.{ts,tsx,js,jsx}",
+    "app.config.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "metro.config.{ts,js}",
+    "react-native.config.{ts,js}",
+    "babel.config.{ts,js}",
+    "app.json"
+  ],
+  "toolingDependencies": [
+    "react-native",
+    "metro",
+    "metro-config",
+    "@react-native-community/cli",
+    "@react-native/metro-config"
+  ]
+}

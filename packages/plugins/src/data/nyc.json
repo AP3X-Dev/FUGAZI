@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "nyc",
+  "enablers": [
+    "nyc"
+  ],
+  "alwaysUsed": [
+    ".nycrc",
+    ".nycrc.{json,yml,yaml}"
+  ],
+  "toolingDependencies": [
+    "nyc"
+  ]
+}

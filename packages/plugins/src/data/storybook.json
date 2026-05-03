@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "storybook",
+  "enablers": [
+    "storybook",
+    "@storybook/"
+  ],
+  "entryPoints": [
+    "**/*.stories.{ts,tsx,js,jsx,mdx}",
+    ".storybook/**/*.{ts,tsx,js,jsx}"
+  ],
+  "configPatterns": [
+    ".storybook/main.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    ".storybook/main.{ts,js,mjs,cjs}",
+    ".storybook/preview.{ts,tsx,js,jsx}",
+    ".storybook/manager.{ts,tsx,js,jsx}"
+  ],
+  "toolingDependencies": [
+    "storybook",
+    "@storybook/react",
+    "@storybook/vue3",
+    "@storybook/angular",
+    "@storybook/svelte",
+    "@storybook/web-components",
+    "@storybook/html",
+    "@storybook/server",
+    "@storybook/blocks",
+    "@storybook/testing-library",
+    "@storybook/test",
+    "@storybook/manager-api",
+    "@storybook/preview-api"
+  ]
+}

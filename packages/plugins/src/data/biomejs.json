@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "biome",
+  "enablers": [
+    "@biomejs/biome"
+  ],
+  "alwaysUsed": [
+    "biome.json",
+    "biome.jsonc"
+  ],
+  "toolingDependencies": [
+    "@biomejs/biome"
+  ]
+}

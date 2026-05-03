@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "unocss",
+  "enablers": [
+    "unocss",
+    "@unocss/"
+  ],
+  "configPatterns": [
+    "uno.config.{ts,js,mjs,cjs}",
+    "unocss.config.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "uno.config.{ts,js,mjs,cjs}",
+    "unocss.config.{ts,js,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "unocss",
+    "@unocss/cli",
+    "@unocss/postcss",
+    "@unocss/vite",
+    "@unocss/webpack",
+    "@unocss/astro",
+    "@unocss/nuxt",
+    "@unocss/svelte-scoped",
+    "@unocss/eslint-plugin",
+    "@unocss/eslint-config",
+    "@unocss/reset"
+  ]
+}

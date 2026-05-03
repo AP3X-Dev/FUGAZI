@@ -1,0 +1,58 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "gatsby",
+  "enablers": [
+    "gatsby"
+  ],
+  "entryPoints": [
+    "src/pages/**/*.{ts,tsx,js,jsx}",
+    "src/templates/**/*.{ts,tsx,js,jsx}",
+    "src/api/**/*.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "gatsby-config.{ts,js,mjs}",
+    "gatsby-node.{ts,js,mjs}",
+    "gatsby-browser.{ts,tsx,js,jsx}",
+    "gatsby-ssr.{ts,tsx,js,jsx}"
+  ],
+  "alwaysUsed": [
+    "gatsby-config.{ts,js,mjs}",
+    "gatsby-node.{ts,js,mjs}",
+    "gatsby-browser.{ts,tsx,js,jsx}",
+    "gatsby-ssr.{ts,tsx,js,jsx}"
+  ],
+  "toolingDependencies": [
+    "gatsby",
+    "gatsby-cli"
+  ],
+  "usedExports": [
+    {
+      "pattern": "src/pages/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "Head",
+        "query",
+        "config",
+        "getServerData"
+      ]
+    },
+    {
+      "pattern": "src/templates/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "Head",
+        "query",
+        "config",
+        "getServerData"
+      ]
+    },
+    {
+      "pattern": "src/api/**/*.{ts,js}",
+      "exports": [
+        "default",
+        "config"
+      ]
+    }
+  ]
+}

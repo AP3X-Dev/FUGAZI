@@ -1,0 +1,14 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "syncpack",
+  "enablers": [
+    "syncpack"
+  ],
+  "alwaysUsed": [
+    ".syncpackrc",
+    ".syncpackrc.{json,js,cjs}"
+  ],
+  "toolingDependencies": [
+    "syncpack"
+  ]
+}

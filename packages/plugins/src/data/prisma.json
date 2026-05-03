@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "prisma",
+  "enablers": [
+    "prisma",
+    "@prisma/client"
+  ],
+  "entryPoints": [
+    "prisma/seed.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "prisma/schema.prisma"
+  ],
+  "toolingDependencies": [
+    "prisma",
+    "@prisma/client"
+  ]
+}

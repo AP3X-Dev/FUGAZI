@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "postcss",
+  "enablers": [
+    "postcss"
+  ],
+  "configPatterns": [
+    "postcss.config.{ts,js,cjs,mjs}"
+  ],
+  "alwaysUsed": [
+    "postcss.config.{ts,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "postcss",
+    "postcss-cli"
+  ]
+}

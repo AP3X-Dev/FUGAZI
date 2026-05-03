@@ -1,0 +1,65 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "remix",
+  "enablers": [
+    "@remix-run/node",
+    "@remix-run/react",
+    "@remix-run/cloudflare",
+    "@remix-run/cloudflare-pages",
+    "@remix-run/deno"
+  ],
+  "entryPoints": [
+    "app/routes/**/*.{ts,tsx,js,jsx}",
+    "app/root.{ts,tsx,js,jsx}",
+    "app/entry.client.{ts,tsx,js,jsx}",
+    "app/entry.server.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "remix.config.{ts,js,mjs}"
+  ],
+  "toolingDependencies": [
+    "@remix-run/dev",
+    "@remix-run/node",
+    "@remix-run/react",
+    "@remix-run/cloudflare",
+    "@remix-run/serve"
+  ],
+  "usedExports": [
+    {
+      "pattern": "app/routes/**/*.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "loader",
+        "clientLoader",
+        "action",
+        "clientAction",
+        "meta",
+        "links",
+        "headers",
+        "handle",
+        "ErrorBoundary",
+        "HydrateFallback",
+        "shouldRevalidate"
+      ]
+    },
+    {
+      "pattern": "app/root.{ts,tsx,js,jsx}",
+      "exports": [
+        "default",
+        "loader",
+        "clientLoader",
+        "action",
+        "clientAction",
+        "meta",
+        "links",
+        "headers",
+        "handle",
+        "ErrorBoundary",
+        "HydrateFallback",
+        "shouldRevalidate",
+        "Layout"
+      ]
+    }
+  ]
+}

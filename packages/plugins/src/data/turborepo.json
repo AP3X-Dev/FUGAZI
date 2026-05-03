@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "turborepo",
+  "enablers": [
+    "turbo"
+  ],
+  "alwaysUsed": [
+    "turbo.json"
+  ],
+  "toolingDependencies": [
+    "turbo"
+  ]
+}

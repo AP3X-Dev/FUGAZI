@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "remark",
+  "enablers": [
+    "remark",
+    "remark-cli"
+  ],
+  "configPatterns": [
+    ".remarkrc.{js,cjs,mjs}"
+  ],
+  "alwaysUsed": [
+    ".remarkrc",
+    ".remarkrc.{js,cjs,mjs,json,yml,yaml}"
+  ],
+  "toolingDependencies": [
+    "remark",
+    "remark-cli"
+  ]
+}

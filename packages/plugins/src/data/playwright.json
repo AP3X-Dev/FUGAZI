@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "playwright",
+  "enablers": [
+    "@playwright/test"
+  ],
+  "entryPoints": [
+    "**/*.spec.{ts,tsx,js,jsx}",
+    "**/*.test.{ts,tsx,js,jsx}",
+    "tests/**/*.{ts,tsx,js,jsx}",
+    "e2e/**/*.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "test",
+  "configPatterns": [
+    "playwright.config.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "playwright.config.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "@playwright/test",
+    "playwright"
+  ]
+}

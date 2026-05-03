@@ -1,0 +1,93 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "astro",
+  "enablers": [
+    "astro"
+  ],
+  "entryPoints": [
+    "src/pages/**/*.{astro,ts,tsx,js,jsx,mts,mjs,cts,cjs,md,mdx}",
+    "src/layouts/**/*.astro",
+    "src/content/**/*.{ts,js,mts,mjs,cts,cjs,md,mdx}",
+    "src/middleware.{js,ts,mjs,mts,cjs,cts}",
+    "src/middleware/index.{js,ts,mjs,mts,cjs,cts}",
+    "src/actions/index.{js,ts,mjs,mts,cjs,cts}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "astro.config.{ts,js,mjs}"
+  ],
+  "alwaysUsed": [
+    "astro.config.{ts,js,mjs}",
+    "src/content/config.{js,ts,mjs,mts,cjs,cts}",
+    "src/content.config.{js,ts,mjs,mts,cjs,cts}"
+  ],
+  "toolingDependencies": [
+    "astro",
+    "@astrojs/check",
+    "@astrojs/ts-plugin"
+  ],
+  "usedExports": [
+    {
+      "pattern": "src/pages/**/*.{astro,md,mdx}",
+      "exports": [
+        "getStaticPaths",
+        "prerender",
+        "partial"
+      ]
+    },
+    {
+      "pattern": "src/pages/**/*.{tsx,jsx}",
+      "exports": [
+        "default",
+        "getStaticPaths",
+        "prerender",
+        "partial"
+      ]
+    },
+    {
+      "pattern": "src/pages/**/*.{ts,js,mts,mjs,cts,cjs}",
+      "exports": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "HEAD",
+        "OPTIONS",
+        "ALL",
+        "getStaticPaths",
+        "prerender"
+      ]
+    },
+    {
+      "pattern": "src/middleware.{js,ts,mjs,mts,cjs,cts}",
+      "exports": [
+        "onRequest"
+      ]
+    },
+    {
+      "pattern": "src/middleware/index.{js,ts,mjs,mts,cjs,cts}",
+      "exports": [
+        "onRequest"
+      ]
+    },
+    {
+      "pattern": "src/content/config.{js,ts,mjs,mts,cjs,cts}",
+      "exports": [
+        "collections"
+      ]
+    },
+    {
+      "pattern": "src/content.config.{js,ts,mjs,mts,cjs,cts}",
+      "exports": [
+        "collections"
+      ]
+    },
+    {
+      "pattern": "src/actions/index.{js,ts,mjs,mts,cjs,cts}",
+      "exports": [
+        "server"
+      ]
+    }
+  ]
+}

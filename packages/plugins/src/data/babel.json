@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "babel",
+  "enablers": [
+    "@babel/core"
+  ],
+  "configPatterns": [
+    "babel.config.{js,cjs,mjs,ts,cts}",
+    ".babelrc",
+    ".babelrc.{js,cjs,mjs,json}"
+  ],
+  "alwaysUsed": [
+    "babel.config.{js,cjs,mjs,ts,cts}",
+    ".babelrc",
+    ".babelrc.{js,cjs,mjs,json}"
+  ],
+  "toolingDependencies": [
+    "@babel/core",
+    "@babel/cli",
+    "@babel/runtime"
+  ]
+}

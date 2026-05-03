@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "karma",
+  "enablers": [
+    "karma"
+  ],
+  "alwaysUsed": [
+    "karma.conf.{js,ts}"
+  ],
+  "toolingDependencies": [
+    "karma"
+  ]
+}

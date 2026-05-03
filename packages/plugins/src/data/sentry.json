@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "sentry",
+  "enablers": [
+    "@sentry/nextjs",
+    "@sentry/react",
+    "@sentry/node",
+    "@sentry/browser"
+  ],
+  "alwaysUsed": [
+    "sentry.client.config.{ts,js,mjs}",
+    "sentry.server.config.{ts,js,mjs}",
+    "sentry.edge.config.{ts,js,mjs}"
+  ],
+  "toolingDependencies": [
+    "@sentry/nextjs",
+    "@sentry/react",
+    "@sentry/node",
+    "@sentry/browser",
+    "@sentry/cli",
+    "@sentry/webpack-plugin",
+    "@sentry/vite-plugin"
+  ]
+}

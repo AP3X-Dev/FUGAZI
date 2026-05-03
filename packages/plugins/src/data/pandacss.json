@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "pandacss",
+  "enablers": [
+    "@pandacss/dev"
+  ],
+  "configPatterns": [
+    "panda.config.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "panda.config.{ts,js,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "@pandacss/dev",
+    "@pandacss/studio",
+    "@pandacss/eslint-plugin"
+  ]
+}

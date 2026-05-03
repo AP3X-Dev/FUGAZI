@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "commitlint",
+  "enablers": [
+    "@commitlint/cli"
+  ],
+  "configPatterns": [
+    "commitlint.config.{js,cjs,mjs,ts}",
+    ".commitlintrc.{js,cjs}"
+  ],
+  "alwaysUsed": [
+    "commitlint.config.{js,cjs,mjs,ts}",
+    ".commitlintrc.{json,yaml,yml,js,cjs}"
+  ],
+  "toolingDependencies": [
+    "@commitlint/cli",
+    "@commitlint/config-conventional",
+    "@commitlint/config-angular"
+  ]
+}

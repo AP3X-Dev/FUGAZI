@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "webpack",
+  "enablers": [
+    "webpack"
+  ],
+  "entryPoints": [
+    "src/index.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "webpack.config.{ts,js,mjs,cjs}",
+    "webpack.*.config.{ts,js,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "webpack.config.{ts,js,mjs,cjs}",
+    "webpack.*.config.{ts,js,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "webpack",
+    "webpack-cli",
+    "webpack-dev-server",
+    "html-webpack-plugin"
+  ]
+}

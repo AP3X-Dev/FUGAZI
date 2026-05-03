@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "msw",
+  "enablers": [
+    "msw"
+  ],
+  "entryPoints": [
+    "mocks/**/*.{ts,tsx,js,jsx}",
+    "src/mocks/**/*.{ts,tsx,js,jsx}",
+    "**/mocks/**/*.{ts,tsx,js,jsx}"
+  ],
+  "alwaysUsed": [
+    "public/mockServiceWorker.js"
+  ],
+  "toolingDependencies": [
+    "msw",
+    "msw-storybook-addon"
+  ]
+}

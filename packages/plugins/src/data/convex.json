@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "convex",
+  "enablers": [
+    "convex"
+  ],
+  "entryPoints": [
+    "convex/**/*.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "convex/_generated/**/*",
+    "convex/schema.{ts,js}",
+    "convex/auth.config.{ts,js}",
+    "convex/auth.{ts,js}",
+    "convex/http.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "convex"
+  ]
+}

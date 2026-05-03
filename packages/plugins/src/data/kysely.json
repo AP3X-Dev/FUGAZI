@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "kysely",
+  "enablers": [
+    "kysely",
+    "kysely-ctl"
+  ],
+  "entryPoints": [
+    "migrations/**/*.{ts,js}",
+    "src/migrations/**/*.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "kysely.config.{ts,js}",
+    ".config/kysely.config.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "kysely",
+    "kysely-ctl"
+  ]
+}

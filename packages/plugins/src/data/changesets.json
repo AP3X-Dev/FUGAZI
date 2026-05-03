@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "changesets",
+  "enablers": [
+    "@changesets/cli"
+  ],
+  "alwaysUsed": [
+    ".changeset/config.json"
+  ],
+  "toolingDependencies": [
+    "@changesets/cli",
+    "@changesets/changelog-github",
+    "@changesets/changelog-git"
+  ]
+}

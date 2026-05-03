@@ -1,0 +1,40 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "hardhat",
+  "enablers": [
+    "hardhat"
+  ],
+  "entryPoints": [
+    "test/**/*.{ts,js}",
+    "scripts/**/*.{ts,js}",
+    "tasks/**/*.{ts,js}",
+    "deploy/**/*.{ts,js}",
+    "ignition/modules/**/*.{ts,js}"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "hardhat.config.{ts,js,cjs,mjs}"
+  ],
+  "alwaysUsed": [
+    "hardhat.config.{ts,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "hardhat",
+    "@nomicfoundation/hardhat-toolbox",
+    "@nomicfoundation/hardhat-verify",
+    "@nomicfoundation/hardhat-ethers",
+    "@nomicfoundation/hardhat-chai-matchers",
+    "@nomicfoundation/hardhat-network-helpers",
+    "@nomicfoundation/hardhat-ignition",
+    "@nomicfoundation/hardhat-ignition-ethers",
+    "@nomiclabs/hardhat-waffle",
+    "@nomiclabs/hardhat-ethers",
+    "@nomiclabs/hardhat-etherscan",
+    "@typechain/hardhat",
+    "hardhat-gas-reporter",
+    "hardhat-deploy",
+    "hardhat-contract-sizer",
+    "solidity-coverage",
+    "solidity-docgen"
+  ]
+}

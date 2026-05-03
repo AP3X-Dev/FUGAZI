@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "dependency-cruiser",
+  "enablers": [
+    "dependency-cruiser"
+  ],
+  "alwaysUsed": [
+    ".dependency-cruiser.{js,cjs,mjs,json}"
+  ],
+  "toolingDependencies": [
+    "dependency-cruiser"
+  ]
+}

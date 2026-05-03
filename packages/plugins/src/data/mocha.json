@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "mocha",
+  "enablers": [
+    "mocha"
+  ],
+  "entryPoints": [
+    "test/**/*.{ts,tsx,js,jsx}",
+    "tests/**/*.{ts,tsx,js,jsx}",
+    "spec/**/*.{ts,tsx,js,jsx}",
+    "**/*.test.{ts,tsx,js,jsx}",
+    "**/*.spec.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "test",
+  "alwaysUsed": [
+    ".mocharc.{json,yaml,yml,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "mocha",
+    "@types/mocha",
+    "ts-mocha"
+  ]
+}

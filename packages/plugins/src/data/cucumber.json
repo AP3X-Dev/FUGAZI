@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "cucumber",
+  "enablers": [
+    "@cucumber/cucumber"
+  ],
+  "entryPoints": [
+    "features/**/*.{ts,js}",
+    "**/*.steps.{ts,js}",
+    "step_definitions/**/*.{ts,js}",
+    "support/**/*.{ts,js}"
+  ],
+  "entryPointRole": "test",
+  "alwaysUsed": [
+    "cucumber.{js,cjs,mjs,ts}",
+    "cucumber.config.{js,cjs,mjs,ts}",
+    ".cucumber.{js,yml}"
+  ],
+  "toolingDependencies": [
+    "@cucumber/cucumber"
+  ]
+}

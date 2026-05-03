@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "jest",
+  "enablers": [
+    "jest"
+  ],
+  "entryPoints": [
+    "**/*.test.{ts,tsx,js,jsx}",
+    "**/*.spec.{ts,tsx,js,jsx}",
+    "**/__tests__/**/*.{ts,tsx,js,jsx}",
+    "**/__mocks__/**/*.{ts,tsx,js,jsx,mjs,cjs}"
+  ],
+  "entryPointRole": "test",
+  "configPatterns": [
+    "jest.config.{ts,js,mjs,cjs}",
+    "jest.config.json"
+  ],
+  "alwaysUsed": [
+    "jest.config.{ts,js,mjs,cjs}",
+    "jest.setup.{ts,js,tsx,jsx}"
+  ],
+  "toolingDependencies": [
+    "jest",
+    "jest-environment-jsdom",
+    "ts-jest",
+    "babel-jest"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "knex",
+  "enablers": [
+    "knex"
+  ],
+  "entryPoints": [
+    "migrations/**/*.{ts,js}",
+    "seeds/**/*.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "knexfile.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "knex"
+  ]
+}

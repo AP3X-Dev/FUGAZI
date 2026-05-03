@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "tsup",
+  "enablers": [
+    "tsup"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "tsup.config.{ts,js,cjs,mjs}"
+  ],
+  "alwaysUsed": [
+    "tsup.config.{ts,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "tsup"
+  ]
+}

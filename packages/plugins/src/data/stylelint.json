@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "stylelint",
+  "enablers": [
+    "stylelint"
+  ],
+  "configPatterns": [
+    "stylelint.config.{js,cjs,mjs}",
+    ".stylelintrc.{js,cjs}"
+  ],
+  "alwaysUsed": [
+    "stylelint.config.{js,cjs,mjs}",
+    ".stylelintrc.{json,yaml,yml,js,cjs}"
+  ],
+  "toolingDependencies": [
+    "stylelint",
+    "stylelint-config-standard",
+    "stylelint-config-recommended",
+    "stylelint-order",
+    "stylelint-scss",
+    "postcss-scss"
+  ]
+}

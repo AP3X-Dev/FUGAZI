@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "prettier",
+  "enablers": [
+    "prettier"
+  ],
+  "configPatterns": [
+    ".prettierrc",
+    ".prettierrc.{json,json5,js,cjs,mjs,ts,cts}",
+    "prettier.config.{js,cjs,mjs,ts,cts}"
+  ],
+  "alwaysUsed": [
+    ".prettierrc",
+    ".prettierrc.{json,json5,yml,yaml,js,cjs,mjs,ts,cts,toml}",
+    "prettier.config.{js,cjs,mjs,ts,cts}",
+    ".prettierignore"
+  ],
+  "toolingDependencies": [
+    "prettier"
+  ]
+}

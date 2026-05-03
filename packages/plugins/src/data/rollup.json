@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "rollup",
+  "enablers": [
+    "rollup"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "rollup.config.{js,ts,mjs,cjs}"
+  ],
+  "alwaysUsed": [
+    "rollup.config.{js,ts,mjs,cjs}"
+  ],
+  "toolingDependencies": [
+    "rollup"
+  ]
+}

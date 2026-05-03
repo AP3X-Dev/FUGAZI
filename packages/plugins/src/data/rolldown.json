@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "rolldown",
+  "enablers": [
+    "rolldown"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": [
+    "rolldown.config.{js,cjs,mjs,ts,mts,cts}"
+  ],
+  "alwaysUsed": [
+    "rolldown.config.{js,cjs,mjs,ts,mts,cts}"
+  ],
+  "toolingDependencies": [
+    "rolldown",
+    "@rolldown/pluginutils"
+  ]
+}

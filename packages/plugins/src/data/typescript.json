@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "typescript",
+  "enablers": [
+    "typescript"
+  ],
+  "configPatterns": [
+    "tsconfig.json",
+    "tsconfig.*.json"
+  ],
+  "alwaysUsed": [
+    "tsconfig.json",
+    "tsconfig.*.json"
+  ],
+  "toolingDependencies": [
+    "typescript",
+    "ts-node",
+    "tsx",
+    "ts-loader"
+  ]
+}

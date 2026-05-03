@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "webdriverio",
+  "enablers": [
+    "webdriverio",
+    "@wdio/"
+  ],
+  "entryPoints": [
+    "test/**/*.{ts,js}",
+    "e2e/**/*.{ts,js}",
+    "**/*.e2e.{ts,js}"
+  ],
+  "entryPointRole": "test",
+  "alwaysUsed": [
+    "wdio.conf.{ts,js}"
+  ],
+  "toolingDependencies": [
+    "webdriverio"
+  ]
+}

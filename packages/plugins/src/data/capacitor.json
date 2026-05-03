@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "capacitor",
+  "enablers": [
+    "@capacitor/core",
+    "@capacitor/cli"
+  ],
+  "alwaysUsed": [
+    "capacitor.config.{ts,js,json}"
+  ],
+  "toolingDependencies": [
+    "@capacitor/core",
+    "@capacitor/cli"
+  ]
+}

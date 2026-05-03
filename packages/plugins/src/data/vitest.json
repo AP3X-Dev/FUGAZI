@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "vitest",
+  "enablers": [
+    "vitest"
+  ],
+  "entryPoints": [
+    "**/*.test.{ts,tsx,js,jsx}",
+    "**/*.spec.{ts,tsx,js,jsx}",
+    "**/__tests__/**/*.{ts,tsx,js,jsx}",
+    "**/*.bench.{ts,tsx,js,jsx}"
+  ],
+  "entryPointRole": "test",
+  "configPatterns": [
+    "**/vitest.config.{ts,js,mts,mjs}",
+    "vitest.workspace.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "vitest.config.{ts,js,mts,mjs}",
+    "vitest.setup.{ts,js}",
+    "vitest.workspace.{ts,js}",
+    "**/src/setupTests.{ts,tsx,js,jsx}",
+    "**/src/test-setup.{ts,tsx,js,jsx}"
+  ],
+  "toolingDependencies": [
+    "vitest"
+  ]
+}

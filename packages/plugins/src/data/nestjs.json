@@ -1,0 +1,38 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "nestjs",
+  "enablers": [
+    "@nestjs/core"
+  ],
+  "entryPoints": [
+    "src/main.ts",
+    "src/**/*.module.ts",
+    "src/**/*.controller.ts",
+    "src/**/*.service.ts",
+    "src/**/*.guard.ts",
+    "src/**/*.interceptor.ts",
+    "src/**/*.pipe.ts",
+    "src/**/*.filter.ts",
+    "src/**/*.middleware.ts",
+    "src/**/*.decorator.ts",
+    "src/**/*.gateway.ts",
+    "src/**/*.resolver.ts"
+  ],
+  "entryPointRole": "runtime",
+  "alwaysUsed": [
+    "nest-cli.json"
+  ],
+  "toolingDependencies": [
+    "@nestjs/core",
+    "@nestjs/common",
+    "@nestjs/cli",
+    "@nestjs/testing",
+    "@nestjs/platform-express",
+    "@nestjs/platform-fastify",
+    "@nestjs/swagger",
+    "@nestjs/config",
+    "@nestjs/typeorm",
+    "@nestjs/mongoose",
+    "reflect-metadata"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "nodemon",
+  "enablers": [
+    "nodemon"
+  ],
+  "alwaysUsed": [
+    "nodemon.json",
+    ".nodemonrc",
+    ".nodemonrc.{json,yml,yaml}"
+  ],
+  "toolingDependencies": [
+    "nodemon"
+  ]
+}

@@ -35,7 +35,10 @@
       "**/node_modules/**",
       "**/*.tsbuildinfo",
       "fixtures/**",
-      "fuzz/corpus/**"
+      "fuzz/corpus/**",
+      "packages/plugins/src/data/**",
+      "**/plugins/src/data/**",
+      "**/data/**"
     ]
   },
   "javascript": {

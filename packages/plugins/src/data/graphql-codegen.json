@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "graphql-codegen",
+  "enablers": [
+    "@graphql-codegen/cli"
+  ],
+  "configPatterns": [
+    "codegen.{ts,js}",
+    "graphql.config.{ts,js}"
+  ],
+  "alwaysUsed": [
+    "codegen.{ts,js,yml,yaml}",
+    "graphql.config.{ts,js,yml,yaml}"
+  ],
+  "toolingDependencies": [
+    "@graphql-codegen/cli",
+    "@graphql-codegen/typescript",
+    "@graphql-codegen/typescript-operations",
+    "@graphql-codegen/typescript-react-query"
+  ]
+}

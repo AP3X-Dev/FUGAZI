@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "lint-staged",
+  "enablers": [
+    "lint-staged"
+  ],
+  "configPatterns": [
+    "lint-staged.config.{js,cjs,mjs,ts}",
+    ".lintstagedrc.{js,cjs,mjs,ts}"
+  ],
+  "alwaysUsed": [
+    "lint-staged.config.{js,cjs,mjs,ts}",
+    ".lintstagedrc",
+    ".lintstagedrc.{json,yaml,yml,js,cjs,mjs,ts}"
+  ],
+  "toolingDependencies": [
+    "lint-staged"
+  ]
+}

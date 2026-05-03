@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../../plugin-schema.json",
+  "name": "tailwind",
+  "enablers": [
+    "tailwindcss",
+    "@tailwindcss/postcss"
+  ],
+  "configPatterns": [
+    "tailwind.config.{ts,js,cjs,mjs}"
+  ],
+  "alwaysUsed": [
+    "tailwind.config.{ts,js,cjs,mjs}"
+  ],
+  "toolingDependencies": [
+    "tailwindcss",
+    "@tailwindcss/postcss"
+  ]
+}
