@@ -1,7 +1,30 @@
 {
   "name": "@fugazi/mcp",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0-rc.1",
+  "private": false,
+  "description": "Fugazi Model Context Protocol server: exposes static analysis tools to AI agents over stdio.",
+  "keywords": [
+    "typescript",
+    "javascript",
+    "mcp",
+    "model-context-protocol",
+    "static-analysis",
+    "fugazi",
+    "ai-agents"
+  ],
+  "license": "MIT",
+  "author": "AP3X",
+  "homepage": "https://github.com/AP3X/fugazi#readme",
+  "bugs": {
+    "url": "https://github.com/AP3X/fugazi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AP3X/fugazi.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -9,6 +32,10 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     }
+  },
+  "files": ["dist/", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc -b",
@@ -21,7 +48,7 @@
     "@fugazi/core": "workspace:*",
     "@fugazi/extract": "workspace:*",
     "@fugazi/graph": "workspace:*",
-    "@fugazi/node-api": "workspace:*",
+    "@fugazi/node": "workspace:*",
     "@fugazi/runtime": "workspace:*",
     "@fugazi/types": "workspace:*",
     "@fugazi/v8-coverage": "workspace:*",

@@ -9,7 +9,7 @@
  * driver. A future expansion may accept inline JSON.
  */
 
-import { type AnalyzeResult, analyze } from '@fugazi/node-api';
+import { type AnalyzeResult, analyze } from '@fugazi/node';
 import { parseCoverageFile } from '@fugazi/v8-coverage';
 import { z } from 'zod';
 import { BaseAnalysisArgs, runWithMeta } from '../common.js';

@@ -1,5 +1,5 @@
 /**
- * @fugazi/node-api — public surface for programmatic consumers.
+ * @fugazi/node — public surface for programmatic consumers.
  *
  * Phase 3h.5 (T201-T204) ships the SIX top-level functions defined in
  * IMP-ARCH-11. Per IMP-API-02 the original Fallow `detect_dead_code`,
@@ -7,8 +7,8 @@
  * `analyze()` with a discriminated `rules` option — those three names are NOT
  * exported here.
  *
- * The package is published as `@fugazi/node` (the workspace name
- * `@fugazi/node-api` is path-clarity only).
+ * The npm-published package is `@fugazi/node`; the workspace path is
+ * `packages/node-api/` (kept for backward-compatible directory layout only).
  */
 
 export { analyze } from './analyze.js';

@@ -5,7 +5,7 @@
  * with the dead-code RuleIds whitelisted.
  */
 
-import { type AnalyzeResult, analyze } from '@fugazi/node-api';
+import { type AnalyzeResult, analyze } from '@fugazi/node';
 import type { RuleId } from '@fugazi/types';
 import type { z } from 'zod';
 import { BaseAnalysisArgs, runWithMeta } from '../common.js';

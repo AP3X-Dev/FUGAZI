@@ -1,10 +1,10 @@
 /**
  * tools/trace-file.ts — Phase 3h.4 (T196) — `trace_file` tool.
  *
- * Read-only. Wraps `traceFile()` from `@fugazi/node-api`.
+ * Read-only. Wraps `traceFile()` from `@fugazi/node`.
  */
 
-import { type TraceResult, traceFile } from '@fugazi/node-api';
+import { type TraceResult, traceFile } from '@fugazi/node';
 import { z } from 'zod';
 import { BaseAnalysisArgs, runWithMeta } from '../common.js';
 import { type ReadOnlyTool, type ToolResult, defineReadOnlyTool } from '../types.js';

@@ -26,7 +26,7 @@ import { describe, expect, it } from 'vitest';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, '..', '..', '..');
-const FUGAZI_BIN = resolve(REPO_ROOT, 'bin', 'fugazi.js');
+const FUGAZI_BIN = resolve(REPO_ROOT, 'packages', 'cli', 'bin', 'fugazi.js');
 
 interface RunResult {
   readonly exitCode: number;

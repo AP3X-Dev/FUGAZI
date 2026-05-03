@@ -21,7 +21,7 @@ const REQUIRED_FUNCTIONS = [
 
 const FORBIDDEN_NAMES = ['detectDeadCode', 'detectUnusedFiles', 'detectUnusedExports'] as const;
 
-describe('@fugazi/node-api contract', () => {
+describe('@fugazi/node contract', () => {
   it('exports exactly the six public functions', () => {
     for (const name of REQUIRED_FUNCTIONS) {
       expect(nodeApi).toHaveProperty(name);

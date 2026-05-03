@@ -1,7 +1,32 @@
 {
   "name": "fugazi",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0-rc.1",
+  "private": false,
+  "description": "Fugazi CLI: TypeScript/Node static analysis (dead code, duplication, complexity, architecture drift, runtime intelligence).",
+  "keywords": [
+    "typescript",
+    "javascript",
+    "static-analysis",
+    "dead-code",
+    "duplication",
+    "complexity",
+    "lsp",
+    "mcp",
+    "fugazi"
+  ],
+  "license": "MIT",
+  "author": "AP3X",
+  "homepage": "https://github.com/AP3X/fugazi#readme",
+  "bugs": {
+    "url": "https://github.com/AP3X/fugazi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AP3X/fugazi.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
@@ -11,9 +36,13 @@
     }
   },
   "bin": {
-    "fugazi": "../../bin/fugazi.js",
-    "fugazi-lsp": "../../bin/fugazi-lsp.js",
-    "fugazi-mcp": "../../bin/fugazi-mcp.js"
+    "fugazi": "./bin/fugazi.js",
+    "fugazi-lsp": "./bin/fugazi-lsp.js",
+    "fugazi-mcp": "./bin/fugazi-mcp.js"
+  },
+  "files": ["dist/", "bin/", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc -b",
@@ -26,7 +55,10 @@
     "@fugazi/core": "workspace:*",
     "@fugazi/extract": "workspace:*",
     "@fugazi/graph": "workspace:*",
-    "@fugazi/node-api": "workspace:*",
+    "@fugazi/lsp": "workspace:*",
+    "@fugazi/mcp": "workspace:*",
+    "@fugazi/node": "workspace:*",
+    "@fugazi/plugins": "workspace:*",
     "@fugazi/runtime": "workspace:*",
     "@fugazi/types": "workspace:*",
     "@parcel/watcher": "^2.5.0",

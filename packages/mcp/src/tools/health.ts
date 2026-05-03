@@ -1,11 +1,11 @@
 /**
  * tools/health.ts — Phase 3h.4 (T196) — `health` tool.
  *
- * Read-only. Wraps `health()` from `@fugazi/node-api` for the
+ * Read-only. Wraps `health()` from `@fugazi/node` for the
  * complexity-hotspot + cognitive-complexity rule pair.
  */
 
-import { type HealthResult, health } from '@fugazi/node-api';
+import { type HealthResult, health } from '@fugazi/node';
 import type { z } from 'zod';
 import { BaseAnalysisArgs, runWithMeta } from '../common.js';
 import { type ReadOnlyTool, type ToolResult, defineReadOnlyTool } from '../types.js';

@@ -21,7 +21,7 @@
     "format": "biome format --write .",
     "clean": "rm -rf packages/*/dist packages/*/.turbo packages/*/*.tsbuildinfo .turbo",
     "fugazi": "bun packages/cli/src/index.ts",
-    "fugazi:built": "node bin/fugazi.js",
+    "fugazi:built": "node packages/cli/bin/fugazi.js",
     "dev:watch": "turbo build --watch",
     "verify:wasm": "bun tools/verify-wasm.ts",
     "forbidden:strings": "bun tools/forbidden-strings.ts",

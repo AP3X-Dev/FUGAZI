@@ -1,10 +1,10 @@
 /**
  * tools/dupes.ts — Phase 3h.4 (T196) — `dupes` tool.
  *
- * Read-only. Wraps `findDupes()` from `@fugazi/node-api`.
+ * Read-only. Wraps `findDupes()` from `@fugazi/node`.
  */
 
-import { type DupesResult, findDupes } from '@fugazi/node-api';
+import { type DupesResult, findDupes } from '@fugazi/node';
 import { z } from 'zod';
 import { BaseAnalysisArgs, runWithMeta } from '../common.js';
 import { type ReadOnlyTool, type ToolResult, defineReadOnlyTool } from '../types.js';

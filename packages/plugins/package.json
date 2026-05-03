@@ -1,11 +1,30 @@
 {
   "name": "@fugazi/plugins",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0-rc.1",
+  "private": false,
+  "description": "Fugazi declarative framework plugins: detection rules and entry-point patterns for popular TS/JS frameworks.",
+  "keywords": ["typescript", "javascript", "static-analysis", "framework", "plugins", "fugazi"],
+  "license": "MIT",
+  "author": "AP3X",
+  "homepage": "https://github.com/AP3X/fugazi#readme",
+  "bugs": {
+    "url": "https://github.com/AP3X/fugazi/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AP3X/fugazi.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+  },
+  "files": ["dist/", "src/data/", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc -b && bun ./tools/copy-data.ts",

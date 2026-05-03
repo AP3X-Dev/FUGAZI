@@ -1,10 +1,10 @@
 /**
  * tools/trace-export.ts — Phase 3h.4 (T196) — `trace_export` tool.
  *
- * Read-only. Wraps `traceExport()` from `@fugazi/node-api`.
+ * Read-only. Wraps `traceExport()` from `@fugazi/node`.
  */
 
-import { type TraceResult, traceExport } from '@fugazi/node-api';
+import { type TraceResult, traceExport } from '@fugazi/node';
 import { z } from 'zod';
 import { BaseAnalysisArgs, runWithMeta } from '../common.js';
 import { type ReadOnlyTool, type ToolResult, defineReadOnlyTool } from '../types.js';

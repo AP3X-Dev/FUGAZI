@@ -1,5 +1,5 @@
 /**
- * @fugazi/node-api types — public surface for programmatic consumers.
+ * @fugazi/node types — public surface for programmatic consumers.
  *
  * Phase 3h.5 (T201-T204) lands six top-level functions: `analyze`, `findDupes`,
  * `health`, `audit`, `traceFile`, `traceExport`. Per IMP-API-02 the original
