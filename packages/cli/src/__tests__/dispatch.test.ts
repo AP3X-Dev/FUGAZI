@@ -70,10 +70,13 @@ describe('analysis command dispatch', () => {
         // ticks even on tiny fixtures because total > 0 triggers final tick).
         const quiet = JSON.parse(quietCtx.getStdout());
         const loud = JSON.parse(loudCtx.getStdout());
-        expect(quiet.progressEventCount).toBe(0);
-        expect(loud.progressEventCount).toBeGreaterThanOrEqual(0);
+        // Phase 3j: progressEventCount lives under _meta in the v1 JSON shape.
+        expect(quiet._meta.progressEventCount).toBe(0);
+        expect(loud._meta.progressEventCount).toBeGreaterThanOrEqual(0);
         // Loud should be >= quiet by definition.
-        expect(loud.progressEventCount).toBeGreaterThanOrEqual(quiet.progressEventCount);
+        expect(loud._meta.progressEventCount).toBeGreaterThanOrEqual(
+          quiet._meta.progressEventCount,
+        );
       } finally {
         process.chdir(cwd);
       }

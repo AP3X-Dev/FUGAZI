@@ -61,8 +61,8 @@ export interface Reporter {
 
 /**
  * Closed list of every output format Fugazi supports. New formats require
- * adding the discriminator here AND adding the stub at `./stubs.ts` AND
- * registering in `selectReporter`.
+ * adding the discriminator here AND shipping a class in `./<format>.ts` that
+ * extends `ReporterBase` AND registering in `selectReporter`.
  */
 export type ReporterFormat =
   | 'human' // Human-readable colour terminal output (default).

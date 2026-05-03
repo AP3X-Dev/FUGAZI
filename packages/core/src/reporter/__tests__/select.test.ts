@@ -3,16 +3,14 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { CodeclimateReporter } from '../codeclimate.js';
+import { CompactReporter } from '../compact.js';
+import { HumanPlainReporter } from '../human-plain.js';
+import { HumanReporter } from '../human.js';
+import { JsonReporter } from '../json.js';
+import { MarkdownReporter } from '../markdown.js';
+import { SarifReporter } from '../sarif.js';
 import { selectReporter } from '../select.js';
-import {
-  CodeclimateReporter,
-  CompactReporter,
-  HumanPlainReporter,
-  HumanReporter,
-  JsonReporter,
-  MarkdownReporter,
-  SarifReporter,
-} from '../stubs.js';
 import type { ReporterFormat } from '../types.js';
 
 const CASES: ReadonlyArray<readonly [ReporterFormat, new () => unknown]> = [

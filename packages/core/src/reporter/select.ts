@@ -1,23 +1,21 @@
 /**
- * reporter/select.ts — Phase 3h.1 (T179-T180) — `selectReporter` factory.
+ * reporter/select.ts — Phase 3j — `selectReporter` factory.
  *
- * One-line dispatch from a `ReporterFormat` discriminator to a fresh stub
+ * One-line dispatch from a `ReporterFormat` discriminator to a fresh reporter
  * instance. The CLI driver, LSP serializer, MCP `_meta` packer, and Node-API
  * consumer all flow through this single seam — so adding a format requires
- * (a) widening `ReporterFormat`, (b) shipping a stub class in `./stubs.ts`,
+ * (a) widening `ReporterFormat`, (b) shipping a class in `./<format>.ts`,
  * (c) registering it in the switch below. The `never` exhaustiveness guard
  * makes (a) without (c) a compile error.
  */
 
-import {
-  CodeclimateReporter,
-  CompactReporter,
-  HumanPlainReporter,
-  HumanReporter,
-  JsonReporter,
-  MarkdownReporter,
-  SarifReporter,
-} from './stubs.js';
+import { CodeclimateReporter } from './codeclimate.js';
+import { CompactReporter } from './compact.js';
+import { HumanPlainReporter } from './human-plain.js';
+import { HumanReporter } from './human.js';
+import { JsonReporter } from './json.js';
+import { MarkdownReporter } from './markdown.js';
+import { SarifReporter } from './sarif.js';
 import type { Reporter, ReporterFormat } from './types.js';
 
 export function selectReporter(format: ReporterFormat): Reporter {

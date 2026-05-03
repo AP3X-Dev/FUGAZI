@@ -13,15 +13,13 @@
 import type { DiscriminatedIssue } from '@fugazi/types';
 import { describe, expect, it } from 'vitest';
 import type { ProgressEvent } from '../../types.js';
-import {
-  CodeclimateReporter,
-  CompactReporter,
-  HumanPlainReporter,
-  HumanReporter,
-  JsonReporter,
-  MarkdownReporter,
-  SarifReporter,
-} from '../stubs.js';
+import { CodeclimateReporter } from '../codeclimate.js';
+import { CompactReporter } from '../compact.js';
+import { HumanPlainReporter } from '../human-plain.js';
+import { HumanReporter } from '../human.js';
+import { JsonReporter } from '../json.js';
+import { MarkdownReporter } from '../markdown.js';
+import { SarifReporter } from '../sarif.js';
 import type { Reporter, ReporterMeta } from '../types.js';
 
 const META: ReporterMeta = {
