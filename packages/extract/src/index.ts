@@ -61,6 +61,13 @@ export {
   type Usage,
   type UsageKind,
 } from './visitor/index.js';
+export type {
+  ASTNodePy,
+  PyExpression,
+  PyProgram,
+  PyStatement,
+} from './ast/kinds-py.js';
+export { childrenOfPy, type PyVisitor, walkPy } from './ast/visit-py.js';
 export {
   type AssetUrlMatch,
   isImportMetaUrl,

@@ -125,6 +125,7 @@ export function buildInventory(program: Program, options?: BuildOptions): Invent
   });
 
   return Object.freeze({
+    lang: 'ts',
     declarations: Object.freeze(sortBy(declarations)),
     imports: Object.freeze(sortBy(imports)),
     usages: Object.freeze(sortBy(usages)),
