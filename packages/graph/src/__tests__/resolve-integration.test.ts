@@ -114,6 +114,96 @@ describe('resolve (dispatcher)', () => {
     expect(c).toBe(d);
   });
 
+  it('node: builtin → kind: builtin (not unresolved/external)', () => {
+    const fs = createMemoryFsAdapter({ '/proj/src/index.ts': '' });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    expect(resolve('node:fs', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'builtin',
+      source: 'node:fs',
+    });
+    expect(resolve('node:path', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'builtin',
+      source: 'node:path',
+    });
+    expect(resolve('node:fs/promises', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'builtin',
+      source: 'node:fs/promises',
+    });
+  });
+
+  it('bun: builtin → kind: builtin (parity with node:)', () => {
+    const fs = createMemoryFsAdapter({ '/proj/src/index.ts': '' });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    expect(resolve('bun:test', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'builtin',
+      source: 'bun:test',
+    });
+    expect(resolve('bun:sqlite', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'builtin',
+      source: 'bun:sqlite',
+    });
+  });
+
+  it('builtin short-circuits BEFORE node_modules dispatch (no on-disk probe)', () => {
+    // No node_modules entry at all — yet the builtin is still recognized
+    // and never falls through to `external`.
+    const fs = createMemoryFsAdapter({ '/proj/src/index.ts': '' });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    const r = resolve('node:fs', '/proj/src/index.ts', ctx);
+    expect(r.kind).toBe('builtin');
+    if (r.kind === 'builtin') {
+      expect(r.source).toBe('node:fs');
+    }
+  });
+
+  it('relative ESM: ./foo.js falls back to ./foo.ts when only .ts exists', () => {
+    const fs = createMemoryFsAdapter({
+      '/proj/src/index.ts': '',
+      '/proj/src/foo.ts': '',
+    });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    expect(resolve('./foo.js', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'resolved',
+      target: '/proj/src/foo.ts',
+    });
+  });
+
+  it('relative ESM: ./bar.jsx → ./bar.tsx fallback', () => {
+    const fs = createMemoryFsAdapter({
+      '/proj/src/index.ts': '',
+      '/proj/src/bar.tsx': '',
+    });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    expect(resolve('./bar.jsx', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'resolved',
+      target: '/proj/src/bar.tsx',
+    });
+  });
+
+  it('relative ESM: ./baz.mjs → ./baz.mts fallback', () => {
+    const fs = createMemoryFsAdapter({
+      '/proj/src/index.ts': '',
+      '/proj/src/baz.mts': '',
+    });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    expect(resolve('./baz.mjs', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'resolved',
+      target: '/proj/src/baz.mts',
+    });
+  });
+
+  it('relative ESM: ./qux.cjs → ./qux.cts fallback', () => {
+    const fs = createMemoryFsAdapter({
+      '/proj/src/index.ts': '',
+      '/proj/src/qux.cts': '',
+    });
+    const ctx: ResolverContext = { projectRoot: '/proj', fs };
+    expect(resolve('./qux.cjs', '/proj/src/index.ts', ctx)).toEqual({
+      kind: 'resolved',
+      target: '/proj/src/qux.cts',
+    });
+  });
+
   it('cascade: tsconfig miss falls through to node_modules', () => {
     // Specifier `lodash/merge` doesn't match a `paths` pattern, so the
     // dispatcher falls through to node_modules where it succeeds via the

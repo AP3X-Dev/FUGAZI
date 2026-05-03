@@ -120,4 +120,73 @@ describe('resolveRelative', () => {
     });
     expect(resolveRelative('./mod.ts', '/proj/src/index.ts', fs)).toBeNull();
   });
+
+  describe('TS-ESM extension fallback (`.js` written → `.ts` on disk)', () => {
+    it('./foo.js falls back to ./foo.ts when only .ts exists', () => {
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/foo.ts': '',
+      });
+      expect(resolveRelative('./foo.js', '/proj/src/index.ts', fs)).toBe('/proj/src/foo.ts');
+    });
+
+    it('./foo.js prefers literal .js over .ts fallback when both exist', () => {
+      // Author wrote `./foo.js`; if a literal foo.js is present on disk it
+      // wins. Fallback only triggers on miss.
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/foo.js': '',
+        '/proj/src/foo.ts': '',
+      });
+      expect(resolveRelative('./foo.js', '/proj/src/index.ts', fs)).toBe('/proj/src/foo.js');
+    });
+
+    it('./foo.js falls back to ./foo.tsx when only .tsx exists', () => {
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/foo.tsx': '',
+      });
+      expect(resolveRelative('./foo.js', '/proj/src/index.ts', fs)).toBe('/proj/src/foo.tsx');
+    });
+
+    it('./foo.js prefers .ts over .tsx in the fallback table', () => {
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/foo.ts': '',
+        '/proj/src/foo.tsx': '',
+      });
+      expect(resolveRelative('./foo.js', '/proj/src/index.ts', fs)).toBe('/proj/src/foo.ts');
+    });
+
+    it('./bar.jsx falls back to ./bar.tsx', () => {
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/bar.tsx': '',
+      });
+      expect(resolveRelative('./bar.jsx', '/proj/src/index.ts', fs)).toBe('/proj/src/bar.tsx');
+    });
+
+    it('./baz.mjs falls back to ./baz.mts', () => {
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/baz.mts': '',
+      });
+      expect(resolveRelative('./baz.mjs', '/proj/src/index.ts', fs)).toBe('/proj/src/baz.mts');
+    });
+
+    it('./qux.cjs falls back to ./qux.cts', () => {
+      const fs = createMemoryFsAdapter({
+        '/proj/src/index.ts': '',
+        '/proj/src/qux.cts': '',
+      });
+      expect(resolveRelative('./qux.cjs', '/proj/src/index.ts', fs)).toBe('/proj/src/qux.cts');
+    });
+
+    it('./missing.js with no .ts sibling still returns null', () => {
+      // Negative case — the fallback only applies when the TS sibling
+      // actually exists; pure misses still report null.
+      const fs = createMemoryFsAdapter({ '/proj/src/index.ts': '' });
+      expect(resolveRelative('./missing.js', '/proj/src/index.ts', fs)).toBeNull();
+    });
+  });
 });

@@ -99,6 +99,15 @@ beforeAll(async () => {
     'utf8',
   );
   await writeFile(join(src, 'c.ts'), "import { b } from './b.js';\nconsole.log(b);\n", 'utf8');
+  // Guaranteed unresolved import so every reporter format has at least one
+  // issue to serialise. Without this the `compact` reporter emits an empty
+  // string when the rest of the fixture resolves cleanly, and the
+  // `expect(a.length).toBeGreaterThan(0)` sanity check fails.
+  await writeFile(
+    join(src, 'broken.ts'),
+    "import { x } from 'this-package-does-not-exist';\nexport const broken = x;\n",
+    'utf8',
+  );
 });
 
 afterAll(async () => {

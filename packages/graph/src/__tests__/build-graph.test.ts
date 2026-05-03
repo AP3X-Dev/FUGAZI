@@ -252,6 +252,48 @@ describe('buildGraph', () => {
     expect(e?.specifier).toBe('react');
   });
 
+  it('node: builtin → ROOT_FILE_ID with resolvable=true (no false-positive)', () => {
+    const specs: FileSpec[] = [{ path: '/proj/a.ts', imports: ['node:fs'] }];
+    const files = makeFileNodes(specs);
+    const ctx = ctxFor(specs);
+    const graph = buildGraph({ files, resolverContext: ctx });
+    expect(graph.edges.length).toBe(1);
+    const e = graph.edges[0];
+    expect(e?.to).toBe(ROOT_FILE_ID);
+    expect(e?.resolvable).toBe(true);
+    expect(e?.specifier).toBe('node:fs');
+  });
+
+  it('bun: builtin → ROOT_FILE_ID with resolvable=true', () => {
+    const specs: FileSpec[] = [{ path: '/proj/a.ts', imports: ['bun:test'] }];
+    const files = makeFileNodes(specs);
+    const ctx = ctxFor(specs);
+    const graph = buildGraph({ files, resolverContext: ctx });
+    expect(graph.edges.length).toBe(1);
+    const e = graph.edges[0];
+    expect(e?.to).toBe(ROOT_FILE_ID);
+    expect(e?.resolvable).toBe(true);
+    expect(e?.specifier).toBe('bun:test');
+  });
+
+  it('resolved on-disk but outside project file set → resolvable=true (third-party)', () => {
+    // `vendor` resolves to a real file under `/vendor/` which is NOT in the
+    // project file set. Pre-fix this surfaced as `resolvable: false` and the
+    // import-hygiene rule false-positived. New behaviour: the specifier did
+    // resolve on disk so the edge is `resolvable: true`, just bucketed under
+    // ROOT_FILE_ID because we have no FileId for the out-of-project file.
+    const specs: FileSpec[] = [{ path: '/proj/a.ts', imports: ['./vendor/dep.js'] }];
+    const files = makeFileNodes(specs);
+    const ctx = ctxFor(specs, { '/proj/vendor/dep.js': '' });
+    // Drop the vendor file from the project file set deliberately by NOT
+    // listing it in `specs`. The fs adapter still has it.
+    const graph = buildGraph({ files, resolverContext: ctx });
+    expect(graph.edges.length).toBe(1);
+    const e = graph.edges[0];
+    expect(e?.to).toBe(ROOT_FILE_ID);
+    expect(e?.resolvable).toBe(true);
+  });
+
   it('determinism: same input produces byte-equal JSON.stringify(graph)', () => {
     const specs: FileSpec[] = [
       { path: '/proj/a.ts', imports: ['./b', './c'] },

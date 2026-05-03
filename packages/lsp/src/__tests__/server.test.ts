@@ -97,9 +97,13 @@ beforeAll(async () => {
   // Synthesise a tiny 3-file fixture; the cold-start budget test below uses
   // a separate 100-file fixture.
   await writeFile(join(fixtureRoot, 'a.ts'), 'export const a = 1;\nexport const b = 2;\n', 'utf8');
+  // Intentional unresolved import (`./missing.js` does not exist on disk).
+  // The unresolved-imports rule fires regardless of entry-point config so
+  // this fixture reliably produces at least one diagnostic for the
+  // "Diagnostics publishing on cold analysis" test below.
   await writeFile(
     join(fixtureRoot, 'b.ts'),
-    "import { a } from './a.js';\nexport const c = a + 1;\n",
+    "import { a } from './a.js';\nimport { z } from './missing.js';\nexport const c = a + (z as unknown as number) + 1;\n",
     'utf8',
   );
 });

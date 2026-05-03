@@ -73,6 +73,42 @@ function endsWithKnownExtension(p: string): boolean {
 }
 
 /**
+ * TypeScript-ESM extension fallbacks. With `"moduleResolution": "NodeNext"`
+ * (and friends) the convention is for source files to write
+ * `import './foo.js'` even though the file on disk is `./foo.ts`. The TS
+ * compiler rewrites the extension at emit time.
+ *
+ * Mirror that behaviour: when a relative specifier ends in a JS-family
+ * extension and the literal file is absent, probe the corresponding TS-family
+ * extension(s) before declaring a miss.
+ *
+ * Order matters — the first hit wins. `.js` falls back to `.ts` first then
+ * `.tsx` so a project that has both flavours of a module still picks the
+ * primary `.ts` over the `.tsx`.
+ */
+const JS_TO_TS_FALLBACKS: ReadonlyMap<string, readonly string[]> = new Map([
+  ['.js', ['.ts', '.tsx']],
+  ['.jsx', ['.tsx']],
+  ['.mjs', ['.mts']],
+  ['.cjs', ['.cts']],
+]);
+
+function tryJsToTsFallback(candidate: string, fs: FsAdapter): string | null {
+  for (const [jsExt, tsExts] of JS_TO_TS_FALLBACKS) {
+    if (!candidate.endsWith(jsExt)) continue;
+    const stem = candidate.slice(0, candidate.length - jsExt.length);
+    for (const tsExt of tsExts) {
+      const probe = `${stem}${tsExt}`;
+      if (fs.existsSync(probe) && !fs.isDirectorySync(probe)) return probe;
+    }
+    // Only one prefix matches per candidate (extensions are mutually
+    // exclusive); break after the first match.
+    return null;
+  }
+  return null;
+}
+
+/**
  * Resolve a relative specifier (`./foo`, `../bar`, `./mod.ts`) against the
  * importing file's directory.
  *
@@ -97,7 +133,13 @@ export function resolveRelative(specifier: string, fromFile: string, fs: FsAdapt
 
   // 1. Specifier already carries a known extension — stat directly.
   if (endsWithKnownExtension(candidate)) {
-    return fs.existsSync(candidate) && !fs.isDirectorySync(candidate) ? candidate : null;
+    if (fs.existsSync(candidate) && !fs.isDirectorySync(candidate)) return candidate;
+    // 1a. TS-ESM convention: `./foo.js` written in source maps to `./foo.ts`
+    //     on disk after the TS compiler rewrites extensions. Try the TS-family
+    //     fallback before giving up.
+    const tsFallback = tryJsToTsFallback(candidate, fs);
+    if (tsFallback !== null) return tsFallback;
+    return null;
   }
 
   // 2. Probe extensions in the fixed order.

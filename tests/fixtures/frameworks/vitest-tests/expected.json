@@ -7,27 +7,7 @@
   "activePlugins": [
     "vitest"
   ],
-  "issues": [
-    {
-      "file": "src/index.test.ts",
-      "kind": "unresolved-imports",
-      "message": "unresolved-imports: cannot resolve vitest from <root>/src/index.test.ts",
-      "range": {
-        "end": {
-          "byteOffset": 69,
-          "column": 38,
-          "line": 2
-        },
-        "start": {
-          "byteOffset": 31,
-          "column": 0,
-          "line": 2
-        }
-      },
-      "severity": "error",
-      "specifier": "vitest"
-    }
-  ],
+  "issues": [],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
@@ -39,10 +19,9 @@
       "duplicate-exports": 0,
       "private-type-leak": 0,
       "unlisted-dependencies": 0,
-      "unresolved-imports": 1,
+      "unresolved-imports": 0,
       "unused-class-members": 0,
       "unused-deps": 0,
-      "unused-dev-deps": 0,
       "unused-enum-members": 0,
       "unused-exports": 0,
       "unused-files": 0,

@@ -22,6 +22,12 @@
  *                                 (target is on disk but not part of the
  *                                  project file set — e.g. a build-output JS
  *                                  file outside the analysed source tree).
+ *        - `kind: 'builtin'`   → `to = ROOT_FILE_ID`, `resolvable = true`.
+ *                                 Runtime built-ins (`node:fs`, `bun:test`)
+ *                                 are not on disk but are not user errors;
+ *                                 keeping `resolvable: true` ensures the
+ *                                 unresolved-imports / unlisted-dependencies
+ *                                 rules don't false-positive on them.
  *        - `kind: 'external'`  → `to = ROOT_FILE_ID`, `resolvable = false`.
  *        - `kind: 'unresolved'` → `to = ROOT_FILE_ID`, `resolvable = false`.
  *   4. Each import record is classified via `classifyEdgeKind` (see
@@ -187,10 +193,19 @@ function resolveTargetId(
       if (id !== undefined) {
         return { id, resolvable: true };
       }
-      // Resolved on disk but outside the project file set — treat as
-      // out-of-project and bucket under ROOT_FILE_ID.
-      return { id: ROOT_FILE_ID, resolvable: false };
+      // Resolved on disk but outside the project file set — typically a
+      // third-party module under `node_modules/` (which discovery skips).
+      // Mark `resolvable: true` so the import-hygiene / unused-deps rules
+      // don't false-positive: the specifier did resolve, it's just to a
+      // non-project file. The edge still bucket under ROOT_FILE_ID because
+      // we have no FileId for it.
+      return { id: ROOT_FILE_ID, resolvable: true };
     }
+    case 'builtin':
+      // Runtime built-in (`node:fs`, `bun:test`, …): not on disk, but not a
+      // user-facing dep either. Mark resolvable so import-hygiene /
+      // unused-deps rules don't fire on them.
+      return { id: ROOT_FILE_ID, resolvable: true };
     case 'external':
     case 'unresolved':
       return { id: ROOT_FILE_ID, resolvable: false };

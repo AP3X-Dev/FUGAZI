@@ -90,7 +90,28 @@ export interface ResolverContext {
 export type Resolution =
   | { readonly kind: 'resolved'; readonly target: string }
   | { readonly kind: 'external'; readonly source: string }
+  | { readonly kind: 'builtin'; readonly source: string }
   | { readonly kind: 'unresolved'; readonly source: string };
+
+/**
+ * Runtime-builtin specifier prefixes. Imports of `node:fs`, `node:path`, etc.
+ * are Node's built-in modules; `bun:test`, `bun:sqlite`, etc. are Bun's
+ * built-ins. Neither resolves on disk and neither is a third-party package,
+ * so flagging them as `unresolved` or `external` produces false-positive
+ * `unresolved-imports` / `unlisted-dependencies` findings.
+ *
+ * The dispatcher short-circuits these to a dedicated `builtin` Resolution
+ * kind. The graph layer treats `builtin` like `external` but with the edge
+ * marked `resolvable: true` so rules don't fire.
+ */
+const RUNTIME_BUILTIN_PREFIXES: readonly string[] = Object.freeze(['node:', 'bun:']);
+
+function isRuntimeBuiltin(specifier: string): boolean {
+  for (const prefix of RUNTIME_BUILTIN_PREFIXES) {
+    if (specifier.startsWith(prefix)) return true;
+  }
+  return false;
+}
 
 /**
  * Resolve a single import specifier.
@@ -103,6 +124,14 @@ export type Resolution =
  */
 export function resolve(specifier: string, fromFile: string, ctx: ResolverContext): Resolution {
   const fs = ctx.fs ?? nodeFsAdapter;
+
+  // 0. Runtime builtins (`node:fs`, `bun:test`, …). These never resolve on
+  //    disk and are not user-facing dependencies — short-circuit before any
+  //    other strategy so they don't fall through to `resolveNodeModules` and
+  //    surface as false-positive unresolved/unlisted findings.
+  if (isRuntimeBuiltin(specifier)) {
+    return { kind: 'builtin', source: specifier };
+  }
 
   // 1. Relative.
   if (specifier.startsWith('.')) {
