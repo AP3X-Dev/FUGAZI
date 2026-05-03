@@ -6,5 +6,12 @@
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "references": [{ "path": "../types" }, { "path": "../core" }, { "path": "../runtime" }]
+  "references": [
+    { "path": "../types" },
+    { "path": "../config" },
+    { "path": "../core" },
+    { "path": "../extract" },
+    { "path": "../graph" },
+    { "path": "../runtime" }
+  ]
 }

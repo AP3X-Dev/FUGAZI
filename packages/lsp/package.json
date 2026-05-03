@@ -14,8 +14,13 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@fugazi/types": "workspace:*",
+    "@fugazi/config": "workspace:*",
     "@fugazi/core": "workspace:*",
-    "@fugazi/runtime": "workspace:*"
+    "@fugazi/extract": "workspace:*",
+    "@fugazi/graph": "workspace:*",
+    "@fugazi/runtime": "workspace:*",
+    "@fugazi/types": "workspace:*",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   }
 }
