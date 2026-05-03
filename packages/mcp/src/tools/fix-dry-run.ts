@@ -1,15 +1,17 @@
 /**
- * tools/fix-dry-run.ts — Phase 3h.4 (T199) — `fix_dry_run` STUB.
+ * tools/fix-dry-run.ts — Phase 3h.6 (T211-T213) — `fix_dry_run` ReadOnlyTool.
  *
- * Read-only at v1: the actual edits aren't computed yet (the fix engine
- * lands in Phase 3h.6). Returns an empty edit list with a v1-limitation
- * marker so callers can wire the surface up today and adopt the real edits
- * when 3h.6 ships.
+ * Read-only preview of would-be edits. Drives the same fix engine as
+ * `fix_apply` with `dryRun: true`, so the planned per-file edit batches are
+ * computed identically — but no disk mutation occurs.
  */
 
+import { type PlannedFileFix, applyFixes, runAnalysis } from '@fugazi/core';
+import type { RuleId } from '@fugazi/types';
 import { z } from 'zod';
-import { buildMeta, wrapResult } from '../meta.js';
+import { runWithMeta } from '../common.js';
 import { type ReadOnlyTool, type ToolResult, defineReadOnlyTool } from '../types.js';
+import { loadConfigForRoot } from './_shared.js';
 
 export const FixDryRunArgs = z.object({
   projectRoot: z.string().min(1),
@@ -18,28 +20,34 @@ export const FixDryRunArgs = z.object({
 
 export type FixDryRunArgsT = z.infer<typeof FixDryRunArgs>;
 
-export interface FixDryRunEdit {
-  readonly file: string;
-  readonly description: string;
-}
-
 export interface FixDryRunResult {
-  readonly edits: readonly FixDryRunEdit[];
-  /** Verbatim marker explaining the v1 limitation. */
-  readonly note: 'fix_dry_run: edit computation lands in Phase 3h.6';
+  readonly plan: readonly PlannedFileFix[];
+  readonly fileCount: number;
 }
 
 export const fixDryRunTool: ReadOnlyTool<FixDryRunArgsT, FixDryRunResult> = defineReadOnlyTool({
   name: 'fix_dry_run',
-  description: 'Preview machine-applicable fixes (stub - returns empty edit list at v1).',
+  description: 'Preview machine-applicable fixes without writing to disk.',
   schema: FixDryRunArgs,
-  handler: async (): Promise<ToolResult<FixDryRunResult>> => {
-    return wrapResult<FixDryRunResult>(
-      Object.freeze({
-        edits: Object.freeze([]) as readonly FixDryRunEdit[],
-        note: 'fix_dry_run: edit computation lands in Phase 3h.6' as const,
-      }),
-      buildMeta([]),
-    );
+  handler: async (input): Promise<ToolResult<FixDryRunResult>> => {
+    return runWithMeta<FixDryRunResult>(async (record) => {
+      const cfg = await loadConfigForRoot(input.projectRoot);
+      const result = await runAnalysis({
+        kind: 'full',
+        config: cfg,
+        projectRoot: input.projectRoot,
+        onProgress: record,
+      });
+      const filter = (input.ruleIds ?? []) as readonly RuleId[];
+      const fix = await applyFixes({
+        actions: result.actions,
+        ...(filter.length > 0 ? { ruleFilter: filter } : {}),
+        dryRun: true,
+      });
+      return {
+        plan: fix.plan,
+        fileCount: fix.plan.length,
+      } satisfies FixDryRunResult;
+    });
   },
 });

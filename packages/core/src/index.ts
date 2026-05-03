@@ -14,6 +14,25 @@ export {
   type CrossReferenceResult,
 } from './cross-ref.js';
 export {
+  NO_RUNNER_MESSAGE,
+  SUPPORTED_RUNNERS,
+  detectRunners,
+  type SupportedRunner,
+  type DetectRunnersOptions,
+} from './coverage-setup/detect.js';
+export { buildSnippets, type RunnerSnippet } from './coverage-setup/snippets.js';
+export {
+  applyFixes,
+  spliceByByteOffset,
+  DRIFT_MESSAGE_PREFIX,
+  MISSING_FILE_PREFIX,
+  OFFSET_OOB_PREFIX,
+  type ApplyFixesOptions,
+  type FileFixOutcome,
+  type FixEngineResult,
+  type PlannedFileFix,
+} from './fix/engine.js';
+export {
   computeFileScore,
   computeProjectScore,
   computeRefactorTargets,

@@ -1,15 +1,20 @@
 /**
- * tools/fix-apply.ts — Phase 3h.4 (T199) — `fix_apply` STUB.
+ * tools/fix-apply.ts — Phase 3h.6 (T211-T213) — `fix_apply` MutatingTool.
  *
- * The lone MUTATING tool (FR-K5 / IMP-SEC-07). Body lands in Phase 3h.6.
- * Returns a verbatim not-implemented envelope; the wire shape and brand are
- * already in place so the registry's read-only invariant is enforceable
- * today.
+ * The lone MUTATING tool (FR-K5 / IMP-SEC-07). Drives the same fix engine
+ * the CLI uses; mutates files on disk via per-file atomic writes (.tmp.<rand>
+ * + rename). When `dryRun: true` the tool returns the plan without writing.
+ *
+ * Result envelope is the standard `_meta`-wrapped shape; `data.outcomes`
+ * carries per-file status and `data.plan` carries the would-be edits.
  */
 
+import { type FileFixOutcome, type PlannedFileFix, applyFixes, runAnalysis } from '@fugazi/core';
+import type { RuleId } from '@fugazi/types';
 import { z } from 'zod';
-import { buildMeta, wrapError } from '../meta.js';
+import { runWithMeta } from '../common.js';
 import { type MutatingTool, type ToolResult, defineMutatingTool } from '../types.js';
+import { loadConfigForRoot } from './_shared.js';
 
 export const FixApplyArgs = z.object({
   projectRoot: z.string().min(1),
@@ -20,16 +25,41 @@ export const FixApplyArgs = z.object({
 export type FixApplyArgsT = z.infer<typeof FixApplyArgs>;
 
 export interface FixApplyResult {
-  readonly stub: true;
+  readonly applied: number;
+  readonly skipped: number;
+  readonly errors: number;
+  readonly outcomes: readonly FileFixOutcome[];
+  readonly plan: readonly PlannedFileFix[];
+  readonly dryRun: boolean;
 }
-
-export const FIX_APPLY_MESSAGE = 'fix_apply: not implemented yet (Phase 3h.6)';
 
 export const fixApplyTool: MutatingTool<FixApplyArgsT, FixApplyResult> = defineMutatingTool({
   name: 'fix_apply',
-  description: 'Apply machine-applicable fixes to project source (stub - lands in Phase 3h.6).',
+  description: 'Apply machine-applicable fixes to project source.',
   schema: FixApplyArgs,
-  handler: async (): Promise<ToolResult<FixApplyResult>> => {
-    return wrapError(FIX_APPLY_MESSAGE, buildMeta([]));
+  handler: async (input): Promise<ToolResult<FixApplyResult>> => {
+    return runWithMeta<FixApplyResult>(async (record) => {
+      const cfg = await loadConfigForRoot(input.projectRoot);
+      const result = await runAnalysis({
+        kind: 'full',
+        config: cfg,
+        projectRoot: input.projectRoot,
+        onProgress: record,
+      });
+      const filter = (input.ruleIds ?? []) as readonly RuleId[];
+      const fix = await applyFixes({
+        actions: result.actions,
+        ...(filter.length > 0 ? { ruleFilter: filter } : {}),
+        dryRun: input.dryRun === true,
+      });
+      return {
+        applied: fix.applied,
+        skipped: fix.skipped,
+        errors: fix.errors,
+        outcomes: fix.outcomes,
+        plan: fix.plan,
+        dryRun: fix.dryRun,
+      } satisfies FixApplyResult;
+    });
   },
 });

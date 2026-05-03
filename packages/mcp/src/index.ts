@@ -50,8 +50,6 @@ export {
   traceExportTool,
   traceFileTool,
 } from './tools/index.js';
-export { COVERAGE_SETUP_MESSAGE } from './tools/coverage-setup.js';
-export { FIX_APPLY_MESSAGE } from './tools/fix-apply.js';
 
 /** Backwards-compat alias used by `bin/fugazi-mcp.js`. */
 export { startServer as start } from './server.js';

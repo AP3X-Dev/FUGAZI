@@ -1,12 +1,20 @@
 /**
- * tools/coverage-setup.ts — Phase 3h.4 (T200) — `coverage_setup` STUB.
+ * tools/coverage-setup.ts — Phase 3h.6 (T215-T217) — `coverage_setup` tool.
  *
- * Read-only stub. Body lands in Phase 3h.6. Returns a verbatim
- * not-implemented envelope.
+ * Read-only wizard. Detects the project's test runner(s) and returns a
+ * structured list of `{ runner, snippet, configPath }` entries. v1 prints
+ * only — does NOT write to user config files.
  */
 
+import {
+  NO_RUNNER_MESSAGE,
+  type RunnerSnippet,
+  type SupportedRunner,
+  buildSnippets,
+  detectRunners,
+} from '@fugazi/core';
 import { z } from 'zod';
-import { buildMeta, wrapError } from '../meta.js';
+import { buildMeta, wrapError, wrapResult } from '../meta.js';
 import { type ReadOnlyTool, type ToolResult, defineReadOnlyTool } from '../types.js';
 
 export const CoverageSetupArgs = z.object({
@@ -16,17 +24,27 @@ export const CoverageSetupArgs = z.object({
 export type CoverageSetupArgsT = z.infer<typeof CoverageSetupArgs>;
 
 export interface CoverageSetupResult {
-  readonly stub: true;
+  readonly detected: readonly SupportedRunner[];
+  readonly snippets: readonly RunnerSnippet[];
 }
-
-export const COVERAGE_SETUP_MESSAGE = 'coverage_setup: not implemented yet (Phase 3h.6)';
 
 export const coverageSetupTool: ReadOnlyTool<CoverageSetupArgsT, CoverageSetupResult> =
   defineReadOnlyTool({
     name: 'coverage_setup',
-    description: 'Wire up V8 coverage capture (stub - lands in Phase 3h.6).',
+    description: 'Detect test runners and emit V8-coverage configuration snippets.',
     schema: CoverageSetupArgs,
-    handler: async (): Promise<ToolResult<CoverageSetupResult>> => {
-      return wrapError(COVERAGE_SETUP_MESSAGE, buildMeta([]));
+    handler: async (input): Promise<ToolResult<CoverageSetupResult>> => {
+      const detected = await detectRunners({ projectRoot: input.projectRoot });
+      if (detected.length === 0) {
+        return wrapError(NO_RUNNER_MESSAGE, buildMeta([]));
+      }
+      const snippets = buildSnippets(input.projectRoot, detected);
+      return wrapResult<CoverageSetupResult>(
+        Object.freeze({
+          detected,
+          snippets,
+        }) satisfies CoverageSetupResult,
+        buildMeta([]),
+      );
     },
   });
