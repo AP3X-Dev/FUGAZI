@@ -1,0 +1,35 @@
+{
+  "name": "pytest",
+  "packageManager": "pip",
+  "enablers": ["pytest"],
+  "entryPoints": ["tests/**/*.py", "**/test_*.py", "**/*_test.py", "**/conftest.py"],
+  "entryPointRole": "test",
+  "configPatterns": ["pytest.ini", "pyproject.toml", "setup.cfg", "tox.ini"],
+  "alwaysUsed": ["**/conftest.py"],
+  "toolingDependencies": [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "pytest-mock",
+    "pytest-django",
+    "pytest-xdist"
+  ],
+  "usedExports": [
+    { "pattern": "tests/**/*.py", "exports": ["*"] },
+    { "pattern": "**/conftest.py", "exports": ["*"] },
+    { "pattern": "**/test_*.py", "exports": ["*"] },
+    { "pattern": "**/*_test.py", "exports": ["*"] }
+  ],
+  "usedDecorators": [
+    "pytest.fixture",
+    "pytest.mark.parametrize",
+    "pytest.mark.skip",
+    "pytest.mark.skipif",
+    "pytest.mark.xfail",
+    "pytest.mark.usefixtures",
+    "pytest.mark.timeout",
+    "pytest.mark.asyncio",
+    "fixture",
+    "parametrize"
+  ]
+}

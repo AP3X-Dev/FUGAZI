@@ -1,0 +1,6 @@
+{
+  "name": "ruff",
+  "packageManager": "pip",
+  "enablers": ["ruff"],
+  "toolingDependencies": ["ruff"]
+}

@@ -22,12 +22,14 @@ const mkPlugin = (overrides: Partial<PluginDef>): PluginDef =>
     toolingDependencies: [],
     usedExports: [],
     usedClassMembers: [],
+    packageManager: 'auto' as const,
+    usedDecorators: [],
     ...overrides,
   });
 
 describe('getBuiltinPlugins', () => {
-  it('returns 91 bundled plugins', () => {
-    expect(getBuiltinPlugins()).toHaveLength(91);
+  it('returns 115 bundled plugins', () => {
+    expect(getBuiltinPlugins()).toHaveLength(115);
   });
   it('cached on second access', () => {
     const a = getBuiltinPlugins();

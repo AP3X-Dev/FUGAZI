@@ -1,0 +1,16 @@
+{
+  "name": "hypothesis",
+  "packageManager": "pip",
+  "enablers": ["hypothesis"],
+  "toolingDependencies": ["hypothesis"],
+  "usedDecorators": [
+    "given",
+    "settings",
+    "example",
+    "composite",
+    "hypothesis.given",
+    "hypothesis.settings",
+    "hypothesis.example",
+    "hypothesis.strategies.composite"
+  ]
+}

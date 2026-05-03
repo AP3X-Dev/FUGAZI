@@ -37,7 +37,8 @@ import type {
   FunctionDef,
   PyExpression,
 } from '../ast/kinds-py.js';
-import type { Declaration } from '../visitor/types.js';
+import type { Attribute, Decorator } from '../ast/kinds-py.js';
+import type { Declaration, MemberDecoration } from '../visitor/types.js';
 import { isExportedName } from './all-list.js';
 
 /**
@@ -75,7 +76,8 @@ export function handleClass(
   if (!isModuleLevel(parent)) return;
   if (node.name === '') return;
   const bases = collectBaseNames(node.bases);
-  const decoratedMembers = collectDecoratedMemberNames(node);
+  const memberDecorations = collectMemberDecorations(node);
+  const decoratedMembers = memberDecorations.map((d) => d.name);
   out.push({
     kind: 'class',
     name: node.name,
@@ -84,30 +86,64 @@ export function handleClass(
     members: node.members.filter((n) => n !== ''),
     ...(bases.length > 0 ? { bases } : {}),
     ...(decoratedMembers.length > 0 ? { decoratedMembers } : {}),
+    ...(memberDecorations.length > 0 ? { memberDecorations } : {}),
   });
 }
 
 /**
- * Walk the class body and collect names of methods (FunctionDef /
- * AsyncFunctionDef) that carry at least one decorator. Used by
- * `unused-class-members` (T333) to suppress framework-driven invocations.
+ * Phase 4d T346. Walk the class body and surface the dotted decorator names
+ * for each decorated method. Each entry pairs the member name with the list
+ * of decorator names attached to it (top-most first, matching source
+ * order). Methods with no decorators are skipped. Used by
+ * `unused-class-members` to apply per-plugin `usedDecorators` allowlists.
  *
- * Module-level. Nested-class handling is recursive: if the class contains
- * a nested class, decorated methods of that nested class are NOT included
- * here — they're owned by the nested class's own ClassDef Declaration when
- * it's emitted at module level (which it isn't currently — nested classes
- * don't surface as Declarations). Sufficient for v1.
+ * Module-level. Nested-class members are not surfaced (parallels existing
+ * `collectDecoratedMemberNames` semantics).
  */
-function collectDecoratedMemberNames(node: ClassDef): readonly string[] {
-  const out: string[] = [];
+function collectMemberDecorations(node: ClassDef): readonly MemberDecoration[] {
+  const out: MemberDecoration[] = [];
   for (const stmt of node.body) {
-    if (stmt.kind === 'FunctionDef' || stmt.kind === 'AsyncFunctionDef') {
-      if (stmt.name === '') continue;
-      if (stmt.decorators.length === 0) continue;
-      out.push(stmt.name);
+    if (stmt.kind !== 'FunctionDef' && stmt.kind !== 'AsyncFunctionDef') continue;
+    if (stmt.name === '') continue;
+    if (stmt.decorators.length === 0) continue;
+    const decorators: string[] = [];
+    for (const dec of stmt.decorators) {
+      const name = decoratorDottedName(dec);
+      if (name !== '') decorators.push(name);
     }
+    if (decorators.length === 0) continue;
+    out.push({ name: stmt.name, decorators });
   }
   return out;
+}
+
+/**
+ * Render a `Decorator` as a dotted name. Unwraps a single Call layer for
+ * `@dec(...)` forms. Mirrors the renderer in `usages.ts::decoratorName` but
+ * is duplicated here to keep the declaration handler self-contained — the
+ * usages module operates on a different AST channel (decorator-as-usage),
+ * so a shared helper would require a new module.
+ */
+function decoratorDottedName(dec: Decorator): string {
+  let cursor: import('../ast/kinds-py.js').PyExpression = dec.expression;
+  if (cursor.kind === 'Call') cursor = cursor.func;
+  if (cursor.kind === 'Name') return cursor.id;
+  if (cursor.kind === 'Attribute') return renderDottedAttribute(cursor);
+  return '';
+}
+
+function renderDottedAttribute(node: Attribute): string {
+  const parts: string[] = [];
+  let cursor: import('../ast/kinds-py.js').PyExpression = node;
+  while (cursor.kind === 'Attribute') {
+    parts.unshift(cursor.attr);
+    cursor = cursor.value;
+  }
+  if (cursor.kind === 'Name') {
+    parts.unshift(cursor.id);
+    return parts.join('.');
+  }
+  return '';
 }
 
 export function handleAssign(

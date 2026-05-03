@@ -7,6 +7,7 @@ import {
   EntryPointRoleSchema,
   PluginDefSchema,
   PluginDetectionSchema,
+  PluginPackageManagerSchema,
   ScopedUsedClassMemberSchema,
   UsedClassMemberSchema,
   UsedExportSchema,
@@ -163,6 +164,8 @@ describe('PluginDefSchema', () => {
     expect(p.toolingDependencies).toEqual([]);
     expect(p.usedExports).toEqual([]);
     expect(p.usedClassMembers).toEqual([]);
+    expect(p.packageManager).toBe('auto');
+    expect(p.usedDecorators).toEqual([]);
   });
   it('accepts a full plugin', () => {
     const p = PluginDefSchema.parse({
@@ -209,5 +212,113 @@ describe('PluginDefSchema', () => {
     const parsed = PluginDefSchema.parse(JSON.parse(JSON.stringify(original)));
     expect(parsed.name).toBe('remix');
     expect(parsed.usedExports[0]?.exports).toContain('loader');
+  });
+});
+
+describe('PluginPackageManagerSchema (Phase 4d T346)', () => {
+  it('accepts npm', () => {
+    expect(PluginPackageManagerSchema.parse('npm')).toBe('npm');
+  });
+  it('accepts pip', () => {
+    expect(PluginPackageManagerSchema.parse('pip')).toBe('pip');
+  });
+  it('accepts poetry', () => {
+    expect(PluginPackageManagerSchema.parse('poetry')).toBe('poetry');
+  });
+  it('accepts uv', () => {
+    expect(PluginPackageManagerSchema.parse('uv')).toBe('uv');
+  });
+  it('accepts auto', () => {
+    expect(PluginPackageManagerSchema.parse('auto')).toBe('auto');
+  });
+  it('rejects unknown manager', () => {
+    expect(() => PluginPackageManagerSchema.parse('cargo')).toThrow();
+  });
+  it('rejects null', () => {
+    expect(() => PluginPackageManagerSchema.parse(null)).toThrow();
+  });
+});
+
+describe('PluginDefSchema — Phase 4d T346 schema extension', () => {
+  it('accepts packageManager: pip', () => {
+    const p = PluginDefSchema.parse({
+      name: 'django',
+      packageManager: 'pip',
+      enablers: ['django'],
+    });
+    expect(p.packageManager).toBe('pip');
+  });
+  it('accepts packageManager: poetry', () => {
+    const p = PluginDefSchema.parse({ name: 'pytest', packageManager: 'poetry' });
+    expect(p.packageManager).toBe('poetry');
+  });
+  it('accepts packageManager: uv', () => {
+    const p = PluginDefSchema.parse({ name: 'ruff', packageManager: 'uv' });
+    expect(p.packageManager).toBe('uv');
+  });
+  it('defaults packageManager to auto when omitted', () => {
+    const p = PluginDefSchema.parse({ name: 'omitted' });
+    expect(p.packageManager).toBe('auto');
+  });
+  it('rejects invalid packageManager', () => {
+    expect(() =>
+      PluginDefSchema.parse({ name: 'bad', packageManager: 'cargo' as 'auto' }),
+    ).toThrow();
+  });
+  it('accepts usedDecorators array', () => {
+    const p = PluginDefSchema.parse({
+      name: 'fastapi',
+      usedDecorators: ['app.get', 'app.post', 'router.get'],
+    });
+    expect(p.usedDecorators).toEqual(['app.get', 'app.post', 'router.get']);
+  });
+  it('accepts dotted decorator names', () => {
+    const p = PluginDefSchema.parse({
+      name: 'pytest',
+      usedDecorators: ['pytest.fixture', 'pytest.mark.parametrize'],
+    });
+    expect(p.usedDecorators).toContain('pytest.fixture');
+    expect(p.usedDecorators).toContain('pytest.mark.parametrize');
+  });
+  it('accepts bare-form decorator names', () => {
+    const p = PluginDefSchema.parse({
+      name: 'pytest',
+      usedDecorators: ['fixture', 'parametrize'],
+    });
+    expect(p.usedDecorators).toEqual(['fixture', 'parametrize']);
+  });
+  it('defaults usedDecorators to empty array when omitted', () => {
+    const p = PluginDefSchema.parse({ name: 'ts-only' });
+    expect(p.usedDecorators).toEqual([]);
+  });
+  it('rejects non-string decorator entries', () => {
+    expect(() =>
+      PluginDefSchema.parse({
+        name: 'bad',
+        usedDecorators: [42] as unknown as readonly string[],
+      }),
+    ).toThrow();
+  });
+  it('round-trips a Python plugin with both new fields via JSON', () => {
+    const original = {
+      name: 'flask',
+      packageManager: 'pip',
+      enablers: ['flask'],
+      usedDecorators: ['app.route', 'app.before_request'],
+    };
+    const parsed = PluginDefSchema.parse(JSON.parse(JSON.stringify(original)));
+    expect(parsed.name).toBe('flask');
+    expect(parsed.packageManager).toBe('pip');
+    expect(parsed.usedDecorators).toContain('app.route');
+  });
+  it('backwards-compat: pre-Phase-4d JSON without new fields still parses', () => {
+    const legacy = {
+      name: 'old-plugin',
+      enablers: ['vite'],
+      entryPoints: ['vite.config.ts'],
+    };
+    const parsed = PluginDefSchema.parse(legacy);
+    expect(parsed.packageManager).toBe('auto');
+    expect(parsed.usedDecorators).toEqual([]);
   });
 });

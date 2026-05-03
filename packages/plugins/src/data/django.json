@@ -1,0 +1,39 @@
+{
+  "name": "django",
+  "packageManager": "pip",
+  "enablers": ["django"],
+  "entryPoints": [
+    "manage.py",
+    "**/wsgi.py",
+    "**/asgi.py",
+    "**/urls.py",
+    "**/views.py",
+    "**/models.py",
+    "**/admin.py",
+    "**/serializers.py",
+    "**/forms.py",
+    "**/middleware.py",
+    "**/signals.py",
+    "**/apps.py",
+    "**/migrations/**.py"
+  ],
+  "entryPointRole": "runtime",
+  "configPatterns": ["settings.py", "**/settings.py", "**/settings/**.py"],
+  "alwaysUsed": ["manage.py", "**/wsgi.py", "**/asgi.py", "**/migrations/**.py"],
+  "toolingDependencies": ["django"],
+  "usedExports": [
+    { "pattern": "**/views.py", "exports": ["*"] },
+    { "pattern": "**/urls.py", "exports": ["urlpatterns"] }
+  ],
+  "usedClassMembers": [
+    { "extends": "Model", "members": ["Meta", "save", "delete", "clean", "__str__"] },
+    {
+      "extends": "ModelAdmin",
+      "members": ["list_display", "search_fields", "list_filter", "readonly_fields", "fieldsets"]
+    },
+    {
+      "extends": "View",
+      "members": ["get", "post", "put", "patch", "delete", "head", "options", "dispatch"]
+    }
+  ]
+}

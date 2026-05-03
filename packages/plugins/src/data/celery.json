@@ -1,0 +1,16 @@
+{
+  "name": "celery",
+  "packageManager": "pip",
+  "enablers": ["celery"],
+  "entryPoints": ["**/tasks.py", "**/celery.py", "celeryconfig.py"],
+  "entryPointRole": "runtime",
+  "alwaysUsed": ["**/tasks.py", "**/celery.py", "celeryconfig.py"],
+  "toolingDependencies": ["celery"],
+  "usedDecorators": [
+    "app.task",
+    "shared_task",
+    "celery.task",
+    "celery.shared_task",
+    "task"
+  ]
+}

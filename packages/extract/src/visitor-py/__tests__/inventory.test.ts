@@ -233,3 +233,66 @@ describe('buildPyInventory — invariants (T305)', () => {
     expect(inv.usages.some((u) => u.kind === 'identifier' && u.name === 'main')).toBe(true);
   });
 });
+
+describe('buildPyInventory — memberDecorations (Phase 4d T346)', () => {
+  it('emits dotted decorator names for @app.route', async () => {
+    const inv = await build(
+      'class UserView:\n' + '    @app.route("/users")\n' + '    def list_users(self): pass\n',
+    );
+    const cls = inv.declarations.find((d) => d.kind === 'class');
+    expect(cls?.memberDecorations).toBeDefined();
+    expect(cls?.memberDecorations?.length).toBe(1);
+    const md = cls?.memberDecorations?.[0];
+    expect(md?.name).toBe('list_users');
+    expect(md?.decorators).toEqual(['app.route']);
+  });
+
+  it('emits bare-name decorator for @fixture', async () => {
+    const inv = await build('class Suite:\n' + '    @fixture\n' + '    def db(self): pass\n');
+    const cls = inv.declarations.find((d) => d.kind === 'class');
+    const md = cls?.memberDecorations?.[0];
+    expect(md?.name).toBe('db');
+    expect(md?.decorators).toEqual(['fixture']);
+  });
+
+  it('emits dotted name for @pytest.fixture (decorator with chain)', async () => {
+    const inv = await build(
+      'class Suite:\n' + '    @pytest.fixture\n' + '    def db(self): pass\n',
+    );
+    const cls = inv.declarations.find((d) => d.kind === 'class');
+    const md = cls?.memberDecorations?.[0];
+    expect(md?.decorators).toEqual(['pytest.fixture']);
+  });
+
+  it('records every decorator in source order (top-most first)', async () => {
+    const inv = await build(
+      'class UserView:\n' +
+        '    @staticmethod\n' +
+        '    @app.route("/")\n' +
+        '    def home(): pass\n',
+    );
+    const cls = inv.declarations.find((d) => d.kind === 'class');
+    const md = cls?.memberDecorations?.[0];
+    expect(md?.decorators).toEqual(['staticmethod', 'app.route']);
+  });
+
+  it('omits memberDecorations for a class with no decorated methods', async () => {
+    const inv = await build('class Plain:\n    def helper(self): pass\n');
+    const cls = inv.declarations.find((d) => d.kind === 'class');
+    expect(cls?.memberDecorations).toBeUndefined();
+  });
+
+  it('keeps decoratedMembers parallel to memberDecorations names', async () => {
+    const inv = await build(
+      'class UserView:\n' +
+        '    @app.route("/a")\n' +
+        '    def a(): pass\n' +
+        '    def plain(): pass\n' +
+        '    @app.route("/b")\n' +
+        '    def b(): pass\n',
+    );
+    const cls = inv.declarations.find((d) => d.kind === 'class');
+    expect(cls?.decoratedMembers).toEqual(['a', 'b']);
+    expect(cls?.memberDecorations?.map((d) => d.name)).toEqual(['a', 'b']);
+  });
+});

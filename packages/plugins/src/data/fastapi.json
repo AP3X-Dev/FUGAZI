@@ -1,0 +1,29 @@
+{
+  "name": "fastapi",
+  "packageManager": "pip",
+  "enablers": ["fastapi"],
+  "entryPoints": ["main.py", "app.py", "**/api/**.py", "**/routers/**.py"],
+  "entryPointRole": "runtime",
+  "toolingDependencies": ["fastapi", "uvicorn"],
+  "usedDecorators": [
+    "app.get",
+    "app.post",
+    "app.put",
+    "app.patch",
+    "app.delete",
+    "app.head",
+    "app.options",
+    "app.middleware",
+    "app.exception_handler",
+    "app.on_event",
+    "app.websocket",
+    "router.get",
+    "router.post",
+    "router.put",
+    "router.patch",
+    "router.delete",
+    "router.head",
+    "router.options",
+    "router.websocket"
+  ]
+}

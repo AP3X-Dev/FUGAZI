@@ -1,0 +1,6 @@
+{
+  "name": "mypy",
+  "packageManager": "pip",
+  "enablers": ["mypy"],
+  "toolingDependencies": ["mypy"]
+}

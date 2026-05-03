@@ -58,6 +58,7 @@ export {
   type Import,
   type ImportKind,
   type Inventory,
+  type MemberDecoration,
   type Usage,
   type UsageKind,
 } from './visitor/index.js';

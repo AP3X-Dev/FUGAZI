@@ -1,0 +1,15 @@
+{
+  "name": "pyramid",
+  "packageManager": "pip",
+  "enablers": ["pyramid"],
+  "entryPointRole": "runtime",
+  "toolingDependencies": ["pyramid"],
+  "usedDecorators": [
+    "view_config",
+    "view_defaults",
+    "subscriber",
+    "notfound_view_config",
+    "forbidden_view_config",
+    "exception_view_config"
+  ]
+}

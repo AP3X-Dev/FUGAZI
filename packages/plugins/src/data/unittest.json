@@ -1,0 +1,24 @@
+{
+  "name": "unittest",
+  "packageManager": "pip",
+  "detection": { "type": "fileExists", "pattern": "**/test_*.py" },
+  "entryPoints": ["**/test_*.py", "**/tests/**/*.py"],
+  "entryPointRole": "test",
+  "usedExports": [
+    { "pattern": "**/test_*.py", "exports": ["*"] },
+    { "pattern": "**/tests/**/*.py", "exports": ["*"] }
+  ],
+  "usedClassMembers": [
+    {
+      "extends": "TestCase",
+      "members": [
+        "setUp",
+        "tearDown",
+        "setUpClass",
+        "tearDownClass",
+        "setUpModule",
+        "tearDownModule"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "click",
+  "packageManager": "pip",
+  "enablers": ["click"],
+  "toolingDependencies": ["click"],
+  "usedDecorators": [
+    "command",
+    "group",
+    "option",
+    "argument",
+    "pass_context",
+    "version_option",
+    "help_option",
+    "click.command",
+    "click.group",
+    "click.option",
+    "click.argument",
+    "click.pass_context",
+    "click.version_option",
+    "click.help_option"
+  ]
+}

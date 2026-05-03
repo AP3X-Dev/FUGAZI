@@ -1,0 +1,6 @@
+{
+  "name": "isort",
+  "packageManager": "pip",
+  "enablers": ["isort"],
+  "toolingDependencies": ["isort"]
+}

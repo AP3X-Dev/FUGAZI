@@ -1,0 +1,6 @@
+{
+  "name": "black",
+  "packageManager": "pip",
+  "enablers": ["black"],
+  "toolingDependencies": ["black"]
+}

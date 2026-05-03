@@ -46,6 +46,22 @@ export type DeclarationKind = 'function' | 'class' | 'variable' | 'type' | 'enum
  * All four fields stay `undefined` for TS and JS, preserving the historical
  * TS shape. Consumers that don't care simply ignore them.
  */
+/**
+ * Phase 4d T346 — per-member decorator metadata. Populated by the Python
+ * visitor for class members carrying at least one decorator. Each entry
+ * records the dotted decorator name(s) attached to the member, allowing
+ * downstream rules to apply per-decorator allowlists (e.g. exempt only
+ * `@app.route`-decorated methods rather than every decorated method).
+ *
+ * The list runs in source order — top-most decorator first, matching the
+ * AST. Decorators with arguments are unwrapped at the visitor (`@dec(...)`
+ * → `'dec'`), matching the `Usage{kind:'decorator'}` payload contract.
+ */
+export interface MemberDecoration {
+  readonly name: string;
+  readonly decorators: readonly string[];
+}
+
 export interface Declaration {
   readonly kind: DeclarationKind;
   readonly name: string;
@@ -56,6 +72,16 @@ export interface Declaration {
   readonly annotation?: string;
   readonly valueCallee?: string;
   readonly decoratedMembers?: readonly string[];
+  /**
+   * Phase 4d T346. Per-member decorator names. Populated by the Python
+   * visitor for class declarations whose members carry decorators. Empty
+   * (`undefined`) for TS classes and for Python classes with no decorated
+   * members. Each entry's `decorators` list mirrors the dotted form emitted
+   * by `Usage{kind:'decorator'}` — `@app.route` → `'app.route'`, `@fixture`
+   * → `'fixture'`. Used by `unused-class-members` to apply per-plugin
+   * `usedDecorators` allowlists.
+   */
+  readonly memberDecorations?: readonly MemberDecoration[];
 }
 
 export type ImportKind = 'static' | 'dynamic' | 'reexport' | 'asset' | 'type';

@@ -208,3 +208,277 @@ describe('bun', () => {
     expect(plugin?.alwaysUsed).toContain('bunfig.toml');
   });
 });
+
+/* ------------------------------------------------------------------------ */
+/* Phase 4d — Python framework plugins                                      */
+/* ------------------------------------------------------------------------ */
+
+describe('django (Phase 4d T348)', () => {
+  const plugin = getPlugin('django');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses pip package manager', () => {
+    expect(plugin?.packageManager).toBe('pip');
+  });
+  it('has django enabler', () => {
+    expect(plugin?.enablers).toContain('django');
+  });
+  it('has runtime role', () => {
+    expect(plugin?.entryPointRole).toBe('runtime');
+  });
+  it('treats manage.py as always-used', () => {
+    expect(plugin?.alwaysUsed).toContain('manage.py');
+  });
+  it('treats migrations as always-used', () => {
+    expect(plugin?.alwaysUsed).toContain('**/migrations/**.py');
+  });
+  it('declares views as wholly used', () => {
+    const rule = plugin?.usedExports.find((u) => u.pattern === '**/views.py');
+    expect(rule?.exports).toContain('*');
+  });
+  it('exempts Model.Meta and Model.save', () => {
+    const modelRule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'Model',
+    );
+    expect(modelRule).toBeDefined();
+    if (typeof modelRule === 'object' && modelRule !== undefined) {
+      expect(modelRule.members).toContain('Meta');
+      expect(modelRule.members).toContain('save');
+    }
+  });
+});
+
+describe('flask (Phase 4d T348)', () => {
+  const plugin = getPlugin('flask');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses pip package manager', () => {
+    expect(plugin?.packageManager).toBe('pip');
+  });
+  it('declares @app.route as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('app.route');
+  });
+  it('declares @blueprint.route as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('blueprint.route');
+  });
+});
+
+describe('fastapi (Phase 4d T348)', () => {
+  const plugin = getPlugin('fastapi');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares HTTP-method decorators', () => {
+    expect(plugin?.usedDecorators).toContain('app.get');
+    expect(plugin?.usedDecorators).toContain('app.post');
+    expect(plugin?.usedDecorators).toContain('router.get');
+  });
+  it('declares uvicorn as tooling', () => {
+    expect(plugin?.toolingDependencies).toContain('uvicorn');
+  });
+});
+
+describe('starlette (Phase 4d T348)', () => {
+  const plugin = getPlugin('starlette');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('exempts HTTPEndpoint methods', () => {
+    const rule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'HTTPEndpoint',
+    );
+    if (typeof rule === 'object' && rule !== undefined) {
+      expect(rule.members).toContain('get');
+      expect(rule.members).toContain('post');
+    }
+  });
+});
+
+describe('tornado (Phase 4d T348)', () => {
+  const plugin = getPlugin('tornado');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('exempts RequestHandler lifecycle methods', () => {
+    const rule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'RequestHandler',
+    );
+    if (typeof rule === 'object' && rule !== undefined) {
+      expect(rule.members).toContain('prepare');
+      expect(rule.members).toContain('on_finish');
+    }
+  });
+});
+
+describe('pytest (Phase 4d T349)', () => {
+  const plugin = getPlugin('pytest');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('has test role', () => {
+    expect(plugin?.entryPointRole).toBe('test');
+  });
+  it('treats conftest.py as always-used', () => {
+    expect(plugin?.alwaysUsed).toContain('**/conftest.py');
+  });
+  it('declares pytest.fixture as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('pytest.fixture');
+  });
+  it('declares bare-form fixture as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('fixture');
+  });
+  it('exempts every export in test files', () => {
+    const rule = plugin?.usedExports.find((u) => u.pattern === '**/test_*.py');
+    expect(rule?.exports).toContain('*');
+  });
+});
+
+describe('unittest (Phase 4d T349)', () => {
+  const plugin = getPlugin('unittest');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('exempts TestCase lifecycle methods', () => {
+    const rule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'TestCase',
+    );
+    if (typeof rule === 'object' && rule !== undefined) {
+      expect(rule.members).toContain('setUp');
+      expect(rule.members).toContain('tearDown');
+    }
+  });
+  it('uses fileExists detection (no enabler — stdlib)', () => {
+    expect(plugin?.detection?.type).toBe('fileExists');
+  });
+});
+
+describe('hypothesis (Phase 4d T349)', () => {
+  const plugin = getPlugin('hypothesis');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @given as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('given');
+  });
+});
+
+describe('sqlalchemy (Phase 4d T350)', () => {
+  const plugin = getPlugin('sqlalchemy');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares alembic as tooling', () => {
+    expect(plugin?.toolingDependencies).toContain('alembic');
+  });
+  it('declares @validates as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('validates');
+  });
+});
+
+describe('tortoise (Phase 4d T350)', () => {
+  const plugin = getPlugin('tortoise');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('uses tortoise-orm enabler', () => {
+    expect(plugin?.enablers).toContain('tortoise-orm');
+  });
+});
+
+describe('pydantic (Phase 4d T351)', () => {
+  const plugin = getPlugin('pydantic');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @validator as used', () => {
+    expect(plugin?.usedDecorators).toContain('validator');
+  });
+  it('declares @field_validator as used', () => {
+    expect(plugin?.usedDecorators).toContain('field_validator');
+  });
+  it('exempts BaseModel.Config and model_config', () => {
+    const rule = plugin?.usedClassMembers.find(
+      (m) => typeof m === 'object' && m.extends === 'BaseModel',
+    );
+    if (typeof rule === 'object' && rule !== undefined) {
+      expect(rule.members).toContain('Config');
+      expect(rule.members).toContain('model_config');
+    }
+  });
+});
+
+describe('dataclasses (Phase 4d T351)', () => {
+  const plugin = getPlugin('dataclasses');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @dataclass as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('dataclass');
+  });
+});
+
+describe('attrs (Phase 4d T351)', () => {
+  const plugin = getPlugin('attrs');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @define as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('define');
+  });
+});
+
+describe('celery (Phase 4d T352)', () => {
+  const plugin = getPlugin('celery');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('treats tasks.py as always-used', () => {
+    expect(plugin?.alwaysUsed).toContain('**/tasks.py');
+  });
+  it('declares @app.task as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('app.task');
+  });
+});
+
+describe('rq (Phase 4d T352)', () => {
+  const plugin = getPlugin('rq');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @job as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('job');
+  });
+});
+
+describe('dramatiq (Phase 4d T352)', () => {
+  const plugin = getPlugin('dramatiq');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @actor as a used decorator', () => {
+    expect(plugin?.usedDecorators).toContain('actor');
+  });
+});
+
+describe('click (Phase 4d T353)', () => {
+  const plugin = getPlugin('click');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @command and @group as used', () => {
+    expect(plugin?.usedDecorators).toContain('command');
+    expect(plugin?.usedDecorators).toContain('group');
+  });
+});
+
+describe('typer (Phase 4d T353)', () => {
+  const plugin = getPlugin('typer');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @app.command as used', () => {
+    expect(plugin?.usedDecorators).toContain('app.command');
+  });
+});
+
+describe('pyramid (Phase 4d T353)', () => {
+  const plugin = getPlugin('pyramid');
+  it('exists', () => expect(plugin).toBeDefined());
+  it('declares @view_config as used', () => {
+    expect(plugin?.usedDecorators).toContain('view_config');
+  });
+});
+
+describe('Phase 4d T354 — tooling-only Python plugins', () => {
+  it('black ships toolingDependencies', () => {
+    const p = getPlugin('black');
+    expect(p?.toolingDependencies).toContain('black');
+  });
+  it('isort ships toolingDependencies', () => {
+    const p = getPlugin('isort');
+    expect(p?.toolingDependencies).toContain('isort');
+  });
+  it('ruff ships toolingDependencies', () => {
+    const p = getPlugin('ruff');
+    expect(p?.toolingDependencies).toContain('ruff');
+  });
+  it('mypy ships toolingDependencies', () => {
+    const p = getPlugin('mypy');
+    expect(p?.toolingDependencies).toContain('mypy');
+  });
+  it('pyright ships toolingDependencies', () => {
+    const p = getPlugin('pyright');
+    expect(p?.toolingDependencies).toContain('pyright');
+  });
+  it('all five tooling plugins use packageManager:pip', () => {
+    for (const name of ['black', 'isort', 'ruff', 'mypy', 'pyright']) {
+      expect(getPlugin(name)?.packageManager).toBe('pip');
+    }
+  });
+});

@@ -1,0 +1,7 @@
+{
+  "name": "rq",
+  "packageManager": "pip",
+  "enablers": ["rq"],
+  "toolingDependencies": ["rq"],
+  "usedDecorators": ["job", "rq.job", "rq.decorators.job"]
+}

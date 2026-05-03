@@ -9,8 +9,9 @@
  */
 
 import type { FugaziConfig } from '@fugazi/config';
-import type { Declaration, Inventory, Usage } from '@fugazi/extract';
+import type { Declaration, Inventory, MemberDecoration, Usage } from '@fugazi/extract';
 import type { Edge, FileNode, Graph } from '@fugazi/graph';
+import type { PluginDef } from '@fugazi/plugins';
 import { type FileId, ROOT_FILE_ID, type Range, assignFileIds } from '@fugazi/types';
 import { describe, expect, it } from 'vitest';
 import type { RuleContext } from '../types.js';
@@ -275,5 +276,170 @@ describe('unused-class-members — Python (T333)', () => {
     expect(findings[0]?.message).toBe(
       'unused-class-members: Service.helper in /proj/models.py has no consumers',
     );
+  });
+});
+
+/* ------------------------------------------------------------------------ */
+/* Phase 4d T346 — decorator-allowlist plumbing                             */
+/* ------------------------------------------------------------------------ */
+
+function pyClassDeclWithDecorations(
+  name: string,
+  members: readonly string[],
+  memberDecorations: readonly MemberDecoration[],
+): Declaration {
+  return {
+    kind: 'class',
+    name,
+    exported: true,
+    range: range(0),
+    members,
+    decoratedMembers: memberDecorations.map((d) => d.name),
+    memberDecorations,
+  };
+}
+
+function mkPyPlugin(usedDecorators: readonly string[]): PluginDef {
+  return Object.freeze({
+    name: 'test-py-plugin',
+    enablers: [],
+    entryPoints: [],
+    entryPointRole: 'support' as const,
+    configPatterns: [],
+    alwaysUsed: [],
+    toolingDependencies: [],
+    usedExports: [],
+    usedClassMembers: [],
+    packageManager: 'pip' as const,
+    usedDecorators,
+  });
+}
+
+function ctxWithPlugins(
+  fixture: ReturnType<typeof buildFixture>,
+  plugins: readonly PluginDef[],
+): RuleContext {
+  return {
+    graph: fixture.graph,
+    fileNodes: fixture.fileNodes,
+    projectRoot: '/proj',
+    entryPoints: [],
+    config: emptyConfig(),
+    activePlugins: plugins,
+  };
+}
+
+describe('unused-class-members — Python decorator allowlist (Phase 4d T346)', () => {
+  it('exempts a method whose decorator is in active-plugin allowlist', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/views.py',
+        declarations: [
+          pyClassDeclWithDecorations(
+            'UserView',
+            ['list_users'],
+            [{ name: 'list_users', decorators: ['app.route'] }],
+          ),
+        ],
+      },
+    ]);
+    const flask = mkPyPlugin(['app.route', 'app.before_request']);
+    const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, [flask]));
+    expect(findings).toEqual([]);
+  });
+
+  it('FLAGS a decorated method whose decorator is NOT in the active allowlist', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/views.py',
+        declarations: [
+          pyClassDeclWithDecorations(
+            'UserView',
+            ['internal'],
+            [{ name: 'internal', decorators: ['some_unrelated_decorator'] }],
+          ),
+        ],
+      },
+    ]);
+    const flask = mkPyPlugin(['app.route', 'app.before_request']);
+    const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, [flask]));
+    expect(findings.length).toBe(1);
+    expect(findings[0]?.kind === 'unused-class-members' && findings[0].memberName).toBe('internal');
+  });
+
+  it('bare-form decorator name (e.g. fixture) matches dotted form (pytest.fixture)', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/conftest.py',
+        declarations: [
+          pyClassDeclWithDecorations(
+            'Suite',
+            ['db'],
+            [{ name: 'db', decorators: ['pytest.fixture'] }],
+          ),
+        ],
+      },
+    ]);
+    const pytest = mkPyPlugin(['fixture', 'parametrize']);
+    const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, [pytest]));
+    expect(findings).toEqual([]);
+  });
+
+  it('multiple decorators on a method — any allowlisted decorator is enough', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/views.py',
+        declarations: [
+          pyClassDeclWithDecorations(
+            'UserView',
+            ['users'],
+            [{ name: 'users', decorators: ['custom_decorator', 'app.get'] }],
+          ),
+        ],
+      },
+    ]);
+    const fastapi = mkPyPlugin(['app.get']);
+    const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, [fastapi]));
+    expect(findings).toEqual([]);
+  });
+
+  it('legacy fallback: empty allowlist exempts every decorated method (T333)', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/views.py',
+        declarations: [
+          pyClassDeclWithDecorations(
+            'UserView',
+            ['list_users'],
+            [{ name: 'list_users', decorators: ['some_random_decorator'] }],
+          ),
+        ],
+      },
+    ]);
+    // No plugins → empty allowlist → fall back to "skip all decorated".
+    const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, []));
+    expect(findings).toEqual([]);
+  });
+
+  it('decorator allowlist combines across multiple active plugins', () => {
+    const fix = buildFixture([
+      {
+        path: '/proj/views.py',
+        declarations: [
+          pyClassDeclWithDecorations(
+            'UserView',
+            ['flask_view', 'fastapi_view'],
+            [
+              { name: 'flask_view', decorators: ['app.route'] },
+              { name: 'fastapi_view', decorators: ['router.get'] },
+            ],
+          ),
+        ],
+      },
+    ]);
+    const flask = mkPyPlugin(['app.route']);
+    const fastapi = mkPyPlugin(['router.get']);
+    const findings = createUnusedClassMembersRule('error')(ctxWithPlugins(fix, [flask, fastapi]));
+    expect(findings).toEqual([]);
   });
 });

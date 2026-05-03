@@ -1,0 +1,6 @@
+{
+  "name": "dataclasses",
+  "packageManager": "pip",
+  "detection": { "type": "fileExists", "pattern": "**/*.py" },
+  "usedDecorators": ["dataclass", "dataclasses.dataclass"]
+}

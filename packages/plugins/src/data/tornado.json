@@ -1,0 +1,27 @@
+{
+  "name": "tornado",
+  "packageManager": "pip",
+  "enablers": ["tornado"],
+  "entryPoints": ["**/handlers.py", "**/app.py"],
+  "entryPointRole": "runtime",
+  "toolingDependencies": ["tornado"],
+  "usedClassMembers": [
+    {
+      "extends": "RequestHandler",
+      "members": [
+        "get",
+        "post",
+        "put",
+        "patch",
+        "delete",
+        "head",
+        "options",
+        "prepare",
+        "on_finish",
+        "initialize",
+        "set_default_headers",
+        "write_error"
+      ]
+    }
+  ]
+}

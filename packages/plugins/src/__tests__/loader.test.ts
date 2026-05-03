@@ -46,9 +46,9 @@ describe('loadBundledPlugins', () => {
     expect(plugins.length).toBeGreaterThan(0);
     expect(Object.isFrozen(plugins)).toBe(true);
   });
-  it('returns 91 bundled plugins', () => {
+  it('returns 115 bundled plugins', () => {
     const plugins = loadBundledPlugins();
-    expect(plugins).toHaveLength(91);
+    expect(plugins).toHaveLength(115);
   });
   it('every plugin is frozen', () => {
     const plugins = loadBundledPlugins();
@@ -87,7 +87,7 @@ describe('loadBundledPluginsVerbose', () => {
   it('produces zero validation errors for the bundled corpus', () => {
     const result = loadBundledPluginsVerbose();
     expect(result.errors).toHaveLength(0);
-    expect(result.plugins).toHaveLength(91);
+    expect(result.plugins).toHaveLength(115);
   });
 });
 

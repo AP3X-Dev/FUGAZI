@@ -1,0 +1,7 @@
+{
+  "name": "dramatiq",
+  "packageManager": "pip",
+  "enablers": ["dramatiq"],
+  "toolingDependencies": ["dramatiq"],
+  "usedDecorators": ["actor", "dramatiq.actor"]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "typer",
+  "packageManager": "pip",
+  "enablers": ["typer"],
+  "toolingDependencies": ["typer"],
+  "usedDecorators": ["app.command", "app.callback", "command", "callback"]
+}

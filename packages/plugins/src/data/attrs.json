@@ -1,0 +1,15 @@
+{
+  "name": "attrs",
+  "packageManager": "pip",
+  "enablers": ["attrs"],
+  "toolingDependencies": ["attrs"],
+  "usedDecorators": [
+    "define",
+    "attrs.define",
+    "frozen",
+    "attrs.frozen",
+    "attr.s",
+    "attrs.s",
+    "s"
+  ]
+}

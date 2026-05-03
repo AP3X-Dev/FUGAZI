@@ -33,7 +33,20 @@
  */
 
 import { matchesGlob } from './matcher.js';
-import type { PluginDef, PluginDetection } from './types.js';
+import type { PluginDef, PluginDetection, PluginPackageManager } from './types.js';
+
+/**
+ * PEP 503 normalize a package name. Lowercase, collapse runs of `[._-]+` to
+ * a single `-`. Local copy to avoid a cross-package import on `@fugazi/graph`
+ * which would create a layer-violation cycle (graph already depends on
+ * plugins indirectly via core).
+ */
+function pep503Normalize(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/[-_.]+/g, '-');
+}
 
 /**
  * The minimal package.json shape the detector reads. Avoids depending on
@@ -47,14 +60,35 @@ export interface PackageJsonForDetection {
 }
 
 /**
+ * Phase 4d T347. The minimal Python-manifest shape the detector reads.
+ * Mirrors the shape produced by `loadPythonManifest()` in `@fugazi/graph`
+ * but without depending on it directly — callers pass either the live
+ * manifest's runtime/dev sets or a constructed surface.
+ *
+ * Names in `runtime` / `dev` MUST be PEP 503-normalized (lowercase, with
+ * runs of `[._-]+` collapsed to a single hyphen). The detector does NOT
+ * re-normalize, so callers that pass raw enabler strings should normalize
+ * them upstream when constructing the context.
+ */
+export interface PythonManifestForDetection {
+  readonly runtime: ReadonlySet<string>;
+  readonly dev: ReadonlySet<string>;
+}
+
+/**
  * The project surface the detector queries. `files` is a list of project-
  * relative POSIX paths used by `fileExists` detection. The driver builds
  * this from the discovery output and from the project root's top-level
  * directory listing.
+ *
+ * `pyManifest` (Phase 4d T347) is optional — when absent, all Python-only
+ * plugins (those with `packageManager: 'pip' | 'poetry' | 'uv'`) silently
+ * fail to activate. `auto` plugins fall back to package.json alone.
  */
 export interface DetectionContext {
   readonly pkg: PackageJsonForDetection;
   readonly files: readonly string[];
+  readonly pyManifest?: PythonManifestForDetection;
 }
 
 /**
@@ -67,6 +101,21 @@ export function collectDependencyNames(pkg: PackageJsonForDetection): ReadonlySe
   for (const key of Object.keys(pkg.dependencies ?? {})) out.add(key);
   for (const key of Object.keys(pkg.devDependencies ?? {})) out.add(key);
   for (const key of Object.keys(pkg.peerDependencies ?? {})) out.add(key);
+  return out;
+}
+
+/**
+ * Build the union dependency-name set from a Python manifest. Returns a
+ * single set unioning `runtime ∪ dev` so membership tests are O(1). All
+ * names are presumed PEP 503 normalized by the manifest loader; the detector
+ * normalizes its enabler at lookup time so callers can ship either form.
+ */
+export function collectPythonDependencyNames(
+  manifest: PythonManifestForDetection,
+): ReadonlySet<string> {
+  const out = new Set<string>();
+  for (const name of manifest.runtime) out.add(name);
+  for (const name of manifest.dev) out.add(name);
   return out;
 }
 
@@ -85,13 +134,76 @@ export function matchesEnabler(enabler: string, deps: ReadonlySet<string>): bool
 }
 
 /**
+ * Phase 4d T347. PEP 503-aware enabler match. The enabler is normalized
+ * before lookup so plugin authors can ship `SQLAlchemy`, `sqlalchemy`, or
+ * `tortoise-orm` interchangeably and get the same activation behaviour.
+ */
+export function matchesPythonEnabler(enabler: string, deps: ReadonlySet<string>): boolean {
+  const normalized = pep503Normalize(enabler);
+  if (normalized.endsWith('/')) {
+    // Prefix-match form is rare for Python; preserved for symmetry.
+    for (const name of deps) {
+      if (name.startsWith(normalized)) return true;
+    }
+    return false;
+  }
+  return deps.has(normalized);
+}
+
+/**
+ * Phase 4d T347. Decide which manifest pipelines to consult for an enabler
+ * lookup, based on the plugin's `packageManager` field.
+ *
+ *   - `auto` (default): check BOTH package.json and any Python manifest.
+ *   - `npm`:            only package.json.
+ *   - `pip` / `poetry` / `uv`: only Python manifest.
+ */
+function enablerMatchesAny(
+  enabler: string,
+  packageManager: PluginPackageManager,
+  ctx: DetectionContext,
+): boolean {
+  const checkNpm = packageManager === 'auto' || packageManager === 'npm';
+  const checkPy =
+    packageManager === 'auto' ||
+    packageManager === 'pip' ||
+    packageManager === 'poetry' ||
+    packageManager === 'uv';
+
+  if (checkNpm) {
+    const npmDeps = collectDependencyNames(ctx.pkg);
+    if (matchesEnabler(enabler, npmDeps)) return true;
+  }
+  if (checkPy && ctx.pyManifest !== undefined) {
+    const pyDeps = collectPythonDependencyNames(ctx.pyManifest);
+    if (matchesPythonEnabler(enabler, pyDeps)) return true;
+  }
+  return false;
+}
+
+/**
  * Recursively evaluate a `PluginDetection` against the detection context.
  * Pure and synchronous.
+ *
+ * Phase 4d T347: the `dependency` rule consults BOTH package.json and any
+ * Python manifest by default. Plugins that need to scope to a single
+ * pipeline express that via the parent plugin's `packageManager` field; the
+ * detection sub-tree is run with that context unchanged. We do NOT thread
+ * `packageManager` into the recursion because the schema only attaches it
+ * to the plugin root, not per-condition.
  */
 export function evaluateDetection(detection: PluginDetection, ctx: DetectionContext): boolean {
   switch (detection.type) {
-    case 'dependency':
-      return collectDependencyNames(ctx.pkg).has(detection.package);
+    case 'dependency': {
+      // Auto-mode dependency match: union of npm + python.
+      const npmDeps = collectDependencyNames(ctx.pkg);
+      if (npmDeps.has(detection.package)) return true;
+      if (ctx.pyManifest !== undefined) {
+        const pyDeps = collectPythonDependencyNames(ctx.pyManifest);
+        if (matchesPythonEnabler(detection.package, pyDeps)) return true;
+      }
+      return false;
+    }
     case 'fileExists':
       return ctx.files.some((file) => matchesGlob(detection.pattern, file));
     case 'all':
@@ -103,16 +215,19 @@ export function evaluateDetection(detection: PluginDetection, ctx: DetectionCont
 
 /**
  * Decide whether a single plugin is active. `detection` takes priority over
- * `enablers` per the schema contract.
+ * `enablers` per the schema contract. When falling back to `enablers`, the
+ * plugin's `packageManager` field decides which manifest pipeline(s) to
+ * consult — `auto` (default) checks both, `npm` only package.json, and
+ * `pip` / `poetry` / `uv` only the Python manifest.
  */
 export function isPluginActive(plugin: PluginDef, ctx: DetectionContext): boolean {
   if (plugin.detection !== undefined) {
     return evaluateDetection(plugin.detection, ctx);
   }
   if (plugin.enablers.length === 0) return false;
-  const deps = collectDependencyNames(ctx.pkg);
+  const packageManager = plugin.packageManager;
   for (const enabler of plugin.enablers) {
-    if (matchesEnabler(enabler, deps)) return true;
+    if (enablerMatchesAny(enabler, packageManager, ctx)) return true;
   }
   return false;
 }

@@ -10,6 +10,7 @@ export type {
   EntryPointRole,
   PluginDef,
   PluginDetection,
+  PluginPackageManager,
   ScopedUsedClassMember,
   UsedClassMember,
   UsedExport,
@@ -19,6 +20,7 @@ export {
   EntryPointRoleSchema,
   PluginDefSchema,
   PluginDetectionSchema,
+  PluginPackageManagerSchema,
   ScopedUsedClassMemberSchema,
   UsedClassMemberSchema,
   UsedExportSchema,
@@ -36,12 +38,15 @@ export {
 
 export {
   collectDependencyNames,
+  collectPythonDependencyNames,
   detectActivePlugins,
   evaluateDetection,
   isPluginActive,
   matchesEnabler,
+  matchesPythonEnabler,
   type DetectionContext,
   type PackageJsonForDetection,
+  type PythonManifestForDetection,
 } from './detect.js';
 
 export {

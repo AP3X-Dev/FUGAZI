@@ -23,6 +23,8 @@ const mkPlugin = (overrides: Partial<PluginDef>): PluginDef =>
     toolingDependencies: [],
     usedExports: [],
     usedClassMembers: [],
+    packageManager: 'auto' as const,
+    usedDecorators: [],
     ...overrides,
   });
 
@@ -240,5 +242,141 @@ describe('detectActivePlugins', () => {
       files: [],
     });
     expect(Object.isFrozen(result)).toBe(true);
+  });
+});
+
+/* ------------------------------------------------------------------------ */
+/* Phase 4d T347 — Python-manifest activation paths                         */
+/* ------------------------------------------------------------------------ */
+
+const pyManifest = (
+  runtime: readonly string[],
+  dev: readonly string[] = [],
+): { runtime: ReadonlySet<string>; dev: ReadonlySet<string> } => ({
+  runtime: new Set(runtime),
+  dev: new Set(dev),
+});
+
+describe('Phase 4d T347 — packageManager-aware activation', () => {
+  it('packageManager:pip plugin activates from pyproject.toml deps', () => {
+    const p = mkPlugin({ name: 'django', packageManager: 'pip', enablers: ['django'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['django']),
+      }),
+    ).toBe(true);
+  });
+
+  it('packageManager:pip plugin does NOT activate from package.json deps', () => {
+    const p = mkPlugin({ name: 'django', packageManager: 'pip', enablers: ['django'] });
+    expect(
+      isPluginActive(p, {
+        pkg: { dependencies: { django: '^4.0' } },
+        files: [],
+      }),
+    ).toBe(false);
+  });
+
+  it('packageManager:poetry plugin activates from python manifest', () => {
+    const p = mkPlugin({ name: 'pytest', packageManager: 'poetry', enablers: ['pytest'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest([], ['pytest']),
+      }),
+    ).toBe(true);
+  });
+
+  it('packageManager:uv plugin activates from python manifest', () => {
+    const p = mkPlugin({ name: 'ruff', packageManager: 'uv', enablers: ['ruff'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['ruff']),
+      }),
+    ).toBe(true);
+  });
+
+  it('packageManager:npm plugin does NOT activate from python manifest', () => {
+    const p = mkPlugin({ name: 'vitest', packageManager: 'npm', enablers: ['vitest'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['vitest']),
+      }),
+    ).toBe(false);
+  });
+
+  it('packageManager:auto plugin activates from EITHER manifest (pkg)', () => {
+    const p = mkPlugin({ name: 'auto', packageManager: 'auto', enablers: ['react'] });
+    expect(
+      isPluginActive(p, {
+        pkg: { dependencies: { react: '^19' } },
+        files: [],
+      }),
+    ).toBe(true);
+  });
+
+  it('packageManager:auto plugin activates from EITHER manifest (python)', () => {
+    const p = mkPlugin({ name: 'auto', packageManager: 'auto', enablers: ['flask'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['flask']),
+      }),
+    ).toBe(true);
+  });
+
+  it('Python plugin matches PEP 503-normalized name (sqlalchemy ↔ SQLAlchemy)', () => {
+    const p = mkPlugin({ name: 'sqlalchemy', packageManager: 'pip', enablers: ['SQLAlchemy'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['sqlalchemy']),
+      }),
+    ).toBe(true);
+  });
+
+  it('Python plugin matches PEP 503-normalized name (tortoise-orm ↔ tortoise_orm)', () => {
+    const p = mkPlugin({ name: 'tortoise', packageManager: 'pip', enablers: ['tortoise_orm'] });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['tortoise-orm']),
+      }),
+    ).toBe(true);
+  });
+
+  it('packageManager:pip plugin without pyManifest is silently inactive', () => {
+    const p = mkPlugin({ name: 'django', packageManager: 'pip', enablers: ['django'] });
+    expect(isPluginActive(p, { pkg: {}, files: [] })).toBe(false);
+  });
+
+  it('detection rule (dependency type) checks both pkg AND python manifest', () => {
+    const p = mkPlugin({
+      name: 'auto',
+      detection: { type: 'dependency', package: 'fastapi' },
+    });
+    expect(
+      isPluginActive(p, {
+        pkg: {},
+        files: [],
+        pyManifest: pyManifest(['fastapi']),
+      }),
+    ).toBe(true);
+    expect(
+      isPluginActive(p, {
+        pkg: { dependencies: { fastapi: '^0.100' } },
+        files: [],
+      }),
+    ).toBe(true);
   });
 });

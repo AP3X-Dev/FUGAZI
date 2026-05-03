@@ -1,0 +1,33 @@
+{
+  "name": "pydantic",
+  "packageManager": "pip",
+  "enablers": ["pydantic"],
+  "toolingDependencies": ["pydantic"],
+  "usedDecorators": [
+    "validator",
+    "root_validator",
+    "field_validator",
+    "model_validator",
+    "computed_field",
+    "pydantic.validator",
+    "pydantic.root_validator",
+    "pydantic.field_validator",
+    "pydantic.model_validator",
+    "pydantic.computed_field"
+  ],
+  "usedClassMembers": [
+    {
+      "extends": "BaseModel",
+      "members": [
+        "Config",
+        "model_config",
+        "model_validate",
+        "model_dump",
+        "model_dump_json",
+        "dict",
+        "json",
+        "parse_obj"
+      ]
+    }
+  ]
+}

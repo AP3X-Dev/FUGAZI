@@ -1,0 +1,6 @@
+{
+  "name": "pyright",
+  "packageManager": "pip",
+  "enablers": ["pyright"],
+  "toolingDependencies": ["pyright"]
+}

@@ -2,14 +2,46 @@
 
 Declarative framework plugin system for Fugazi.
 
-Ships 91 bundled plugins (Next.js, Vite, Vitest, Jest, ESLint, TypeScript,
-Tailwind, etc.) as JSON data files validated against
-[`plugin-schema.json`](../../plugin-schema.json). Plugins:
+Ships 115 bundled plugins (Next.js, Vite, Vitest, Jest, ESLint, TypeScript,
+Tailwind, Django, Flask, FastAPI, pytest, SQLAlchemy, Pydantic, etc.) as
+JSON data files validated against `PluginDefSchema`. Plugins:
 
 - mark framework convention files as entry points
 - allow-list tooling dependencies (so they don't surface as `unused-deps`)
 - declare which exports are framework-used per file pattern (so they don't
   surface as `unused-exports`)
+- declare per-decorator allowlists for class members (Python, Phase 4d) so
+  framework-driven dispatch (`@app.route`, `@pytest.fixture`) doesn't fire
+  spurious `unused-class-members` findings
+
+## Phase 4d — Python framework plugins
+
+24 Python framework plugins ship in 4d:
+
+| Family       | Plugins                                                   |
+|--------------|-----------------------------------------------------------|
+| Web          | django, flask, fastapi, starlette, tornado, pyramid      |
+| Test         | pytest, unittest, hypothesis                             |
+| ORM          | sqlalchemy, tortoise                                      |
+| Validation   | pydantic, dataclasses, attrs                              |
+| Async / queue| celery, rq, dramatiq                                      |
+| CLI          | click, typer                                              |
+| Tooling-only | black, isort, ruff, mypy, pyright                         |
+
+Each Python plugin sets `packageManager: 'pip'` so its `enablers` are
+checked against `pyproject.toml` / `setup.cfg` / `requirements.txt` instead
+of `package.json`. The default `packageManager` is `'auto'` (both
+manifests are consulted) so existing TS plugins are backwards-compatible.
+
+### Deferred to v1.x (T355–T360)
+
+- **Jupyter notebooks (`.ipynb`).** Notebook parsing is JSON-cell-aware and
+  adds extraction complexity. The plugin shape is reserved.
+- **Poetry / uv tooling-only plugins.** Per-resolver tooling allowlists
+  beyond what pip's manifest already covers.
+- **FastAPI extras, sqlmodel, polars.** Frameworks with thinner
+  decorator/heritage surfaces; their declarative shape needs more
+  ecosystem usage data before shipping.
 
 ## Public surface
 

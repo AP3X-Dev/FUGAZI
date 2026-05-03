@@ -50,6 +50,7 @@ export type {
   Import,
   ImportKind,
   Inventory,
+  MemberDecoration,
   Usage,
   UsageKind,
 } from './types.js';

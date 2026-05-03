@@ -1,0 +1,24 @@
+{
+  "name": "sqlalchemy",
+  "packageManager": "pip",
+  "enablers": ["sqlalchemy"],
+  "toolingDependencies": ["sqlalchemy", "alembic"],
+  "usedClassMembers": [
+    {
+      "extends": "DeclarativeBase",
+      "members": ["__tablename__", "__table_args__", "__mapper_args__"]
+    },
+    {
+      "extends": "Base",
+      "members": ["__tablename__", "__table_args__", "__mapper_args__"]
+    }
+  ],
+  "usedDecorators": [
+    "validates",
+    "hybrid_property",
+    "hybrid_method",
+    "sqlalchemy.orm.validates",
+    "sqlalchemy.ext.hybrid.hybrid_property",
+    "sqlalchemy.ext.hybrid.hybrid_method"
+  ]
+}

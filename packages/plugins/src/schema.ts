@@ -21,6 +21,7 @@ import type {
   EntryPointRole,
   PluginDef,
   PluginDetection,
+  PluginPackageManager,
   ScopedUsedClassMember,
   UsedClassMember,
   UsedExport,
@@ -34,6 +35,21 @@ export const EntryPointRoleSchema: z.ZodType<EntryPointRole> = z.enum([
   'runtime',
   'test',
   'support',
+]);
+
+/**
+ * `PluginPackageManagerSchema` — five closed values, defaults to `auto` when
+ * absent from the input. Matches `PluginPackageManager` from `types.ts` 1:1.
+ *
+ * Phase 4d T346 — backwards-compatible addition. Existing TS plugins that
+ * omit this field parse to `auto`, which checks both manifest pipelines.
+ */
+export const PluginPackageManagerSchema: z.ZodType<PluginPackageManager> = z.enum([
+  'npm',
+  'pip',
+  'poetry',
+  'uv',
+  'auto',
 ]);
 
 /**
@@ -99,4 +115,6 @@ export const PluginDefSchema: z.ZodType<PluginDef> = z.object({
   toolingDependencies: z.array(z.string()).default([]),
   usedExports: z.array(UsedExportSchema).default([]),
   usedClassMembers: z.array(UsedClassMemberSchema).default([]),
+  packageManager: PluginPackageManagerSchema.default('auto'),
+  usedDecorators: z.array(z.string()).default([]),
 }) as unknown as z.ZodType<PluginDef>;

@@ -1,0 +1,22 @@
+{
+  "name": "flask",
+  "packageManager": "pip",
+  "enablers": ["flask"],
+  "entryPoints": ["app.py", "wsgi.py", "**/blueprints/**.py"],
+  "entryPointRole": "runtime",
+  "configPatterns": ["config.py", "**/config.py"],
+  "alwaysUsed": ["wsgi.py"],
+  "toolingDependencies": ["flask"],
+  "usedDecorators": [
+    "app.route",
+    "app.before_request",
+    "app.after_request",
+    "app.errorhandler",
+    "app.teardown_appcontext",
+    "app.context_processor",
+    "blueprint.route",
+    "blueprint.before_request",
+    "blueprint.after_request",
+    "route"
+  ]
+}

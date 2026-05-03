@@ -35,6 +35,8 @@ function mkPlugin(overrides: Partial<PluginDef>): PluginDef {
     toolingDependencies: [],
     usedExports: [],
     usedClassMembers: [],
+    packageManager: 'auto' as const,
+    usedDecorators: [],
     ...overrides,
   });
 }

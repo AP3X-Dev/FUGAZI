@@ -35,6 +35,21 @@
 export type EntryPointRole = 'runtime' | 'test' | 'support';
 
 /**
+ * `PluginPackageManager` — which manifest the plugin's `enablers` apply to.
+ *
+ *   - `npm`    — package.json (dependencies / devDependencies / peerDependencies).
+ *   - `pip`    — Python: pyproject.toml [project.dependencies], setup.cfg, requirements*.txt.
+ *   - `poetry` — Python: pyproject.toml [tool.poetry.*].
+ *   - `uv`     — Python: pyproject.toml [tool.uv.*] (best-effort).
+ *   - `auto`   — default; both package.json AND any Python manifest are consulted.
+ *
+ * `pip` / `poetry` / `uv` all consult the same Python-manifest pipeline today
+ * — the distinction is informational, not behavioural — but the field is
+ * preserved so future per-resolver constraints can land without a schema bump.
+ */
+export type PluginPackageManager = 'npm' | 'pip' | 'poetry' | 'uv' | 'auto';
+
+/**
  * `PluginDetection` — discriminated union over the four detection strategies
  * a plugin can use to decide whether it is active for a given project.
  *
@@ -104,4 +119,24 @@ export interface PluginDef {
   readonly toolingDependencies: readonly string[];
   readonly usedExports: readonly UsedExport[];
   readonly usedClassMembers: readonly UsedClassMember[];
+  /**
+   * Phase 4d T346. Which manifest the plugin's `enablers` apply to. Defaults
+   * to `auto` (both package.json and pyproject.toml are checked). When
+   * explicit, only the named manager's manifest is consulted by the
+   * detection layer. Backwards-compatible: bundled TS plugins that do not
+   * set this field continue to be evaluated against package.json (since
+   * `auto` checks both, but no Python manifest will ever contain a TS
+   * package name).
+   */
+  readonly packageManager: PluginPackageManager;
+  /**
+   * Phase 4d T346. Decorator names (dotted-form, matching the visitor's
+   * `Usage{kind:'decorator'}.name` payload) that mark a class member as
+   * framework-used. Examples: `'app.route'`, `'pytest.fixture'`. Bare names
+   * (`'fixture'`) match both `@fixture` and `@pytest.fixture`. Empty by
+   * default. The `unused-class-members` rule reads the union of this list
+   * across active plugins and exempts members carrying any allowlisted
+   * decorator.
+   */
+  readonly usedDecorators: readonly string[];
 }

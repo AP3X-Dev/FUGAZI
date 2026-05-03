@@ -186,22 +186,55 @@ const PY_DUNDER_LIFECYCLE_METHODS: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Phase 4c T333. Build the per-class set of member names that should NOT
- * be flagged as unused. Returns null for non-Python classes (caller skips
- * the lookup). Includes:
+ * Phase 4c T333 + Phase 4d T346. Build the per-class set of member names
+ * that should NOT be flagged as unused. Returns null for non-Python classes
+ * (caller skips the lookup). Includes:
  *   - All dunder lifecycle methods that the class actually defines.
- *   - All decorated methods (the visitor surfaces these via
- *     `decoratedMembers`).
- *
- * Plugin-layer refinement (Phase 4d) extends this with per-framework
- * `usedClassMembers` rules (e.g. `setUp` for unittest, `dispatch` for
- * Django views).
+ *   - All members whose decorators overlap with the active plugins'
+ *     `usedDecorators` allowlist (T346 refinement). Bare-form names like
+ *     `'fixture'` match both `@fixture` and `@pytest.fixture` — the rule
+ *     compares against the dotted decorator name AND its trailing segment.
+ *   - When the active-plugin allowlist is EMPTY (no Python plugin loaded),
+ *     fall back to the conservative T333 behaviour and exempt every
+ *     decorated member regardless of decorator name. This preserves
+ *     pre-Phase-4d behaviour on projects where no framework plugin
+ *     contributes decorator hints — better to under-flag than over-flag.
  */
-function buildPyMemberExemptions(decl: Declaration): ReadonlySet<string> {
+function buildPyMemberExemptions(
+  decl: Declaration,
+  pluginUsedDecorators: ReadonlySet<string>,
+): ReadonlySet<string> {
   const out = new Set<string>();
   for (const m of decl.members) {
     if (PY_DUNDER_LIFECYCLE_METHODS.has(m)) out.add(m);
   }
+  // Active-plugin allowlist refinement (T346): exempt only members whose
+  // decorators include at least one allowlisted name. Bare-form match: the
+  // trailing segment of a dotted decorator is checked against the bare-form
+  // entries in the allowlist (e.g. `'fixture'` matches `@pytest.fixture`).
+  if (decl.memberDecorations !== undefined && pluginUsedDecorators.size > 0) {
+    for (const md of decl.memberDecorations) {
+      let exempted = false;
+      for (const dotted of md.decorators) {
+        if (pluginUsedDecorators.has(dotted)) {
+          exempted = true;
+          break;
+        }
+        const lastDot = dotted.lastIndexOf('.');
+        if (lastDot >= 0) {
+          const tail = dotted.slice(lastDot + 1);
+          if (pluginUsedDecorators.has(tail)) {
+            exempted = true;
+            break;
+          }
+        }
+      }
+      if (exempted) out.add(md.name);
+    }
+    return out;
+  }
+  // Fallback (T333 legacy): no active-plugin decorator allowlist — exempt
+  // every decorated member.
   if (decl.decoratedMembers !== undefined) {
     for (const m of decl.decoratedMembers) out.add(m);
   }
@@ -240,6 +273,16 @@ function collectCandidates(ctx: RuleContext): readonly MemberCandidate[] {
     bucket.add(edge.to as unknown as number);
   }
 
+  // Phase 4d T346. Build the union of `usedDecorators` across active
+  // plugins. Empty when no plugin contributed — the per-class exemption
+  // builder falls back to the T333 legacy "skip-all-decorated" behaviour.
+  const pluginUsedDecorators = new Set<string>();
+  if (ctx.activePlugins !== undefined) {
+    for (const plugin of ctx.activePlugins) {
+      for (const dec of plugin.usedDecorators) pluginUsedDecorators.add(dec);
+    }
+  }
+
   const candidates: MemberCandidate[] = [];
   for (const node of ctx.graph.files.values()) {
     const isPy = node.path.endsWith('.py') || node.inventory.lang === 'py';
@@ -248,10 +291,11 @@ function collectCandidates(ctx: RuleContext): readonly MemberCandidate[] {
       if (!decl.exported) continue;
       if (decl.members.length === 0) continue;
 
-      // Phase 4c T333: build the per-class Python exemption set. Members
-      // matching the dunder allowlist OR carrying at least one decorator
-      // are framework-presumed-used and skipped.
-      const pyExempt = isPy ? buildPyMemberExemptions(decl) : null;
+      // Phase 4c T333 + Phase 4d T346: build the per-class Python exemption
+      // set. Members matching the dunder allowlist OR carrying an
+      // allowlisted decorator (or any decorator when the allowlist is
+      // empty, preserving T333 behaviour) are framework-presumed-used.
+      const pyExempt = isPy ? buildPyMemberExemptions(decl, pluginUsedDecorators) : null;
 
       for (const member of decl.members) {
         if (pyExempt?.has(member)) continue;

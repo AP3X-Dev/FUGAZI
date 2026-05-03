@@ -1,0 +1,14 @@
+{
+  "name": "starlette",
+  "packageManager": "pip",
+  "enablers": ["starlette"],
+  "entryPoints": ["main.py", "**/routes.py", "**/endpoints.py"],
+  "entryPointRole": "runtime",
+  "toolingDependencies": ["starlette"],
+  "usedClassMembers": [
+    {
+      "extends": "HTTPEndpoint",
+      "members": ["get", "post", "put", "patch", "delete", "head", "options"]
+    }
+  ]
+}

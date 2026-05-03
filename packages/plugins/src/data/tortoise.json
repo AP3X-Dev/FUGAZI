@@ -1,0 +1,9 @@
+{
+  "name": "tortoise",
+  "packageManager": "pip",
+  "enablers": ["tortoise-orm"],
+  "toolingDependencies": ["tortoise-orm"],
+  "usedClassMembers": [
+    { "extends": "Model", "members": ["Meta", "__str__"] }
+  ]
+}
