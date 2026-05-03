@@ -22,6 +22,11 @@
  * The function is synchronous and never throws. Inputs are not mutated.
  */
 
+import { type PythonManifest, loadPythonManifest } from '../resolve-py/manifest.js';
+import { resolvePyRelative } from '../resolve-py/relative.js';
+import { isPythonStdlib } from '../resolve-py/stdlib.js';
+import { resolveSysPath } from '../resolve-py/sys-path.js';
+import { findVirtualenv, resolveInVirtualenv } from '../resolve-py/virtualenv.js';
 import { matchesAliasPrefix, resolveAlias } from './alias.js';
 import { type FsAdapter, nodeFsAdapter } from './fs-adapter.js';
 import { resolveNodeModules } from './node-modules.js';
@@ -85,6 +90,13 @@ export interface ResolverContext {
    * Filesystem adapter. Defaults to `nodeFsAdapter`.
    */
   readonly fs?: FsAdapter;
+  /**
+   * Optional pre-loaded Python manifest. When omitted, the dispatcher loads
+   * it on demand from `<projectRoot>/pyproject.toml` (or the documented
+   * fallback chain). Hermetic tests pass this directly to skip filesystem
+   * probing.
+   */
+  readonly pythonManifest?: PythonManifest;
 }
 
 export type Resolution =
@@ -133,6 +145,12 @@ export function resolve(specifier: string, fromFile: string, ctx: ResolverContex
     return { kind: 'builtin', source: specifier };
   }
 
+  // 0b. Python files: route through the Python resolver chain. The TS
+  //     resolvers below are skipped entirely.
+  if (isPythonFile(fromFile)) {
+    return resolvePython(specifier, fromFile, ctx, fs);
+  }
+
   // 1. Relative.
   if (specifier.startsWith('.')) {
     const hit = resolveRelative(specifier, fromFile, fs);
@@ -179,4 +197,77 @@ function looksBare(specifier: string): boolean {
   if (specifier.includes('://')) return false;
   if (specifier.startsWith('data:')) return false;
   return true;
+}
+
+/**
+ * Return `true` if `fromFile` is a Python source file (`.py` or `.pyi`).
+ * The dispatcher uses this to choose between the TS and Python resolver
+ * chains.
+ */
+function isPythonFile(fromFile: string): boolean {
+  return fromFile.endsWith('.py') || fromFile.endsWith('.pyi');
+}
+
+/**
+ * Python resolver dispatcher. Order:
+ *
+ *   1. stdlib       — `os`, `sys`, `urllib.request`, …  → `builtin`
+ *   2. relative     — `.foo`, `..bar.baz`              → `resolved` | `unresolved`
+ *   3. sys.path     — absolute project module           → `resolved`
+ *   4. manifest+venv — declared in pyproject etc        → `external`
+ *   5. fallback     — anything else                     → `unresolved`
+ *
+ * Step 4: when the specifier did not resolve to a project file, we ask the
+ * manifest "is this a declared dependency?" If yes, it's `external` regardless
+ * of whether the virtualenv has it installed. If no, but virtualenv DOES have
+ * it installed, we still report `external` (the user has it locally; the
+ * declaration check happens in a downstream rule). If neither, it's
+ * `unresolved`.
+ */
+function resolvePython(
+  specifier: string,
+  fromFile: string,
+  ctx: ResolverContext,
+  fs: FsAdapter,
+): Resolution {
+  if (specifier === '') return { kind: 'unresolved', source: specifier };
+
+  // 1. Stdlib short-circuit (cheapest, no FS access).
+  if (isPythonStdlib(specifier)) {
+    return { kind: 'builtin', source: specifier };
+  }
+
+  // 2. Relative imports.
+  if (specifier.startsWith('.')) {
+    const hit = resolvePyRelative(specifier, fromFile, fs);
+    if (hit !== null) return { kind: 'resolved', target: hit };
+    return { kind: 'unresolved', source: specifier };
+  }
+
+  // 3. Absolute import — try the project's sys.path roots first.
+  const sysHit = resolveSysPath(specifier, ctx.projectRoot, fs);
+  if (sysHit !== null) return { kind: 'resolved', target: sysHit };
+
+  // 4. Manifest + virtualenv.
+  const dot = specifier.indexOf('.');
+  const head = dot === -1 ? specifier : specifier.slice(0, dot);
+  if (head === '') return { kind: 'unresolved', source: specifier };
+
+  // PEP 503 normalize the head for manifest lookup.
+  const normalizedHead = head.toLowerCase().replace(/[-_.]+/g, '-');
+
+  const manifest = ctx.pythonManifest ?? loadPythonManifest(ctx.projectRoot, fs);
+  if (manifest.all.has(normalizedHead)) {
+    return { kind: 'external', source: specifier };
+  }
+
+  const sitePackages = findVirtualenv(ctx.projectRoot, fs);
+  if (sitePackages !== null) {
+    const venvHit = resolveInVirtualenv(specifier, sitePackages, fs);
+    if (venvHit !== null) {
+      return { kind: 'external', source: specifier };
+    }
+  }
+
+  return { kind: 'unresolved', source: specifier };
 }

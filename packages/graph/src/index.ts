@@ -90,3 +90,22 @@ export {
   tryOutputToSourceFallback,
   tryWideIndexProbe,
 } from './resolve/index.js';
+
+export {
+  type PythonManifest,
+  EMPTY_PYTHON_MANIFEST,
+  PYTHON_STDLIB_MODULES,
+  buildSysPathRoots,
+  extractRequirementName,
+  findPackageRoot as findPythonPackageRoot,
+  findVirtualenv,
+  isAnyPackage,
+  isPythonStdlib,
+  isRegularPackage,
+  loadPythonManifest,
+  normalizePackageName,
+  parseRelativeSpec,
+  resolveInVirtualenv,
+  resolvePyRelative,
+  resolveSysPath,
+} from './resolve-py/index.js';

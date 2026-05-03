@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@fugazi/types": "workspace:*",
-    "@fugazi/extract": "workspace:*"
+    "@fugazi/extract": "workspace:*",
+    "smol-toml": "^1.6.1"
   },
   "devDependencies": {
     "@fast-check/vitest": "0.1.3",
