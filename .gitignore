@@ -4,6 +4,10 @@ node_modules/
 .pnp.js
 .yarn/
 
+# test fixtures intentionally model a node_modules/ layout
+!packages/config/test/fixtures/**/node_modules/
+!packages/config/test/fixtures/**/node_modules/**
+
 # build output
 dist/
 build/
