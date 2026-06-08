@@ -24,7 +24,7 @@
  * the other signal can still produce a useful result.
  *
  * Spec refs: design-doc §3.4 frameworks, §4.D.1 plugins / framework
- * presets. PRP refs: FR-B3 (preset auto-detection), FR-D3 (deterministic
+ * presets. spec refs: FR-B3 (preset auto-detection), FR-D3 (deterministic
  * emit).
  */
 import { readFile } from 'node:fs/promises';

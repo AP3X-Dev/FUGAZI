@@ -7,19 +7,17 @@
  *            workspace src trees outside documented call-site casts.
  *   - SC-29: `bun run lint` (biome) clean. Existing baseline gate.
  *   - SC-30: `bun test` and `node --test` parity — vitest is the v1.0
- *            runner; `node --test` parity is YELLOW per docs/V1_LIMITATIONS.md.
+ *            runner; `node --test` parity is not pursued in v1.0.
  *   - SC-31: Dogfood — `bunx fugazi audit` against the Fugazi repo itself
  *            completes without crash, exits ≤ 1, and produces a parseable
- *            JSON report. Findings are dispositioned (fix-now vs v1.x).
+ *            JSON report.
  *
- * The full dogfood report is archived in `docs/DOGFOOD.md`. This test
- * exists to (a) prove the dogfood path is non-fatal and (b) re-run it
- * fresh on every CI iteration so silent regressions are caught.
+ * This test exists to (a) prove the dogfood path is non-fatal and (b) re-run
+ * it fresh on every CI iteration so silent regressions are caught.
  */
 
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -151,16 +149,6 @@ describe('SC-29: lint clean (biome)', () => {
   });
 });
 
-describe('SC-30: bun test / node --test parity (deferred to v1.x)', () => {
-  it('docs/V1_LIMITATIONS.md documents the deferral', () => {
-    const path = resolve(REPO_ROOT, 'docs', 'V1_LIMITATIONS.md');
-    expect(existsSync(path)).toBe(true);
-    const text = readFileSync(path, 'utf8');
-    expect(text).toMatch(/node --test/);
-    expect(text).toMatch(/SC-30/);
-  });
-});
-
 describe('SC-31: dogfood — `fugazi audit` against the Fugazi repo', () => {
   it('audit runs without crashing, exits 0 or 1, and produces parseable JSON', async () => {
     const result = await runFugazi(['audit', '--format', 'json', '--quiet']);
@@ -177,14 +165,4 @@ describe('SC-31: dogfood — `fugazi audit` against the Fugazi repo', () => {
     expect(Array.isArray(report.issues)).toBe(true);
     expect(report._meta.projectRoot).toBe(REPO_ROOT);
   }, 300_000);
-
-  it('dogfood findings inventory exists at docs/DOGFOOD.md', async () => {
-    const path = resolve(REPO_ROOT, 'docs', 'DOGFOOD.md');
-    expect(existsSync(path)).toBe(true);
-    const text = await readFile(path, 'utf8');
-    // The doc must call out the rule-by-rule disposition: which findings
-    // are v1.x carries vs fix-now.
-    expect(text).toMatch(/dogfood/i);
-    expect(text).toMatch(/v1\.x/i);
-  });
 });

@@ -8,21 +8,18 @@
  *
  *   1. Audit completes without crash and returns valid JSON.
  *   2. Dead-code completes with exit ≤ 1 (findings allowed).
- *   3. Documented findings disposition exists in `docs/DOGFOOD.md`.
  *
  * SC-36 target: total findings <5% of file count after `.fugazirc.json`
  * config. The current Python pipeline carries known limitations that
  * exceed this bar at the toy-fixture scale (pyproject deps not consulted
  * by the Python resolver yet, package-init-not-reachable, BaseModel field
- * usage not tracked). Each finding is dispositioned as a v1.x carry in
- * docs/DOGFOOD.md and docs/V1_LIMITATIONS.md — the rule code is NOT
- * suppressed to make the count drop, since that would invalidate the
- * dogfood signal.
+ * usage not tracked). Each finding is a known v1.x limitation — the rule
+ * code is NOT suppressed to make the count drop, since that would
+ * invalidate the dogfood signal.
  */
 
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -121,12 +118,4 @@ describe('SC-36: Python dogfood — py-sample fixture', () => {
     // Hard bar: <5% per the SC-36 contract. py-sample after fixes = 0.
     expect(ratio).toBeLessThan(0.05);
   }, 120_000);
-
-  it('docs/DOGFOOD.md mentions the Python sample disposition', async () => {
-    const path = resolve(REPO_ROOT, 'docs', 'DOGFOOD.md');
-    expect(existsSync(path)).toBe(true);
-    const text = await readFile(path, 'utf8');
-    expect(text).toMatch(/python/i);
-    expect(text).toMatch(/py-sample/i);
-  });
 });

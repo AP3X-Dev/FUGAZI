@@ -51,23 +51,7 @@ Thumbs.db
 *.tmp
 *.code-workspace
 
-# editor / tool configs
-CLAUDE.md
-AGENTS.md
-GEMINI.md
-.claude/
-.cursor/
-.copilot/
-
-# internal planning / working docs (not for publication)
-docs/superpowers/
-docs/decisions/QUESTIONNAIRE.md
-docs/DOGFOOD_AGENT_ASSIST_CR.md
-tools/port-plugins.ts
-tasks/
-BUG_TRACKER.md
-
-# experimental local-only packages — kept local, not published
+# local-only scratch (not published)
 _local/
 
 # js/ts framework + lint caches

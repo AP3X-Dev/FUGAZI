@@ -2,7 +2,7 @@
  * cache-paths.test.ts — T057-test acceptance suite for the Phase 3c.3
  * Dispatch B fast/slow/cold path dispatcher (T058) plus xxhash-wasm helper.
  *
- * Acceptance map (docs/superpowers/plans/02-phase-3c-3d-3e.md L447..474):
+ * Acceptance map:
  *   - Cold path on first call — `dispatch — cold path`
  *   - Fast path on unchanged mtime+size — `dispatch — fast path`
  *   - mtime/size change forces cold — `dispatch — invalidation`

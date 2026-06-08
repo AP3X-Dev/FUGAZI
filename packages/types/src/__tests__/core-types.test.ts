@@ -20,7 +20,7 @@ describe('Severity', () => {
 });
 
 describe('RuleId', () => {
-  // The 19 named rules from PRP FR-E1, in source order. Committed verbatim.
+  // The 19 named rules from spec FR-E1, in source order. Committed verbatim.
   const ALL_RULES: readonly RuleId[] = [
     'unused-files',
     'unused-exports',

@@ -19,7 +19,7 @@
  * vitest invocations.
  *
  * Spec refs: design-doc §7.4 (config-relevant invariants).
- * PRP refs: NFR-1 (determinism), FR-B (config) family.
+ * spec refs: NFR-1 (determinism), FR-B (config) family.
  */
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';

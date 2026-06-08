@@ -4,7 +4,7 @@
  * SC-2 calls for a target corpus of 145 project fixtures. v1.0
  * ships 34 representative fixtures across 6 themes (boundary, frameworks,
  * path-aliases, re-export, suppression, workspace). The remaining 111 are
- * carried to v1.x — see `docs/V1_LIMITATIONS.md`.
+ * carried to v1.x.
  *
  * The actual byte-equality assertions live in `fixtures.test.ts`. This file
  * is the SC-2 row gate:

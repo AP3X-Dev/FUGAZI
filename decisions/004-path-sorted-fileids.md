@@ -41,7 +41,7 @@ The branded type is `type FileId = number & { readonly __brand: 'FileId' }`. Con
 
 ## References
 
-- PRP NFR-2, FR-D3, FR-G2
+- Requirements: NFR-2, FR-D3, FR-G2
 - Spec `§5`, `§9`
 - ADR-002 (edge storage)
 - ADR-003 (Map/Set discipline)

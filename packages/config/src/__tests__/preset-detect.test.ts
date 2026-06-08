@@ -13,7 +13,7 @@
  * contributes). Determinism: idempotent, sorted output.
  *
  * Spec refs: design-doc §3.4 frameworks, §4.D.1 plugins / framework presets.
- * PRP refs: FR-B3 (preset auto-detection), FR-D3 (deterministic emit).
+ * spec refs: FR-B3 (preset auto-detection), FR-D3 (deterministic emit).
  */
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';

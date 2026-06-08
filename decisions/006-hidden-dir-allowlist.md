@@ -47,6 +47,6 @@ The allowlist is a constant in `@fugazi/extract`. Adding to it requires a pull r
 
 ## References
 
-- PRP FR-D1
+- Requirements: FR-D1
 - Spec `§3.E`
 - Implementation: exhaustiveness test in `packages/extract/src/discover/__tests__/hidden-dirs.test.ts`

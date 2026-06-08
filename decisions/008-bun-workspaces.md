@@ -36,6 +36,6 @@ We do not use `pnpm`. An earlier draft of this decision left `pnpm` as the fallb
 
 ## References
 
-- PRP `H1`
+- Requirements: `H1`
 - Spec `§2.A`
 - ADR-009 (Turbo orchestration on top of these workspaces)

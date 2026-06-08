@@ -183,7 +183,7 @@ A worked example is committed at
 
 ## Limitations
 
-The following are tracked in [`docs/V1_LIMITATIONS.md`](V1_LIMITATIONS.md):
+Known limitations of the Python pipeline in v1.0:
 
 - TYPE_CHECKING `else:` branch contents incorrectly type-classified.
 - `bigint` literal not preserved in `Constant.value` (precision loss for

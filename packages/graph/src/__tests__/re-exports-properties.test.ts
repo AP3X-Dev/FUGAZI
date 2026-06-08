@@ -13,7 +13,7 @@
  * 100-200 iterations per property; the entire file completes in ~3s on a
  * cold workspace (no parser, no IO).
  *
- * Spec refs: design-doc §7.5 (re-export invariants), PRP NFR-1 (determinism),
+ * Spec refs: design-doc §7.5 (re-export invariants), spec NFR-1 (determinism),
  * Phase 3d.4 dispatch (re-export propagation).
  */
 

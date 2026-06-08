@@ -2,7 +2,7 @@
  * scan-error.test.ts — T053-test acceptance suite for the fail-soft
  * `ScanError` union, `scanFile()` wrapper, and `ScanErrorAggregator` (Wave 5b-4).
  *
- * Acceptance map (from docs/superpowers/plans/02-phase-3c-3d-3e.md L383..411):
+ * Acceptance map:
  *   1. Discriminated-union exhaustive match via `assertNever`.
  *   2. Unsupported language returns verbatim message; parser is NOT invoked.
  *   3. No-extension file emits unsupported_language with extension ''.

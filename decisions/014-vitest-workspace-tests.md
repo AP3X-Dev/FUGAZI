@@ -8,7 +8,7 @@ Date: 2026-04-30
 
 ## Context
 
-The PRP requires that the test suite produce identical results under both Bun and Node 22+ (`SC-30`). Two ways to read this:
+The spec requires that the test suite produce identical results under both Bun and Node 22+ (`SC-30`). Two ways to read this:
 
 1. Maintain two separate test suites: `node:test` for Node, `bun:test` for Bun. Run both in CI. Diverge by definition; converge by discipline.
 2. Use a single test runner that runs cleanly on both runtimes and execute it twice in CI. One source, two runtimes.
@@ -23,9 +23,9 @@ We use Vitest as the only test runner. Each package has its own `vitest.config.t
 
 CI runs `bun x vitest run` and `node --import @vitest/import-meta-resolve --import vitest/runner ...` (or the equivalent Node runner invocation) as separate jobs. The expectation is identical results.
 
-Property tests are written with `fast-check`. The PRP's `SC-30` and `§9.2` checklist (re-export termination, FileId determinism) are satisfied via property runs that exercise generated input shapes.
+Property tests are written with `fast-check`. The spec's `SC-30` and `§9.2` checklist (re-export termination, FileId determinism) are satisfied via property runs that exercise generated input shapes.
 
-We do **not** maintain a separate `node:test` suite. The PRP requirement is "tests produce identical results under both runtimes," and a single Vitest suite executed twice meets that bar without doubling maintenance.
+We do **not** maintain a separate `node:test` suite. The spec requirement is "tests produce identical results under both runtimes," and a single Vitest suite executed twice meets that bar without doubling maintenance.
 
 ## Consequences
 
@@ -43,6 +43,6 @@ We do **not** maintain a separate `node:test` suite. The PRP requirement is "tes
 
 ## References
 
-- PRP `SC-30`, FR-D3
+- Requirements: `SC-30`, FR-D3
 - Spec `§3.E`, `§11.E`
 - ADR-008 (workspaces)

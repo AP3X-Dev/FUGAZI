@@ -225,7 +225,6 @@ Node-only contributors can substitute `npm install --workspaces && npm run build
 - [`docs/PYTHON.md`](docs/PYTHON.md) — Python support and contract
 - [`CONVENTIONS.md`](CONVENTIONS.md) — configuration, severities, suppression, determinism
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — workflow, branch model, ADR process
-- [`docs/V1_LIMITATIONS.md`](docs/V1_LIMITATIONS.md) — what's deferred past 1.0
 
 ## License
 

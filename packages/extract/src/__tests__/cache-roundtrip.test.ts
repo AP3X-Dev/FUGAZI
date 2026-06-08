@@ -2,7 +2,7 @@
  * cache-roundtrip.test.ts — T055-test acceptance suite for the Phase 3c.3
  * Dispatch A msgpackr cache codec + writer/reader (T056).
  *
- * Acceptance map (docs/superpowers/plans/02-phase-3c-3d-3e.md L415..445):
+ * Acceptance map:
  *   - 12+ round-trip tests across AST shapes — see `cache codec — round-trip`
  *   - Determinism: same input → same byte-output — `cache codec — determinism`
  *   - Version mismatch returns null (no throw) — `cache codec — version stamp`

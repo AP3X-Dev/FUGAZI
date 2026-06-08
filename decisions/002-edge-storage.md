@@ -46,6 +46,6 @@ Analysis passes consume these read-only. Adding an edge after graph construction
 
 ## References
 
-- PRP NFR-2, FR-G3
+- Requirements: NFR-2, FR-G3
 - Spec `§5`
 - ADR-004 (path-sorted FileIds)

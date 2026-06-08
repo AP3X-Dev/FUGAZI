@@ -38,6 +38,6 @@ Rolldown was the alternative and remains a viable swap target — it would produ
 
 ## References
 
-- PRP `H1`
+- Requirements: `H1`
 - Spec `§5.D`
 - ADR-008 (workspaces)

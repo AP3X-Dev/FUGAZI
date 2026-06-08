@@ -14,7 +14,7 @@ Fugazi accepts user configuration in three formats (JSON, TypeScript, TOML) and 
 2. Generate a JSON Schema that editor tooling (VS Code, JetBrains) can consume for autocomplete in `.fugazirc.json`.
 3. Validate plugin manifests before any plugin code is loaded — a plugin with a malformed schema must never reach the plugin loader.
 
-The PRP names two candidates: `valibot` and Zod. Both are TypeScript-first schema libraries with similar shapes; the differences are ecosystem maturity and JSON Schema interop.
+The spec names two candidates: `valibot` and Zod. Both are TypeScript-first schema libraries with similar shapes; the differences are ecosystem maturity and JSON Schema interop.
 
 ## Decision
 
@@ -40,10 +40,10 @@ Zod's `safeParse` pattern is used everywhere to avoid throwing across module bou
 - Zod's compilation time on TypeScript-heavy codebases is non-trivial. Mitigated because our schemas are small (config has ~40 fields total).
 
 ### Neutral
-- The PRP's `IMP-SEC-06` requirement ("Zod validation pre-load" for plugins) is satisfied by definition. If we ever need to swap Zod, the same requirement applies to the replacement.
+- The spec's `IMP-SEC-06` requirement ("Zod validation pre-load" for plugins) is satisfied by definition. If we ever need to swap Zod, the same requirement applies to the replacement.
 
 ## References
 
-- PRP `IMP-SEC-06`, FR-K2
+- Requirements: `IMP-SEC-06`, FR-K2
 - Spec `§11.B`
 - ADR-013 (clipanion CLI parser, which composes with Zod for argument validation)

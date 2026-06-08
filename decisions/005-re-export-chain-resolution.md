@@ -44,6 +44,6 @@ Cycle detection is implicit: once the fixed point is reached (or the cap is hit)
 
 ## References
 
-- PRP FR-G2, NFR-3
+- Requirements: FR-G2, NFR-3
 - Spec `§5`, `§9.2`
 - ADR-002 (edge storage), ADR-003 (Map discipline)

@@ -37,13 +37,13 @@ Sets that participate in cycle detection use the same discipline. `WeakMap`/`Wea
 - Reproducible iteration without a custom seed mechanism.
 
 ### Negative
-- Programmer must remember to sort on emit. We address this with a CI byte-diff gate (see PRP `SC-29`) that runs the analyzer twice on the same input and diffs output. Forgotten sorts surface immediately.
+- Programmer must remember to sort on emit. We address this with a CI byte-diff gate (see `SC-29`) that runs the analyzer twice on the same input and diffs output. Forgotten sorts surface immediately.
 
 ### Neutral
 - A future regression where we need a faster map (suffix-array internals, for example) is permitted; this ADR governs the default, not a hard ban. Such a regression must come with its own ADR justifying the swap.
 
 ## References
 
-- PRP NFR-2, FR-D3, SC-29
+- Requirements: NFR-2, FR-D3, SC-29
 - Spec `§3`, `§9`
 - ADR-004 (path-sorted FileIds)

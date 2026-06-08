@@ -43,6 +43,6 @@ A zone that matches zero files emits a `FugaziAnalysisError` warning with code `
 
 ## References
 
-- PRP FR-A4
+- Requirements: FR-A4
 - Spec `§9.4`
 - ADR-005 (re-export resolution; boundary check happens after re-export resolution but reads only direct edges)

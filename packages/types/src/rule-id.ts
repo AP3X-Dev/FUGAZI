@@ -1,6 +1,6 @@
 /**
  * RuleId — the closed string-literal union of every named rule Fugazi can
- * report. The 19 names below are committed verbatim per PRP FR-E1 and are
+ * report. The 19 names below are committed verbatim per spec FR-E1 and are
  * the canonical kebab-case identifiers used in:
  *
  *   - config files (rule severity overrides),

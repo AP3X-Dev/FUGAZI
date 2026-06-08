@@ -10,7 +10,7 @@
  *   - Ids are dense (1..n) within a single project state and intended to
  *     index packed arrays, NOT to survive across runs.
  *
- * Per PRP FR-D1 + SC-7 the assignment function MUST be stable under input
+ * Per spec FR-D1 + SC-7 the assignment function MUST be stable under input
  * permutation; per FR-D3 the returned Map iterates in insertion order, which
  * we deliberately make lexicographic.
  *

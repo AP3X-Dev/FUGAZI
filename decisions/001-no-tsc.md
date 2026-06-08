@@ -14,7 +14,7 @@ Fugazi is a static analyzer for TypeScript and JavaScript codebases. The temptat
 
 We reject that path for three reasons:
 
-1. **Performance ceiling.** Loading `tsc`'s checker on a medium-sized monorepo costs seconds before we have done any of our own analysis. NFR targets in the PRP demand sub-second cold-start on the same workloads. There is no engineering sleight-of-hand that closes that gap while still using the type checker.
+1. **Performance ceiling.** Loading `tsc`'s checker on a medium-sized monorepo costs seconds before we have done any of our own analysis. NFR targets demand sub-second cold-start on the same workloads. There is no engineering sleight-of-hand that closes that gap while still using the type checker.
 2. **Determinism.** `tsc`'s output depends on `lib`, `target`, `moduleResolution`, the user's `tsconfig`, and the exact compiler version in their `node_modules`. Running Fugazi twice on the same source can produce different findings if any of those drift. Our determinism goal (byte-identical output across runs given identical source) is incompatible with this.
 3. **Install footprint.** Pulling `typescript` as a runtime dependency adds ~70 MB to every install. Users who already have `typescript` in their workspace can deduplicate; users who don't pay the full price.
 
@@ -40,6 +40,6 @@ When a check would benefit from type knowledge (e.g., distinguishing a type-only
 
 ## References
 
-- PRP `H1`, NFR-1, NFR-3
+- Requirements: `H1`, NFR-1, NFR-3
 - Spec `§4`, `§9`
 - ADR-005 (re-export chain resolution)

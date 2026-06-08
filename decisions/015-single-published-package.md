@@ -8,7 +8,7 @@ Date: 2026-04-30
 
 ## Context
 
-The repo has 11 internal packages (`@fugazi/types`, `@fugazi/config`, `@fugazi/extract`, etc.). The naive distribution strategy is to publish each one to npm. The PRP rules this out: users should run `npm install -D fugazi` and get a working tool, not a chain of 11 dependencies they have to know by name.
+The repo has 11 internal packages (`@fugazi/types`, `@fugazi/config`, `@fugazi/extract`, etc.). The naive distribution strategy is to publish each one to npm. The spec rules this out: users should run `npm install -D fugazi` and get a working tool, not a chain of 11 dependencies they have to know by name.
 
 Two distribution shapes were considered:
 
@@ -47,6 +47,6 @@ There are no platform-specific binaries. Anything that varies by OS (path separa
 
 ## References
 
-- PRP `H1`, `SC-23`
+- Requirements: `H1`, `SC-23`
 - Spec `§6.A`, `§11.F`
 - ADR-008 (workspaces), ADR-009 (Turbo)

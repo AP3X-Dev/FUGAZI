@@ -18,8 +18,8 @@
  * cache integration belongs to `cache-roundtrip.test.ts`, not the visitor
  * pipeline.
  *
- * Spec refs: design-doc §7.4 (visitor invariants), PRP NFR-1 (determinism),
- * PRP FR-D3 (immutability), Phase 3c.4 dispatch C-2 (type-only imports).
+ * Spec refs: design-doc §7.4 (visitor invariants), spec NFR-1 (determinism),
+ * spec FR-D3 (immutability), Phase 3c.4 dispatch C-2 (type-only imports).
  */
 
 import { fc, test as fctest } from '@fast-check/vitest';

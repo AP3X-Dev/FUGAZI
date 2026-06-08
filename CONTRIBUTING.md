@@ -44,7 +44,7 @@ fix(extract): handle CRLF in template literal line counts
 docs(adr): record clipanion choice as ADR-013
 ```
 
-Do not include AI attribution, `Co-Authored-By` trailers, or "automated" markers. Commit messages are written in natural developer voice.
+Write commit messages in plain, descriptive developer voice — no tool-generated trailers.
 
 ## ADR workflow
 

@@ -15,7 +15,7 @@ The `fugazi` binary exposes 17 subcommands at v1.0 (`check`, `dead-code`, `dupes
 3. Auto-generated `--help` output.
 4. Native support for preset/alias expansion (`--preset ci` becomes a fixed set of flags).
 
-PRP candidates were `commander` and `clipanion`. Both are competent. The differentiator is ergonomics for nested subcommands and the class-based command model.
+Spec candidates were `commander` and `clipanion`. Both are competent. The differentiator is ergonomics for nested subcommands and the class-based command model.
 
 ## Decision
 
@@ -41,6 +41,6 @@ Argument validation that goes beyond Clipanion's built-ins (e.g., "this path mus
 
 ## References
 
-- PRP FR-C1
+- Requirements: FR-C1
 - Spec `§11.A`
 - ADR-012 (Zod validation, composes with clipanion option parsing)

@@ -10,7 +10,7 @@
  *   5. Arrow-wrapped                     `() => import('./X')`
  *   6. `.then(({foo}) => …)` callback
  *
- * v1.0 status (per docs/V1_LIMITATIONS.md):
+ * v1.0 status:
  *   - patterns 1, 5 are supported,
  *   - patterns 3 and 4 are deferred to v1.x (carried),
  *   - patterns 2 and 6 are partial.

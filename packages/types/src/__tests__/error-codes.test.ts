@@ -86,7 +86,7 @@ const ALL_REQUIRED_CODES: readonly ErrorCode[] = [
 const VALID_CODE_PATTERN = /^[A-Z][A-Z0-9_]*$/;
 
 describe('ConfigErrorCode', () => {
-  it('contains the required entries from PRP / spec', () => {
+  it('contains the required entries from spec', () => {
     expect(REQUIRED_CONFIG_CODES).toContain('CONFIG_INVALID_SCHEMA');
     expect(REQUIRED_CONFIG_CODES).toContain('CONFIG_EXTENDS_DEPTH_EXCEEDED');
     expect(REQUIRED_CONFIG_CODES).toContain('CONFIG_EXTENDS_PROTOCOL_REJECTED');
@@ -110,7 +110,7 @@ describe('ParseErrorCode', () => {
     expect(REQUIRED_PARSE_CODES).toContain('WASM_MISSING');
   });
 
-  it('contains the required entries from PRP / spec', () => {
+  it('contains the required entries from spec', () => {
     expect(REQUIRED_PARSE_CODES).toContain('PARSE_SYNTAX_ERROR');
     expect(REQUIRED_PARSE_CODES).toContain('PARSE_TIMEOUT');
   });
@@ -123,7 +123,7 @@ describe('ParseErrorCode', () => {
 });
 
 describe('CacheErrorCode', () => {
-  it('contains the required entries from PRP / spec', () => {
+  it('contains the required entries from spec', () => {
     expect(REQUIRED_CACHE_CODES).toContain('CACHE_VERSION_MISMATCH');
     expect(REQUIRED_CACHE_CODES).toContain('CACHE_LOCK_TIMEOUT');
   });
@@ -136,7 +136,7 @@ describe('CacheErrorCode', () => {
 });
 
 describe('GraphErrorCode', () => {
-  it('contains the required entries from PRP / spec', () => {
+  it('contains the required entries from spec', () => {
     expect(REQUIRED_GRAPH_CODES).toContain('GRAPH_REEXPORT_ITERATION_CAP');
     expect(REQUIRED_GRAPH_CODES).toContain('GRAPH_CYCLE_DETECTED');
   });

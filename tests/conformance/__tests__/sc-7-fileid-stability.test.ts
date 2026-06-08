@@ -1,7 +1,7 @@
 /**
  * sc-7-fileid-stability.test.ts — Phase 3m T287 — SC-7 acceptance row.
  *
- * SC-7 is the FileId-stability invariant from ADR-004 / PRP FR-D1: the same
+ * SC-7 is the FileId-stability invariant from ADR-004 / spec FR-D1: the same
  * set of input paths must always yield the same FileId map regardless of the
  * order they were supplied in. This file permutes a synthetic path set across
  * 100 runs and asserts byte-identical output every time.

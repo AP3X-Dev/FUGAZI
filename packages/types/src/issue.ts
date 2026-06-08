@@ -19,7 +19,7 @@ import type { Severity } from './severity.js';
  *                    summarized at file granularity). Per
  *                    `exactOptionalPropertyTypes`, omitting `range` is NOT
  *                    equivalent to setting it to `undefined`.
- *   - message      — human-readable description; verbatim per PRP E5 and
+ *   - message      — human-readable description; verbatim per spec E5 and
  *                    IMP-DX-08 (consumers grep `error.name` / `message`).
  *   - suggestions  — optional readonly array of safe, machine-applicable
  *                    Actions that would resolve this issue.

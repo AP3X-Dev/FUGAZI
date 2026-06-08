@@ -18,7 +18,7 @@
  * the value of `strict` after a permissive first parse.
  *
  * Spec ref: design-doc §3.4 / §4.C.2 (config schema and precedence).
- * PRP refs: FR-B1 (file priority), FR-B2 (extends chain — `extends` field
+ * spec refs: FR-B1 (file priority), FR-B2 (extends chain — `extends` field
  * is captured here; the loader implements the chain in T038/T039).
  */
 import type { RuleId, Severity } from '@fugazi/types';

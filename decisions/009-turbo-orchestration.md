@@ -41,6 +41,6 @@ Turbo's `--watch` mode is wired to `bun run dev:watch` for ergonomic iteration.
 
 ## References
 
-- PRP NFR-7
+- Requirements: NFR-7
 - Spec `§5.B`
 - ADR-008 (workspaces)

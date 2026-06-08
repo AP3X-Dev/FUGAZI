@@ -2,7 +2,7 @@
  * cache-lock.test.ts — T059-test acceptance suite for the Phase 3c.3
  * Dispatch B `proper-lockfile` cross-process safety wrapper (T060).
  *
- * Acceptance map (docs/superpowers/plans/02-phase-3c-3d-3e.md L475..501):
+ * Acceptance map:
  *   - 50-iteration concurrent-write surface — `withLock — concurrency`
  *   - Lock release on success — `withLock — release`
  *   - Lock release on error — `withLock — release`

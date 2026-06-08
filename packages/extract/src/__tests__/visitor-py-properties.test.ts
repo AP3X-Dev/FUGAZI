@@ -8,8 +8,8 @@
  * than attempting to model the full Python grammar; canonical hand-written
  * fixtures cover the corners the generator misses.
  *
- * Spec refs: design-doc §7.4 (visitor invariants), PRP NFR-1 (determinism),
- * PRP FR-D3 (immutability), Phase 4a T306 (`__all__`), T307 (TYPE_CHECKING).
+ * Spec refs: design-doc §7.4 (visitor invariants), spec NFR-1 (determinism),
+ * spec FR-D3 (immutability), Phase 4a T306 (`__all__`), T307 (TYPE_CHECKING).
  */
 
 import { fc, test as fctest } from '@fast-check/vitest';

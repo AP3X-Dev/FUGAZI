@@ -8,7 +8,6 @@
  *
  * Allowlisted paths (skipped):
  *   - LICENSE                                 (the MIT text)
- *   - docs/decisions/QUESTIONNAIRE.md         (records the SC-17 list as out-of-scope)
  *   - tools/forbidden-strings.ts              (this scanner; tokens are match data)
  */
 

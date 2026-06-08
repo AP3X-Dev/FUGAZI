@@ -8,7 +8,7 @@ Date: 2026-04-30
 
 ## Context
 
-The PRP lists "ESLint + Biome" as a stretch goal but does not require both at the same layer. Running both is the historical default in TypeScript projects: ESLint for richer rules, Prettier (now Biome) for formatting. Combined, however, they have problems: two tools means two config files, two caches, two version-pin points, and a non-trivial chance of conflicting rules.
+The spec lists "ESLint + Biome" as a stretch goal but does not require both at the same layer. Running both is the historical default in TypeScript projects: ESLint for richer rules, Prettier (now Biome) for formatting. Combined, however, they have problems: two tools means two config files, two caches, two version-pin points, and a non-trivial chance of conflicting rules.
 
 Biome's lint coverage in 2026 includes the rules we care about for v1.0:
 
@@ -44,6 +44,6 @@ Lefthook runs Biome on staged files at commit. Biome's CI command runs in the ma
 
 ## References
 
-- PRP `H2`
+- Requirements: `H2`
 - Spec `§4.A`, `§4.B`
 - ADR-001 (no `tsc` dependency)
