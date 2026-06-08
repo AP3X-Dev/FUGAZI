@@ -4,7 +4,7 @@ Codebase intelligence for TypeScript, JavaScript, and Python. TS/Node port of [f
 
 **Languages supported:** TypeScript / TSX, JavaScript / JSX, Python (`.py`, `.pyi`). Mixed TS+Python monorepos analyze in a single pass — the dispatcher routes each source file by extension and merges findings into one report. See [`docs/PYTHON.md`](docs/PYTHON.md) for the Python contract.
 
-**Status: in implementation.** The repo is on its Phase 3 foundation pass; build commands run, but feature work is in progress and `bunx fugazi` does not yet produce real findings. Track progress in `docs/superpowers/plans/`.
+**Status: in implementation.** The repo is on its Phase 3 foundation pass; build commands run, but feature work is in progress and `bunx fugazi` does not yet produce real findings.
 
 ## Goal
 

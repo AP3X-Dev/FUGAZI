@@ -18,7 +18,7 @@ We use `bun workspaces` as the primary workspace manager. The repo ships a `bun.
 
 We commit to Node compatibility: every script that Bun runs must also run on Node 22+. The CI matrix runs `npm install --workspaces && npm run build && npm test` on Node 22 LTS to enforce this. A second job runs the same scripts under Bun. Any divergence is a release blocker.
 
-We do not use `pnpm`. The earlier draft of this decision (recorded in `docs/superpowers/specs/fugazi-design-spec.md` §2 with an override clause) leaves `pnpm` as the fallback if `bun install` ever produces a non-deterministic resolution graph. As of the date above, no such issue has been observed.
+We do not use `pnpm`. An earlier draft of this decision left `pnpm` as the fallback if `bun install` ever produces a non-deterministic resolution graph. As of the date above, no such issue has been observed.
 
 ## Consequences
 

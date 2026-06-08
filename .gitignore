@@ -47,3 +47,56 @@ Thumbs.db
 
 # packaged binaries
 *.tgz
+
+# editor / OS (additional)
+*.swp
+*.swo
+*~
+*.tmp
+*.code-workspace
+
+# editor / tool configs
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.claude/
+.cursor/
+.copilot/
+
+# internal planning / working docs (not for publication)
+docs/superpowers/
+docs/DOGFOOD_AGENT_ASSIST_CR.md
+tasks/
+BUG_TRACKER.md
+
+# experimental memory-layer integration — kept local, not published
+packages/memory/
+packages/neo4j/
+packages/redis/
+packages/arch/
+packages/research/
+packages/retrieval/
+packages/wiki/
+packages/mcp/src/amp-tools/
+tsconfig.amp.json
+
+# js/ts framework + lint caches
+.eslintcache
+.next/
+.nuxt/
+.output/
+
+# env (additional) / secrets / certificates / credentials
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+credentials.json
+serviceAccountKey.json
