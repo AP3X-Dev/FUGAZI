@@ -117,7 +117,7 @@ describe('SC-28: TS strict + zero `: any` in packages/<*>/src/', () => {
             // Strip string literals so `s = ': any';` doesn't trip.
             const stripped = codePart.replace(stripStringRe, '""');
             if (annotationRe.test(stripped)) {
-              // `as any` is a documented escape hatch (per CLAUDE.md). It
+              // `as any` is a documented escape hatch (per the project conventions). It
               // is allowed when paired with a justification comment on the
               // same or previous line. We allow `as any` literally.
               const isAsAny = /\bas\s+any\b/.test(stripped);

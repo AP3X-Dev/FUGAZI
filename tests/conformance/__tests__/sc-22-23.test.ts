@@ -61,7 +61,7 @@ describe('SC-23: QUESTIONNAIRE.md mirrored at docs/decisions/', () => {
     const text = readFileSync(MIRROR_QUESTIONNAIRE, 'utf8');
     // Loose assertion — the document references the A1..H3 lettered decision
     // family. We don't enforce the exact count of 35 here; that's a manual
-    // review concern (per the CLAUDE.md project conventions).
+    // review concern (per the project conventions).
     expect(text).toMatch(/\bA1\b/);
   });
 });

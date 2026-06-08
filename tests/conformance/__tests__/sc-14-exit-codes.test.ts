@@ -4,7 +4,7 @@
  * SC-14 is the closed exit-code contract: every CLI path returns 0, 1, or 2
  * — never 3..13. The original Fallow exit-code surface included codes for
  * license / sidecar / signature errors that Fugazi does not implement
- * (see CLAUDE.md SC-17 forbidden-string list). Tests asserting those codes
+ * (see the SC-17 forbidden-string list in the project conventions). Tests asserting those codes
  * must NOT exist in the Fugazi suite.
  *
  * Verification:
