@@ -44,7 +44,7 @@ fix(extract): handle CRLF in template literal line counts
 docs(adr): record clipanion choice as ADR-013
 ```
 
-Write commit messages in plain, descriptive developer voice — no tool-generated trailers.
+Write commit messages in plain, descriptive developer voice.
 
 ## ADR workflow
 
