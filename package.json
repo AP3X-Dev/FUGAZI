@@ -30,12 +30,12 @@
     "postinstall": "lefthook install"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@types/node": "22.10.2",
-    "lefthook": "1.9.2",
-    "tsup": "8.3.5",
-    "turbo": "2.3.3",
-    "typescript": "5.7.2",
-    "vitest": "2.1.8"
+    "@biomejs/biome": "2.4.16",
+    "@types/node": "25.9.2",
+    "lefthook": "2.1.9",
+    "tsup": "8.5.1",
+    "turbo": "2.9.16",
+    "typescript": "6.0.3",
+    "vitest": "4.1.8"
   }
 }
