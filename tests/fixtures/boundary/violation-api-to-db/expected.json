@@ -4,11 +4,34 @@
     "version": "0.0.0"
   },
   "actions": [],
-  "issues": [],
+  "issues": [
+    {
+      "file": "src/api/handler.ts",
+      "from": "src/api/handler.ts",
+      "fromZone": "api",
+      "kind": "boundary-violations",
+      "message": "boundary-violations: api may not import db",
+      "range": {
+        "end": {
+          "byteOffset": 34,
+          "column": 34,
+          "line": 1
+        },
+        "start": {
+          "byteOffset": 0,
+          "column": 0,
+          "line": 1
+        }
+      },
+      "severity": "error",
+      "to": "src/db/client.ts",
+      "toZone": "db"
+    }
+  ],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
-      "boundary-violations": 0,
+      "boundary-violations": 1,
       "circular-dependencies": 0,
       "code-duplication": 0,
       "cognitive-complexity": 0,

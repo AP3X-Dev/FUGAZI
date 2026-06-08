@@ -4,11 +4,56 @@
     "version": "0.0.0"
   },
   "actions": [],
-  "issues": [],
+  "issues": [
+    {
+      "file": "src/api/a.ts",
+      "from": "src/api/a.ts",
+      "fromZone": "api",
+      "kind": "boundary-violations",
+      "message": "boundary-violations: api may not import infra",
+      "range": {
+        "end": {
+          "byteOffset": 40,
+          "column": 40,
+          "line": 1
+        },
+        "start": {
+          "byteOffset": 0,
+          "column": 0,
+          "line": 1
+        }
+      },
+      "severity": "error",
+      "to": "src/infra/x.ts",
+      "toZone": "infra"
+    },
+    {
+      "file": "src/api/a.ts",
+      "from": "src/api/a.ts",
+      "fromZone": "api",
+      "kind": "boundary-violations",
+      "message": "boundary-violations: api may not import db",
+      "range": {
+        "end": {
+          "byteOffset": 75,
+          "column": 34,
+          "line": 2
+        },
+        "start": {
+          "byteOffset": 41,
+          "column": 0,
+          "line": 2
+        }
+      },
+      "severity": "error",
+      "to": "src/db/y.ts",
+      "toZone": "db"
+    }
+  ],
   "metrics": {
     "cacheHitRate": 0,
     "diagnosticsByRule": {
-      "boundary-violations": 0,
+      "boundary-violations": 2,
       "circular-dependencies": 0,
       "code-duplication": 0,
       "cognitive-complexity": 0,
