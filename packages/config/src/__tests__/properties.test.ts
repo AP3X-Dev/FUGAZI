@@ -27,7 +27,6 @@ import { join } from 'node:path';
 import { fc, test as fctest } from '@fast-check/vitest';
 import { afterEach, beforeEach, describe, expect } from 'vitest';
 import { loadJsonConfig } from '../loaders/json.js';
-import { migrateFallowDir } from '../migration.js';
 import { detectFrameworks } from '../preset-detect.js';
 import { FugaziConfigSchemaPermissive } from '../schema.js';
 import { discoverWorkspaces } from '../workspace-discovery.js';
@@ -336,55 +335,6 @@ describe('property: detectFrameworks is order-independent (invariant 6)', () => 
       expect([...fb]).toEqual([...fa]);
       // Sanity: returned list is sorted (deterministic output contract).
       expect([...fa]).toEqual([...fa].slice().sort());
-    },
-    60_000,
-  );
-});
-
-/* ------------------------------------------------------------------------ */
-/* Invariant 7 — migration idempotence                                       */
-/* ------------------------------------------------------------------------ */
-
-describe('property: migrateFallowDir is idempotent (invariant 7)', () => {
-  fctest.prop(
-    [
-      fc.boolean(), // does .fallow/ start populated?
-      fc.uniqueArray(fc.stringMatching(/^f-[a-z]{1,6}$/), { minLength: 0, maxLength: 5 }),
-    ],
-    { numRuns: 100 },
-  )(
-    'second migration run preserves the post-first-run state',
-    async (hasFallow, fileNames) => {
-      const id = `${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
-      const root = join(tmpRoot, `mig-${id}`);
-      await mkdir(root, { recursive: true });
-
-      if (hasFallow) {
-        const fallow = join(root, '.fallow');
-        await mkdir(fallow, { recursive: true });
-        for (const fn of fileNames) {
-          await writeFile(join(fallow, `${fn}.bin`), `payload-${fn}`, 'utf8');
-        }
-      }
-
-      const first = await migrateFallowDir(root);
-      const second = await migrateFallowDir(root);
-
-      if (hasFallow) {
-        expect(first.action).toBe('migrated');
-        // Second call sees only .fugazi/ → 'skipped-target-exists'.
-        expect(second.action).toBe('skipped-target-exists');
-        // All files preserved under .fugazi/ after both runs.
-        for (const fn of fileNames) {
-          const text = await import('node:fs/promises').then((m) =>
-            m.readFile(join(root, '.fugazi', `${fn}.bin`), 'utf8'),
-          );
-          expect(text).toBe(`payload-${fn}`);
-        }
-      } else {
-        expect(first.action).toBe('skipped-no-source');
-        expect(second.action).toBe('skipped-no-source');
-      }
     },
     60_000,
   );

@@ -1,6 +1,3 @@
-# clean-room planning artifacts — do not commit
-clean-room/
-
 # dependencies
 node_modules/
 .pnp/
@@ -18,9 +15,8 @@ out/
 coverage/
 .nyc_output/
 
-# fugazi local cache (and fallow cache, in case fixtures contain one)
+# fugazi local cache
 .fugazi/
-.fallow/
 
 # logs
 *.log
@@ -65,18 +61,14 @@ GEMINI.md
 
 # internal planning / working docs (not for publication)
 docs/superpowers/
+docs/decisions/QUESTIONNAIRE.md
 docs/DOGFOOD_AGENT_ASSIST_CR.md
+tools/port-plugins.ts
 tasks/
 BUG_TRACKER.md
 
-# experimental memory-layer integration — kept local, not published
-packages/memory/
-packages/neo4j/
-packages/redis/
-packages/arch/
-packages/research/
-packages/retrieval/
-packages/wiki/
+# experimental local-only packages — kept local, not published
+_local/
 packages/mcp/src/amp-tools/
 tsconfig.amp.json
 
