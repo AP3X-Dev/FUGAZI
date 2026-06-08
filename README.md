@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/fugazi-banner.png" alt="Fugazi — codebase intelligence for TypeScript, JavaScript, and Python" width="100%" />
+</p>
+
 # Fugazi
 
 **Codebase intelligence for TypeScript, JavaScript, and Python.**
