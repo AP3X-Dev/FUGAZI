@@ -13,9 +13,9 @@
  * reported as `unused-files`, with the path emitted in path-sorted order for
  * deterministic output.
  *
- * Per IMP-PERF-07 the original Fallow Rust pipeline's three-layer fallback
- * (transitive closure, unreached files, hand-crafted heuristics) is collapsed
- * into a single BFS pass. There are no fallbacks here.
+ * Per IMP-PERF-07 a three-layer fallback approach (transitive closure,
+ * unreached files, hand-crafted heuristics) is collapsed into a single BFS
+ * pass. There are no fallbacks here.
  *
  * When `entryPoints` is empty, no roots exist and the rule emits nothing
  * rather than flagging the entire project — without declared entries, a

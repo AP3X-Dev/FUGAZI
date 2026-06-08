@@ -51,7 +51,7 @@ jobs:
 
 ## Environment variables
 
-The action reads only `FUGAZI_*` environment variables (none of `FALLOW_*`).
+The action reads only `FUGAZI_*` environment variables.
 The internal scripts forward `FUGAZI_VERSION`, `FUGAZI_FORMAT`,
 `FUGAZI_FAIL_ON_ISSUES`, `FUGAZI_RESULTS_FILE`, `FUGAZI_RUNTIME_COVERAGE`.
 

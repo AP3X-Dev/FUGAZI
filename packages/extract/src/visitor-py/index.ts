@@ -23,8 +23,8 @@
  * `JSON.stringify(inventory)`.
  *
  * Per IMP-DEBT-08: this file (and its sibling helpers) operates exclusively
- * on the discriminated union from `../ast/kinds-py.ts`. The original Fallow
- * Rust pipeline's string-sentinel pattern never appears.
+ * on the discriminated union from `../ast/kinds-py.ts`. No string-sentinel
+ * pattern ever appears.
  */
 
 import type { ASTNodePy, Comprehension, PyProgram, Walrus } from '../ast/kinds-py.js';

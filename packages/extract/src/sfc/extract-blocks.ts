@@ -2,8 +2,7 @@
  * extract-blocks.ts — Phase 3c.5 — shared SFC block extractor.
  *
  * Regex-based extraction of `<script>`, `<style>`, and `<template>` blocks
- * from a Vue or Svelte SFC source string. Mirrors the original Fallow Rust
- * pipeline (`crates/extract/src/sfc.rs`): no full HTML parser, no
+ * from a Vue or Svelte SFC source string. Uses no full HTML parser and no
  * `@vue/compiler-sfc` runtime dependency. The regexes accept `>` inside
  * quoted attribute values and skip blocks that fall inside HTML comments.
  *

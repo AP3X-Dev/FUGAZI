@@ -188,8 +188,7 @@ export function resolve(specifier: string, fromFile: string, ctx: ResolverContex
 
 /**
  * Cheap classification: a specifier is "bare" when it's neither relative
- * nor absolute and doesn't carry a URL scheme. Mirrors the original Fallow
- * Rust `is_bare_specifier`.
+ * nor absolute and doesn't carry a URL scheme.
  */
 function looksBare(specifier: string): boolean {
   if (specifier === '') return false;

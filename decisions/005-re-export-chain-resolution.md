@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "re-export-chain-resolution" ADR. The TS port preserves the algorithm and the iteration cap; the warning machinery is rewritten on `FugaziGraphError` and the per-process warn-once dedup convention.
+Background / prior art: this ADR documents Fugazi's re-export-chain-resolution approach. The algorithm and the iteration cap are paired with warning machinery built on `FugaziGraphError` and the per-process warn-once dedup convention.
 
 ## Context
 

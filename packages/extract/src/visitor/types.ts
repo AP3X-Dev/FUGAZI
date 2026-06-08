@@ -8,7 +8,7 @@
  *
  * Per IMP-DEBT-08: every collection is an `Array` (insertion-ordered, no
  * `Map` / `Set`) and every property is `readonly`. The visitor never reaches
- * for the original Fallow Rust pipeline's string-sentinel pattern.
+ * for a string-sentinel pattern.
  *
  * Cross-language discriminator (Phase 4a T302): `Inventory.lang` is an
  * optional `'ts' | 'py'` tag. ABSENT is interpreted as `'ts'` by all

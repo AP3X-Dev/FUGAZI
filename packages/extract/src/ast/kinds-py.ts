@@ -28,9 +28,9 @@
  * switches in the test suite and `./visit-py.ts` — adding a new variant
  * without a matching case will fail `tsc --noEmit`.
  *
- * Per IMP-DEBT-08: Fugazi NEVER reintroduces the original Fallow's
- * string-based sentinel pipeline. The Python visitor pass operates exclusively
- * on this discriminated union — sentinel strings are forbidden by SC-17.
+ * Per IMP-DEBT-08: Fugazi NEVER uses a string-based sentinel pipeline. The
+ * Python visitor pass operates exclusively on this discriminated union —
+ * sentinel strings are forbidden by SC-17.
  *
  * Reserved (T306): module-level `__all__ = [...]` extraction will surface as a
  * sibling field on the future `Module` inventory shape (NOT on `PyProgram`

@@ -56,7 +56,7 @@ export function findType2Clones(
  * v1 heuristic: we run Type-2 detection, then for each family verify that the
  * matched window still has a local match ratio ≥ 0.85 when we DILATE the
  * window by up to `gapBudget` tokens on either side. The
- * canonical Fallow/Type-3 approach is windowed-LCS over normalized streams;
+ * canonical Type-3 approach is windowed-LCS over normalized streams;
  * v1 ships the dilation heuristic and documents the gap explicitly.
  *
  * Concretely: any Type-2 hit already has a 100% match in its window, so the

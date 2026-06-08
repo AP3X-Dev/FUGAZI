@@ -2,7 +2,7 @@
  * analyze.ts — Phase 3h.5 (T201) — programmatic `analyze()` entry point.
  *
  * Thin wrapper over `runAnalysis()` from `@fugazi/core`. Per IMP-API-02 the
- * three original Fallow helpers (`detect_dead_code`, `detect_unused_files`,
+ * dead-code helpers (`detect_dead_code`, `detect_unused_files`,
  * `detect_unused_exports`) collapse into this single function with a
  * discriminated `rules` option:
  *

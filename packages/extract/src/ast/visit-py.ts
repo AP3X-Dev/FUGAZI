@@ -14,9 +14,9 @@
  * exhaustiveness: adding a new variant to the `ASTNodePy` union without
  * updating `childrenOfPy` fails `tsc --noEmit`.
  *
- * Per IMP-DEBT-08: Fugazi NEVER reintroduces the original Fallow's
- * string-based sentinel pipeline. The Python visitor pass operates exclusively
- * on the discriminated union from `./kinds-py.ts`.
+ * Per IMP-DEBT-08: Fugazi NEVER uses a string-based sentinel pipeline. The
+ * Python visitor pass operates exclusively on the discriminated union from
+ * `./kinds-py.ts`.
  */
 
 import { assertNever } from '@fugazi/types';

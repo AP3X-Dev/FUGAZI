@@ -23,9 +23,9 @@
  * Default condition order. Per the dispatch contract, `default` is a
  * universal fallback so it sits last.
  *
- * Note: the original Fallow Rust resolver puts `default` first. The dispatch
- * here mirrors that for compatibility with the contract requested in T085 —
- * tests cover both ordering cases via the configurable list.
+ * Note: the resolver lists `default` first in this array; the dispatch logic
+ * treats it as a universal fallback regardless of position. Tests cover both
+ * ordering cases via the configurable list.
  */
 export const DEFAULT_CONDITIONS: readonly string[] = Object.freeze([
   'default',

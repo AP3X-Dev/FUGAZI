@@ -1,22 +1,21 @@
 /**
  * types.ts — declarative plugin type system (Phase 3i Wave A).
  *
- * Mirrors the canonical `plugin-schema.json` published by the upstream Fallow
- * project (MIT-licensed). All field shapes are deeply-readonly tuples of
- * primitives so the registry can freeze every loaded plugin at boot and
- * downstream consumers can pass plugins around with full type-safety and
- * zero defensive copies.
+ * Conforms to the canonical `plugin-schema.json` schema. All field shapes are
+ * deeply-readonly tuples of primitives so the registry can freeze every loaded
+ * plugin at boot and downstream consumers can pass plugins around with full
+ * type-safety and zero defensive copies.
  *
  * camelCase is the canonical wire format. The JSON data files under `data/`
- * are emitted in camelCase by `tools/port-plugins.ts`.
+ * are emitted in camelCase by the plugin generator.
  *
  * Determinism (NFR-1 / SC-15): plugin iteration order is alphabetical-by-name.
  * The loader sorts the bundled plugin map by `name` before returning. This
  * guarantees that two consumers loading the same JSON corpus see the same
  * order and produce byte-identical analysis output.
  *
- * AST-based config parsing (`resolve_config()` in the Rust source) is OUT OF
- * SCOPE for v1. Plugins ship the static `entryPoints` / `configPatterns` /
+ * AST-based dynamic config-file parsing is OUT OF SCOPE for v1. Plugins ship
+ * the static `entryPoints` / `configPatterns` /
  * `alwaysUsed` / `usedExports` / `toolingDependencies` / `usedClassMembers`
  * fields. Dynamic config-file parsing may be added in a later phase via a
  * per-plugin `resolveConfig` callback.
@@ -86,7 +85,7 @@ export interface UsedExport {
  *
  * Either or both of `extends` / `implements` may be present. When both are
  * absent, the rule is equivalent to a global string entry — the schema does
- * not enforce that, but the porter and registry treat it consistently.
+ * not enforce that, but the generator and registry treat it consistently.
  */
 export interface ScopedUsedClassMember {
   readonly extends?: string;
@@ -101,8 +100,8 @@ export interface ScopedUsedClassMember {
 export type UsedClassMember = string | ScopedUsedClassMember;
 
 /**
- * `PluginDef` — the full declarative plugin shape. Mirrors the
- * `ExternalPluginDef` schema from `plugin-schema.json` verbatim.
+ * `PluginDef` — the full declarative plugin shape, matching the external
+ * plugin definition described by `plugin-schema.json`.
  *
  * Every list-typed field defaults to an empty list when omitted from the JSON
  * data file. The loader normalises missing fields to `Object.freeze([])` so

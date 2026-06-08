@@ -27,22 +27,20 @@ const FORBIDDEN_TOKENS = [
   'sidecar',
   'paid',
   'enterprise',
-  // Phase 3c.4 — IMP-DEBT-08: the original Fallow Rust pipeline used a string
-  // sentinel `INSTANCE_EXPORT_SENTINEL` to thread state across its 4-pass
-  // visitor. Fugazi's single-pass typed visitor uses a discriminated-union
-  // accumulator instead. Reintroducing the sentinel string anywhere in source
-  // is forbidden per the clean-room contract.
+  // IMP-DEBT-08: an earlier pipeline design used a string sentinel
+  // `INSTANCE_EXPORT_SENTINEL` to thread state across a multi-pass visitor.
+  // Fugazi's single-pass typed visitor uses a discriminated-union accumulator
+  // instead. Reintroducing the sentinel string anywhere in source is forbidden.
   'INSTANCE_EXPORT_SENTINEL',
 ];
 
 const ALLOWLISTED_PATHS = new Set([
   'LICENSE',
-  'docs/decisions/QUESTIONNAIRE.md',
   'tools/forbidden-strings.ts',
 ]);
 
 // Phase 4e (T362): also scan Python source + stub files so a stray
-// `# fallow-*` reference can't sneak into a Python test fixture.
+// forbidden string can't sneak into a Python test fixture.
 const EXTENSIONS = new Set(['.ts', '.js', '.json', '.py', '.pyi']);
 
 function toRepoRel(absolute: string): string {

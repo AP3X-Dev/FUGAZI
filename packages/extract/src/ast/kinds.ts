@@ -27,9 +27,9 @@
  * via `assertNever` switches in the test suite — adding a new variant without
  * a matching case will fail `tsc --noEmit`.
  *
- * Per IMP-DEBT-08: Fugazi NEVER reintroduces the original Fallow's
- * string-based sentinel pipeline. The visitor pass operates exclusively on
- * this discriminated union — sentinel strings are forbidden by SC-17.
+ * Per IMP-DEBT-08: Fugazi NEVER uses a string-based sentinel pipeline. The
+ * visitor pass operates exclusively on this discriminated union — sentinel
+ * strings are forbidden by SC-17.
  */
 
 import type { Range } from '@fugazi/types';

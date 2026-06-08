@@ -13,9 +13,9 @@
  * gives compile-time exhaustiveness: adding a new variant to the `ASTNode`
  * union without updating `childrenOf` fails `tsc --noEmit`.
  *
- * Per IMP-DEBT-08: Fugazi NEVER reintroduces the original Fallow's
- * string-based sentinel pipeline. The visitor pass operates exclusively on
- * the discriminated union from `./kinds.ts`.
+ * Per IMP-DEBT-08: Fugazi NEVER uses a string-based sentinel pipeline. The
+ * visitor pass operates exclusively on the discriminated union from
+ * `./kinds.ts`.
  */
 
 import { assertNever } from '@fugazi/types';

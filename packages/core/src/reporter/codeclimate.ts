@@ -1,7 +1,7 @@
 /**
  * reporter/codeclimate.ts — Phase 3j — GitLab Code Climate JSON report.
  *
- * Pretty-printed JSON array (Fallow precedent: `serde_json::to_string_pretty`).
+ * Pretty-printed JSON array (two-space indentation).
  * Each element is a Code Climate issue object with a deterministic
  * sha1-based fingerprint over `(ruleId, path, line, message)`.
  *

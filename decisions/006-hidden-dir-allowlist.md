@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "hidden-dir-allowlist" ADR. The exact five directory names match the original. The TS port keeps both the list and the principle of refusing to grow it without an explicit follow-up ADR.
+Background: Fugazi maintains a fixed list of five hidden directories and the principle of refusing to grow it without an explicit follow-up ADR.
 
 ## Context
 
@@ -43,7 +43,7 @@ The allowlist is a constant in `@fugazi/extract`. Adding to it requires a pull r
 - If a community framework popularizes a new dot-directory convention (`.svelte-kit/`?), Fugazi has to ship an update before users see it. This is rare and acceptable.
 
 ### Neutral
-- The allowlist intentionally matches the original Fallow project. Keeping the list aligned simplifies cross-tool comparisons during the port.
+- The allowlist is intentionally fixed and small. Keeping it stable simplifies cross-tool comparisons.
 
 ## References
 

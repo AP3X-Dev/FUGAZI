@@ -1,6 +1,6 @@
 # Fugazi
 
-Codebase intelligence for TypeScript, JavaScript, and Python. TS/Node port of [fallow](https://github.com/fallow-rs/fallow).
+Codebase intelligence for TypeScript, JavaScript, and Python.
 
 **Languages supported:** TypeScript / TSX, JavaScript / JSX, Python (`.py`, `.pyi`). Mixed TS+Python monorepos analyze in a single pass — the dispatcher routes each source file by extension and merges findings into one report. See [`docs/PYTHON.md`](docs/PYTHON.md) for the Python contract.
 
@@ -8,7 +8,7 @@ Codebase intelligence for TypeScript, JavaScript, and Python. TS/Node port of [f
 
 ## Goal
 
-Replace the Rust toolchain dependency of Fallow with a pure-TypeScript implementation that runs on Node 22+ and Bun, while preserving:
+A pure-TypeScript implementation that runs on Node 22+ and Bun, with no Rust toolchain dependency, delivering:
 
 - Sub-second analysis on medium-sized codebases
 - Whole-project understanding (module graph, re-export resolution, cross-reference)

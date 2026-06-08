@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "path-sorted-fileids" ADR. The strategy is identical because the determinism rationale is identical. The TS port packages it as a branded number type rather than a Rust newtype, but the behavior is the same.
+Background: this ADR records the determinism rationale behind `FileId` assignment. The strategy follows directly from that rationale. Fugazi packages it as a branded number type.
 
 ## Context
 

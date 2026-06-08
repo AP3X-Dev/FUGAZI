@@ -14,7 +14,7 @@
  *          onLeave order, determinism, leaves, every kind walks without
  *          throwing.
  *   14.    Sentinel-absence guard — kinds-py.ts and visit-py.ts contain no
- *          legacy Fallow string sentinel.
+ *          legacy string sentinel.
  *   15..16. Cross-lang Inventory shape (T302) — TS visitor emits `lang: 'ts'`,
  *           Inventory.lang is the optional discriminator.
  */

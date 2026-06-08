@@ -15,8 +15,7 @@
  *      template usages, sort by `range.start.byteOffset` then by name, freeze.
  *
  * Parser strategy: regex-based block extraction, no `@vue/compiler-sfc`
- * runtime dependency. This matches the original Fallow Rust pipeline
- * (`crates/extract/src/sfc.rs`) and keeps the install footprint small.
+ * runtime dependency. This keeps the install footprint small.
  * The plan spec listed `@vue/compiler-sfc` as the planned parser; the regex
  * approach is a deliberate deviation captured in the Phase 3c.5 commit body.
  *

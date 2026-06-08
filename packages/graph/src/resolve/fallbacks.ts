@@ -40,7 +40,7 @@ const SOURCE_EXTS: readonly string[] = Object.freeze([
 /**
  * Try to map a resolved output path back to its source file.
  *
- * Mirrors the original Fallow Rust algorithm:
+ * Algorithm:
  *   - Find the LAST output directory segment in the path (closest to file).
  *   - Walk backwards collecting consecutive output-dir segments.
  *   - Replace those segments with `src` and probe each source extension.

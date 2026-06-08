@@ -8,8 +8,7 @@
  *      inline-code spans (`...`), and HTML comments with whitespace
  *      (preserving newlines). Imports/exports inside fences MUST NOT count.
  *   2. Walk the masked source line by line and collect lines beginning with
- *      `import ` / `import{` / `export ` / `export{` (mirrors the original
- *      Fallow Rust pipeline `crates/extract/src/mdx.rs`). Multi-line imports
+ *      `import ` / `import{` / `export ` / `export{`. Multi-line imports
  *      are stitched via brace-depth tracking. Concatenate the collected lines
  *      into a synthetic TypeScript source, parse, and harvest the inventory.
  *   3. For JSX usage: walk the masked source for `<Component />` style tags
@@ -172,8 +171,7 @@ function buildScanView(source: string): string {
 
 /**
  * Stitch top-of-line `import` / `export` statements from the scan view into a
- * synthetic TypeScript source. Multi-line imports are tracked via brace depth,
- * mirroring the original Fallow Rust pipeline (`crates/extract/src/mdx.rs`).
+ * synthetic TypeScript source. Multi-line imports are tracked via brace depth.
  *
  * Returns an empty string when nothing is found.
  */

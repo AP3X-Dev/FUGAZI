@@ -2,7 +2,7 @@
  * FileId — a branded, immutable integer identifier for a source file in the
  * project graph. Branding prevents accidental mixing with raw numbers.
  *
- * Per ADR-004 (carried forward from the original Fallow design):
+ * Per ADR-004:
  *   - Ids are assigned in lexicographic path order, so the same set of paths
  *     always yields the same id for each path regardless of input order.
  *   - Id 0 is reserved as ROOT_FILE_ID (project-root sentinel); real files

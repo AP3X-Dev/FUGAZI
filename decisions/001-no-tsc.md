@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "no-tsc" ADR. The Rust-native original arrived at the same conclusion for symmetric reasons; the prose here is rewritten for the TS/Node target.
+Background: this ADR records Fugazi's decision to avoid a runtime dependency on the TypeScript compiler.
 
 ## Context
 

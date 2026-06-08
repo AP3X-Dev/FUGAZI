@@ -50,7 +50,7 @@ export interface ChangedSinceOptions {
   readonly ref: string;
   /**
    * When true (the default), the result also includes unstaged AND staged
-   * changes, matching the original Fallow contract for `--changed-since`.
+   * changes, matching the Fugazi contract for `--changed-since`.
    * When false, only committed changes between `ref` and HEAD are returned.
    */
   readonly includeUncommitted?: boolean;

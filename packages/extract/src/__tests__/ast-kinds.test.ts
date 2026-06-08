@@ -5,12 +5,13 @@
  *   1..3. Compile-time exhaustiveness on `Statement`, `Expression`, and
  *         `ASTNode` discriminated unions via `assertNever`. Type-only checks;
  *         `tsc --noEmit` is the gate.
- *   4.    No `INSTANCE` + `_EXPORT_` + `SENTINEL` joined-token in src/ (the
- *         original Fallow Rust pipeline used a string sentinel; Fugazi never
- *         reintroduces it). Delegated to `tools/forbidden-strings.ts` SC-17
- *         gate; this test smoke-checks the assertion at runtime against the
- *         AST + parser sources. The token is constructed by concatenation to
- *         avoid tripping the SC-17 scanner against this very test file.
+ *   4.    No `INSTANCE` + `_EXPORT_` + `SENTINEL` joined-token in src/. The
+ *         typed visitor must never thread state through a string sentinel, so
+ *         the literal token is forbidden. Delegated to
+ *         `tools/forbidden-strings.ts` SC-17 gate; this test smoke-checks the
+ *         assertion at runtime against the AST + parser sources. The token is
+ *         constructed by concatenation to avoid tripping the SC-17 scanner
+ *         against this very test file.
  *   5.    `walk()` visits each node exactly once.
  *   6.    `walk()` depth-first — `onEnter` before children, `onLeave` after.
  *   7.    `walk()` handles every kind without throwing.
@@ -248,11 +249,10 @@ describe('AST kinds — discriminated-union exhaustiveness', () => {
 // --------------------------------------------------------------------------
 // 4. No legacy sentinel anywhere in src/.
 //
-// The original Fallow Rust pipeline used a string sentinel to thread state
-// across its 4-pass visitor; Fugazi's single-pass typed visitor uses a
-// discriminated-union accumulator instead and never reintroduces the literal
-// token. The token is built by concatenation here so the SC-17 forbidden-
-// strings gate (which also lists this token) does not flag THIS test file.
+// The single-pass typed visitor uses a discriminated-union accumulator to
+// thread state and never relies on a string sentinel literal. The token is
+// built by concatenation here so the SC-17 forbidden-strings gate (which also
+// lists this token) does not flag THIS test file.
 // --------------------------------------------------------------------------
 
 describe('AST kinds — no string sentinels', () => {

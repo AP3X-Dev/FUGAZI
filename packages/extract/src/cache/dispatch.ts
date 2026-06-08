@@ -18,8 +18,8 @@
  *                 parse via `scanFile`, compute xxh3, persist atomically
  *                 under `withLock`.
  *
- * Env policy (SC-18): only `FUGAZI_CACHE_STRICT` is read. There is NO
- * `FALLOW_*` env var. Forbidden-env scanner enforces this.
+ * Env policy (SC-18): only `FUGAZI_CACHE_STRICT` is read. No other env
+ * vars are consulted. Forbidden-env scanner enforces this.
  *
  * Verification ordering for a non-null cache hit:
  *   1. mtime+size match → fast path (return immediately) UNLESS strict.

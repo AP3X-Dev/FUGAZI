@@ -7,8 +7,8 @@
  *     for the same key share the in-flight promise — no double-load.
  *   - Rejected promises remain in the Map: a failure is cached as a rejected
  *     promise, so subsequent callers receive the same rejection without
- *     re-invoking the loader (mirrors fallow's git-toplevel cache, which
- *     memoizes failures to avoid hammering subprocess on a broken repo).
+ *     re-invoking the loader. The git-toplevel cache relies on this to memoize
+ *     failures and avoid hammering the subprocess on a broken repo.
  *   - No time-based eviction. Lifetime is the process.
  *
  * Canonical use: `gitToplevelCache = processCache((cwd) => execGitToplevel(cwd))`.

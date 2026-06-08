@@ -27,7 +27,7 @@ variables:
 | `FUGAZI_FAIL_ON_ISSUES` | `true` | Exit non-zero when any issue is reported. |
 | `FUGAZI_GITLAB_TOKEN` | (unset) | GitLab API token with `api` scope. Required to post MR discussion notes. |
 
-The template reads only `FUGAZI_*` variables (none of `FALLOW_*`).
+The template reads only `FUGAZI_*` variables.
 
 ## What it does
 

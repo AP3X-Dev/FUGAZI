@@ -2,7 +2,7 @@
  * @fugazi/node — public surface for programmatic consumers.
  *
  * Phase 3h.5 (T201-T204) ships the SIX top-level functions defined in
- * IMP-ARCH-11. Per IMP-API-02 the original Fallow `detect_dead_code`,
+ * IMP-ARCH-11. Per IMP-API-02 the `detect_dead_code`,
  * `detect_unused_files`, `detect_unused_exports` trio collapses into a single
  * `analyze()` with a discriminated `rules` option — those three names are NOT
  * exported here.

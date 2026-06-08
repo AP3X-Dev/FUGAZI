@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "fxhashmap-equivalent" ADR. The original chose `FxHashMap`/`FxHashSet` (Rust's deterministically-seeded hashmap) for both speed and reproducibility. We arrive at the same property by leaning on a guarantee V8 already gives us.
+We need associative data structures that are both fast and reproducible. We achieve that property by leaning on a guarantee V8 already gives us.
 
 ## Context
 
@@ -15,7 +15,7 @@ Dead-code analysis, duplicate detection, and re-export propagation all rely on a
 1. **Determinism.** Two runs of the analyzer over the same input must produce byte-identical output. If iteration over a hashmap shuffles based on hash seed, findings may shuffle, and output drift becomes a CI flake.
 2. **Speed.** These maps are touched in inner loops; a per-insert cost difference of 10ns compounds to seconds on large graphs.
 
-Rust solves this with `FxHashMap` (FxHash, no per-process seed). The TS/Node target has different primitives available.
+A deterministically-seeded hash table is one way to satisfy both, but the TS/Node runtime gives us simpler primitives that already meet our needs.
 
 ## Decision
 

@@ -25,7 +25,7 @@
     "dev:watch": "turbo build --watch",
     "verify:wasm": "bun tools/verify-wasm.ts",
     "forbidden:strings": "bun tools/forbidden-strings.ts",
-    "forbidden:env": "bun tools/forbidden-fallow-env.ts",
+    "forbidden:env": "bun tools/forbidden-env.ts",
     "prepare": "lefthook install",
     "postinstall": "lefthook install"
   },

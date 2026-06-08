@@ -2,8 +2,8 @@
  * sc-14-exit-codes.test.ts — Phase 3m T290 — SC-14 acceptance row.
  *
  * SC-14 is the closed exit-code contract: every CLI path returns 0, 1, or 2
- * — never 3..13. The original Fallow exit-code surface included codes for
- * license / sidecar / signature errors that Fugazi does not implement
+ * — never 3..13. Fugazi deliberately does not define exit codes for
+ * license / sidecar / signature errors
  * (see the SC-17 forbidden-string list in the project conventions). Tests asserting those codes
  * must NOT exist in the Fugazi suite.
  *

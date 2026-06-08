@@ -7,8 +7,8 @@
  *        independent `childrenOf` recursion. (Asserted by parsing each fixture
  *        and walking the resulting Program twice — once via the visitor and
  *        once via a parallel recursive baseline — counting visited nodes.)
- *   2.   No legacy sentinel — none of the visitor source files contain the
- *        joined-token used by the original Fallow Rust pipeline. The token is
+ *   2.   No forbidden sentinel — none of the visitor source files contain the
+ *        joined-token banned by the forbidden-strings gate. The token is
  *        constructed by concatenation here so this test file does NOT itself
  *        trip the SC-17 forbidden-strings gate.
  *   3.   Determinism — three representative fixtures parsed twice produce
@@ -138,7 +138,7 @@ describe('visitor — structural invariants', () => {
     }
   });
 
-  it('no legacy sentinel token in visitor source files', async () => {
+  it('no forbidden sentinel token in visitor source files', async () => {
     const FORBIDDEN = ['INSTANCE', '_EXPORT_', 'SENTINEL'].join('');
     const here = dirname(fileURLToPath(import.meta.url));
     const candidates = [

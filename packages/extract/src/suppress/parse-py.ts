@@ -6,8 +6,6 @@
  *
  *   - `# fugazi-ignore-next-line [tokens...]`  — suppress next physical line
  *   - `# fugazi-ignore-file       [tokens...]` — suppress entire file
- *   - `# fallow-ignore-next-line  [tokens...]` — legacy alias of the above
- *   - `# fallow-ignore-file       [tokens...]` — legacy alias of the above
  *
  * Tokens are space-separated rule identifiers from the closed `RuleId` union
  * (see `packages/types/src/rule-id.ts`). An empty token list means "suppress
@@ -27,16 +25,12 @@
  *      regex scans every `#` it sees on every line. A `# fugazi-ignore-*`
  *      directive inside a `"""docstring"""` would be matched.
  *
- *   3. **Legacy alias deprecation.** `fallow-ignore-*` is accepted but emits
- *      a once-per-file `console.warn` via the shared dedup helper. Verbatim
- *      message format matches the TS variant byte-for-byte.
- *
- *   4. **Unknown tokens.** An unknown token still produces a `Suppression`
+ *   3. **Unknown tokens.** An unknown token still produces a `Suppression`
  *      record AND emits a once-per-(file, token) `console.warn` with a
  *      Levenshtein-distance did-you-mean suggestion when one rule is within
  *      edit distance ≤ 2.
  *
- *   5. **`fugazi-ignore-file` is file-wide regardless of position.**
+ *   4. **`fugazi-ignore-file` is file-wide regardless of position.**
  *
  * Determinism (NFR-1): `JSON.stringify(parseSuppressionsPy(src, file))` is
  * byte-equal across runs for any fixed `(src, file)` pair.
@@ -74,8 +68,6 @@ const KNOWN_SET: ReadonlySet<string> = new Set<string>(KNOWN_RULES);
 
 const FUGAZI_NEXT_LINE = 'fugazi-ignore-next-line';
 const FUGAZI_FILE = 'fugazi-ignore-file';
-const LEGACY_NEXT_LINE = 'fallow-ignore-next-line';
-const LEGACY_FILE = 'fallow-ignore-file';
 
 /**
  * Iterates every `#` line comment in `source`, paired with its 1-based line
@@ -161,33 +153,17 @@ function emitUnknownWarning(file: string, token: string): void {
   warnOncePerFile(file, 'unknown', token, message);
 }
 
-function emitLegacyWarning(file: string): void {
-  warnOncePerFile(
-    file,
-    'legacy',
-    '',
-    `fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in ${file})`,
-  );
-}
-
 interface DirectiveMatch {
   readonly kind: 'next-line' | 'file';
-  readonly legacy: boolean;
   readonly rest: string;
 }
 
 function matchDirective(body: string): DirectiveMatch | null {
   if (body.startsWith(FUGAZI_NEXT_LINE)) {
-    return { kind: 'next-line', legacy: false, rest: body.slice(FUGAZI_NEXT_LINE.length) };
+    return { kind: 'next-line', rest: body.slice(FUGAZI_NEXT_LINE.length) };
   }
   if (body.startsWith(FUGAZI_FILE)) {
-    return { kind: 'file', legacy: false, rest: body.slice(FUGAZI_FILE.length) };
-  }
-  if (body.startsWith(LEGACY_NEXT_LINE)) {
-    return { kind: 'next-line', legacy: true, rest: body.slice(LEGACY_NEXT_LINE.length) };
-  }
-  if (body.startsWith(LEGACY_FILE)) {
-    return { kind: 'file', legacy: true, rest: body.slice(LEGACY_FILE.length) };
+    return { kind: 'file', rest: body.slice(FUGAZI_FILE.length) };
   }
   return null;
 }
@@ -220,8 +196,6 @@ export function parseSuppressionsPy(source: string, filename: string): readonly 
     const directive = matchDirective(body);
     if (directive === null) continue;
     if (!isWordBoundary(directive.rest)) continue;
-
-    if (directive.legacy) emitLegacyWarning(filename);
 
     const tokens = tokenize(directive.rest);
     for (const tok of tokens) {

@@ -19,9 +19,8 @@
  *   fixed-point loop without changing the public shape — adding a per-edge
  *   alias map only changes the per-iteration `propagateOne` step.
  *
- * Algorithm (matches the original Fallow reference at
- * `crates/graph/src/graph/re_exports/propagate.rs` adapted for our coarser
- * inventory):
+ * Algorithm
+ * ---------
  *
  *   1. Seed: `exports[f] = { decl.name | decl ∈ inventory.declarations,
  *                             decl.exported, decl.name !== '' }`.
@@ -36,8 +35,8 @@
  *      For names propagated through one or more star re-exports, `sourceFile`
  *      points at the FIRST barrel hop the name came in through and
  *      `sourceName === name`. We do NOT walk the chain to its terminal
- *      declaration — provenance is one hop deep, matching the Fallow reference
- *      where the per-iteration delta records the immediate source file.
+ *      declaration — provenance is one hop deep: the per-iteration delta
+ *      records the immediate source file.
  *
  * Determinism (NFR-1 / SC-15)
  * ---------------------------
@@ -61,7 +60,7 @@ import type { Edge, Graph } from '../types.js';
 
 /**
  * Maximum number of fixed-point iterations before we bail with a `'cap-hit'`
- * diagnostic. Matches the original Fallow `max_iterations = 20` constant.
+ * diagnostic. The `max_iterations = 20` cap bounds barrel-chain resolution.
  */
 export const MAX_ITERATIONS = 20;
 
@@ -211,9 +210,8 @@ export function propagateReExports(graph: Graph): PropagatedExports {
           fromSet.add(name);
           changedThisIteration = true;
           // Set provenance only if not already recorded. The first source
-          // we observe wins — matches the Fallow reference's monotonic
-          // accumulator. Per-iteration ordering above guarantees the same
-          // "first source" deterministically.
+          // we observe wins — a monotonic accumulator. Per-iteration ordering
+          // above guarantees the same "first source" deterministically.
           const key = `${from as unknown as number}:${name}`;
           if (!provenance.has(key)) {
             provenance.set(key, { sourceFile: to, sourceName: name });

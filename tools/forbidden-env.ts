@@ -1,14 +1,13 @@
 #!/usr/bin/env bun
 /**
- * forbidden-fallow-env.ts — SC-18 enforcement.
+ * forbidden-env.ts — SC-18 enforcement.
  *
  * Scans packages/<*>/src/<**>/<*>.{ts,js} for FALLOW_ env var reads via either
  * process.env or import.meta.env. Lists every violation, then exits 1 if any
  * were found, else 0.
  *
  * Allowlisted paths (skipped):
- *   - docs/decisions/QUESTIONNAIRE.md   (historical record may mention these names)
- *   - tools/forbidden-fallow-env.ts     (this scanner; the patterns are match data)
+ *   - tools/forbidden-env.ts            (this scanner; the patterns are match data)
  */
 
 import { readFile, readdir, stat } from 'node:fs/promises';
@@ -29,8 +28,7 @@ const PATTERNS: ReadonlyArray<RegExp> = [
 ];
 
 const ALLOWLISTED_PATHS = new Set([
-  'docs/decisions/QUESTIONNAIRE.md',
-  'tools/forbidden-fallow-env.ts',
+  'tools/forbidden-env.ts',
 ]);
 
 // Phase 4e (T362): scan Python source + stub files alongside TS/JS so the

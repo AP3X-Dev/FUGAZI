@@ -57,8 +57,7 @@ class WholeFileExempt:
 ```
 
 Inline comments are recognised whether they appear at module level, inside
-class bodies, or inside function bodies. The legacy `fallow-ignore-*`
-spellings remain supported for compatibility.
+class bodies, or inside function bodies.
 
 ## Framework plugins
 

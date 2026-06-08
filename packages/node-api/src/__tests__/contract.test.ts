@@ -2,9 +2,9 @@
  * contract.test.ts — Phase 3h.5 (T204) — public-surface contract checks.
  *
  * Asserts the SIX-function surface defined by IMP-ARCH-11 and the
- * collapsed-helper requirement from IMP-API-02 (the original Fallow
- * `detect_dead_code`, `detect_unused_files`, `detect_unused_exports` are NOT
- * exported — `analyze({ rules: [...] })` replaces them).
+ * collapsed-helper requirement from IMP-API-02 (the granular
+ * `detect_dead_code`, `detect_unused_files`, `detect_unused_exports` helpers are
+ * NOT exported — `analyze({ rules: [...] })` replaces them).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -29,7 +29,7 @@ describe('@fugazi/node contract', () => {
     }
   });
 
-  it('does not export the collapsed Fallow helpers (IMP-API-02)', () => {
+  it('does not export the collapsed granular helpers (IMP-API-02)', () => {
     for (const forbidden of FORBIDDEN_NAMES) {
       expect((nodeApi as Record<string, unknown>)[forbidden]).toBeUndefined();
     }

@@ -1,7 +1,7 @@
 /**
  * sc-2.test.ts — Phase 3m T282 — SC-2 acceptance row.
  *
- * SC-2 calls for 145 project fixtures vs the original Fallow corpus. v1.0
+ * SC-2 calls for a target corpus of 145 project fixtures. v1.0
  * ships 34 representative fixtures across 6 themes (boundary, frameworks,
  * path-aliases, re-export, suppression, workspace). The remaining 111 are
  * carried to v1.x — see `docs/V1_LIMITATIONS.md`.

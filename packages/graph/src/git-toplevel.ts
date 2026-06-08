@@ -17,7 +17,7 @@
  *
  * Rejected promises stay in the cache: a failure is memoized as a rejected
  * Promise, so callers receive the same rejection without re-spawning git on a
- * known-broken repo. This mirrors fallow's git_toplevel behavior.
+ * known-broken repo.
  *
  * Errors wrap as `FugaziGraphError({ code: 'GIT_TOPLEVEL_FAILED' })` with the
  * verbatim message

@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "flat-edge-storage" ADR. The TS port preserves the data-shape rationale; the in-memory representation differs to suit V8.
+Background / prior art: this builds on our "flat-edge-storage" data-shape rationale, with the in-memory representation tuned to suit V8.
 
 ## Context
 
@@ -17,7 +17,7 @@ Two patterns are tempting and wrong:
 1. **Per-query traversal.** Walk the forward edges every time a "who imports X?" question is asked. Wastes work proportional to graph size on every query.
 2. **Hash-keyed adjacency lists with arbitrary iteration order.** Fast for queries but produces non-deterministic findings when iteration order leaks into output (and it always does, eventually).
 
-The Rust original solved this with flat `Vec<Edge>` arrays plus `Range<usize>` slices into them. JavaScript engines don't give us the same memory layout, but the strategy translates: build all the indices once, up front, and consult them by lookup.
+A flat-array approach with sliced ranges into a contiguous buffer is the classic fix for this. JavaScript engines don't give us that exact memory layout, but the strategy translates: build all the indices once, up front, and consult them by lookup.
 
 ## Decision
 

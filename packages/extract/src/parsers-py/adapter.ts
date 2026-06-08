@@ -27,8 +27,8 @@
  * each into a `ParseError` matching the SWC adapter's verbatim message
  * convention (`parse-error: unexpected '<text>'` / `missing token: <type>`).
  *
- * Per IMP-DEBT-08: this adapter is the bridge to the discriminated union; the
- * original Fallow Rust pipeline's string-sentinel pattern never appears.
+ * Per IMP-DEBT-08: this adapter is the bridge to the discriminated union; no
+ * string-sentinel pattern ever appears.
  */
 
 import type { Position, Range } from '@fugazi/types';

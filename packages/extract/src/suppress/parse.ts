@@ -5,18 +5,14 @@
  *
  *   - `// fugazi-ignore-next-line [tokens...]`  — suppress next physical line
  *   - `// fugazi-ignore-file       [tokens...]` — suppress entire file
- *   - `// fallow-ignore-next-line  [tokens...]` — legacy alias of the above
- *   - `// fallow-ignore-file       [tokens...]` — legacy alias of the above
  *
  * Tokens are space-separated rule identifiers from the closed `RuleId` union
  * (see `packages/types/src/rule-id.ts`). An empty token list means "suppress
  * all issues" and is encoded as `issueTypes: []`.
  *
- * Behavior decisions (vs. the original Fallow Rust implementation in
- * `crates/extract/src/suppress.rs`):
+ * Behavior decisions:
  *
- *   1. **Regex-based, line-oriented scan.** The original Fallow uses oxc's
- *      tokenizer to enumerate comments. Fugazi runs the suppression parser
+ *   1. **Regex-based, line-oriented scan.** Fugazi runs the suppression parser
  *      *before* the AST visitor (it must work on SFC sub-blocks and on files
  *      that fail to parse). Consequence: a `// fugazi-ignore-next-line` token
  *      that appears inside a string literal would be picked up. This is a
@@ -25,23 +21,19 @@
  *      and can be tightened later behind a feature flag without changing the
  *      `Suppression` shape.
  *
- *   2. **Block / HTML comments are NOT recognized.** The original supports
+ *   2. **Block / HTML comments are NOT recognized.** Some tools recognize
  *      `/* ...*\/` and `<!-- ... -->` styles for SFCs; Fugazi's SFC handlers
  *      already extract `<script>` blocks and route them through this parser
  *      with `//` comments only. Fixture #14 asserts this.
  *
- *   3. **Legacy alias deprecation.** `fallow-ignore-*` is accepted but emits
- *      a once-per-file `console.warn` via the dedup helper. The verbatim
- *      message is fixture-asserted byte-for-byte (E5 / IMP-CORRECT-09).
- *
- *   4. **Unknown tokens.** An unknown token still produces a `Suppression`
+ *   3. **Unknown tokens.** An unknown token still produces a `Suppression`
  *      record (the consumer ignores unknown tokens at suppression-resolution
  *      time) AND emits a once-per-(file, token) `console.warn` with a
  *      Levenshtein-distance did-you-mean suggestion when one rule is within
  *      edit distance 2.
  *
- *   5. **`fugazi-ignore-file` is file-wide regardless of position.** The
- *      original spec phrasing ("at top of file") is interpreted semantically:
+ *   4. **`fugazi-ignore-file` is file-wide regardless of position.** Earlier
+ *      spec phrasing ("at top of file") is interpreted semantically:
  *      `kind: 'file'` means file-wide whether the directive appears on line 1
  *      or line 50.
  *
@@ -105,8 +97,6 @@ const KNOWN_SET: ReadonlySet<string> = new Set<string>(KNOWN_RULES);
 // against the `…-file` prefix.
 const FUGAZI_NEXT_LINE = 'fugazi-ignore-next-line';
 const FUGAZI_FILE = 'fugazi-ignore-file';
-const LEGACY_NEXT_LINE = 'fallow-ignore-next-line';
-const LEGACY_FILE = 'fallow-ignore-file';
 
 /**
  * Iterates every `//` line comment in `source`, paired with its 1-based line
@@ -198,21 +188,8 @@ function emitUnknownWarning(file: string, token: string): void {
   warnOncePerFile(file, 'unknown', token, message);
 }
 
-function emitLegacyWarning(file: string): void {
-  // Per-file dedup: pass an empty token so all legacy comments in the same
-  // file collapse to a single warning regardless of which alias variant they
-  // used.
-  warnOncePerFile(
-    file,
-    'legacy',
-    '',
-    `fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in ${file})`,
-  );
-}
-
 interface DirectiveMatch {
   readonly kind: 'next-line' | 'file';
-  readonly legacy: boolean;
   readonly rest: string;
 }
 
@@ -223,16 +200,10 @@ interface DirectiveMatch {
  */
 function matchDirective(body: string): DirectiveMatch | null {
   if (body.startsWith(FUGAZI_NEXT_LINE)) {
-    return { kind: 'next-line', legacy: false, rest: body.slice(FUGAZI_NEXT_LINE.length) };
+    return { kind: 'next-line', rest: body.slice(FUGAZI_NEXT_LINE.length) };
   }
   if (body.startsWith(FUGAZI_FILE)) {
-    return { kind: 'file', legacy: false, rest: body.slice(FUGAZI_FILE.length) };
-  }
-  if (body.startsWith(LEGACY_NEXT_LINE)) {
-    return { kind: 'next-line', legacy: true, rest: body.slice(LEGACY_NEXT_LINE.length) };
-  }
-  if (body.startsWith(LEGACY_FILE)) {
-    return { kind: 'file', legacy: true, rest: body.slice(LEGACY_FILE.length) };
+    return { kind: 'file', rest: body.slice(FUGAZI_FILE.length) };
   }
   return null;
 }
@@ -267,13 +238,11 @@ export function parseSuppressions(source: string, filename: string): readonly Su
   const comments = scanLineComments(source);
 
   for (const c of comments) {
-    // Trim the comment body; the original Rust impl trims both sides.
+    // Trim the comment body on both sides.
     const body = c.body.trim();
     const directive = matchDirective(body);
     if (directive === null) continue;
     if (!isWordBoundary(directive.rest)) continue;
-
-    if (directive.legacy) emitLegacyWarning(filename);
 
     const tokens = tokenize(directive.rest);
     for (const tok of tokens) {

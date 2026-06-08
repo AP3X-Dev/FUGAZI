@@ -185,15 +185,6 @@ const FIXTURES: readonly FixtureSpec[] = [
   },
   {
     theme: 'suppression',
-    name: 'mixed-fallow-legacy',
-    files: {
-      'src/index.ts': `export const used = 1;\n`,
-      'src/orphan.ts': `// fallow-ignore-file unused-files\nexport const x = 1;\n`,
-    },
-    fixtureConfig: { entrypoints: ['src/index.ts'] },
-  },
-  {
-    theme: 'suppression',
     name: 'unknown-token',
     files: {
       'src/index.ts': `// fugazi-ignore-next-line not-a-real-rule\nexport const used = 1;\n`,

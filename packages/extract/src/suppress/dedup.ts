@@ -6,7 +6,7 @@
  * so that:
  *
  *   - The legacy-alias deprecation warning is emitted at most once per file
- *     even when many `fallow-ignore-*` comments appear in that file.
+ *     even when many legacy-alias ignore comments appear in that file.
  *   - The unknown-token did-you-mean warning is emitted at most once per
  *     `(file, token)` pair so a typo repeated on consecutive lines does not
  *     spam stderr.

@@ -8,7 +8,7 @@
  *
  * Both contracts are enforced by the existing scanners under `tools/`:
  *   - `tools/forbidden-strings.ts` (SC-17)
- *   - `tools/forbidden-fallow-env.ts` (SC-18)
+ *   - `tools/forbidden-env.ts` (SC-18)
  *
  * This test re-runs them as a child process and asserts exit code 0,
  * which is what the CI gate enforces. The rich token list and allowlist
@@ -60,8 +60,8 @@ describe('SC-17: forbidden-strings gate', () => {
 });
 
 describe('SC-18: forbidden-FALLOW_-env gate', () => {
-  it('tools/forbidden-fallow-env.ts exits 0 (zero FALLOW_ env reads)', async () => {
-    const result = await runBun('tools/forbidden-fallow-env.ts');
-    expect(result.exitCode, `forbidden-fallow-env reported violations:\n${result.stderr}`).toBe(0);
+  it('tools/forbidden-env.ts exits 0 (zero FALLOW_ env reads)', async () => {
+    const result = await runBun('tools/forbidden-env.ts');
+    expect(result.exitCode, `forbidden-env reported violations:\n${result.stderr}`).toBe(0);
   }, 60_000);
 });

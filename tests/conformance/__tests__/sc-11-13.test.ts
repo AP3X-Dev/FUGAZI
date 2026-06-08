@@ -34,13 +34,6 @@ describe('SC-11: suppression semantics', () => {
     expect(suppressions[1]?.kind).toBe('file');
   });
 
-  it('parseSuppressions accepts both fugazi-ignore-* and fallow-ignore-* legacy forms', () => {
-    const src = ['// fallow-ignore-next-line unused-exports', 'export const x = 1;'].join('\n');
-    const suppressions = parseSuppressions(src, '/test.ts');
-    expect(suppressions.length).toBe(1);
-    expect(suppressions[0]?.kind).toBe('next-line');
-  });
-
   it('parseSuppressions returns an empty list when no directives are present', () => {
     const src = 'export const a = 1;\nexport const b = 2;\n';
     const suppressions = parseSuppressions(src, '/test.ts');

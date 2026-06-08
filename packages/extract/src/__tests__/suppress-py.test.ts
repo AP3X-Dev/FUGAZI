@@ -60,21 +60,6 @@ describe('parseSuppressionsPy — fixture cases (T308)', () => {
     });
   });
 
-  it('3. legacy # fallow-ignore-* emits deprecation warning', async () => {
-    const src = '# fallow-ignore-next-line unused-exports\ndef foo(): pass\n';
-    const result = parseSuppressionsPy(src, 'c.py');
-    expect(result.length).toBe(1);
-    expect(pick(result[0] as Suppression)).toEqual({
-      file: 'c.py',
-      line: 1,
-      kind: 'next-line',
-      issueTypes: ['unused-exports'],
-    });
-    expect(warningMessages()).toEqual([
-      'fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in c.py)',
-    ]);
-  });
-
   it('4. unknown token emits did-you-mean suggestion', async () => {
     const src = '# fugazi-ignore-next-line unsued-exports\ndef foo(): pass\n';
     const result = parseSuppressionsPy(src, 'd.py');
@@ -111,19 +96,6 @@ describe('parseSuppressionsPy — fixture cases (T308)', () => {
     expect((result[0] as Suppression).issueTypes).toEqual(['unused-exports']);
     expect((result[1] as Suppression).line).toBe(3);
     expect((result[1] as Suppression).issueTypes).toEqual(['unused-types']);
-  });
-
-  it('legacy alias warns ONCE per file even when several legacy directives appear', async () => {
-    const src = [
-      '# fallow-ignore-next-line unused-exports',
-      'def a(): pass',
-      '# fallow-ignore-file unused-types',
-      '',
-    ].join('\n');
-    const result = parseSuppressionsPy(src, 'g.py');
-    expect(result.length).toBe(2);
-    const legacy = warningMessages().filter((m) => m.includes('deprecated'));
-    expect(legacy.length).toBe(1);
   });
 
   it('determinism: byte-equal JSON.stringify across repeated runs', async () => {
@@ -185,12 +157,12 @@ describe('parseSuppressionsByLang — dispatch by extension', () => {
 
 describe('parseSuppressionsPy — dedup state', () => {
   it('__resetForTest cleanly clears warn-once state', async () => {
-    parseSuppressionsPy('# fallow-ignore-next-line unused-exports\ndef a(): pass\n', 'r.py');
+    parseSuppressionsPy('# fugazi-ignore-next-line zzzzzz\ndef a(): pass\n', 'r.py');
     expect(__sizeForTest()).toBeGreaterThan(0);
     __resetForTest();
     expect(__sizeForTest()).toBe(0);
-    parseSuppressionsPy('# fallow-ignore-next-line unused-exports\ndef a(): pass\n', 'r.py');
-    const legacy = warningMessages().filter((m) => m.includes('deprecated'));
-    expect(legacy.length).toBe(2);
+    parseSuppressionsPy('# fugazi-ignore-next-line zzzzzz\ndef a(): pass\n', 'r.py');
+    const warns = warningMessages().filter((m) => m.includes('unknown ignore token'));
+    expect(warns.length).toBe(2);
   });
 });

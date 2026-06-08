@@ -6,7 +6,7 @@ Accepted
 
 Date: 2026-04-30
 
-Background / prior art: carry-forward from the original Fallow project's "boundary-zone-root" ADR. The TS port preserves the same semantic decisions; the rule-engine wiring is rewritten in TypeScript.
+Background / prior art: this ADR captures Fugazi's boundary-zone-root semantics. The rule-engine wiring is implemented in TypeScript.
 
 ## Context
 

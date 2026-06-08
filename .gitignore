@@ -69,8 +69,6 @@ BUG_TRACKER.md
 
 # experimental local-only packages — kept local, not published
 _local/
-packages/mcp/src/amp-tools/
-tsconfig.amp.json
 
 # js/ts framework + lint caches
 .eslintcache

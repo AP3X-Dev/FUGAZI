@@ -22,11 +22,9 @@
  *      template usages. Sort by `range.start.byteOffset` then by name, freeze.
  *
  * Parser strategy: regex-based frontmatter extraction, no `@astrojs/compiler`
- * runtime dependency. This is a deliberate deviation; matches the no-runtime-
- * parser policy established in Phase 3c.5 Dispatch A (Vue) and continued in
- * Dispatch B (Svelte). Mirrors the original Fallow Rust pipeline
- * (`crates/extract/src/astro.rs`) which relied on the same `(?s)\A\s*---...---`
- * pattern.
+ * runtime dependency. This follows the no-runtime-parser policy established in
+ * Phase 3c.5 Dispatch A (Vue) and continued in Dispatch B (Svelte). The
+ * frontmatter is matched with a `(?s)\A\s*---...---`-style pattern.
  *
  * Determinism (NFR-1): a single `.astro` source produces byte-equal
  * `JSON.stringify(inventory)` across runs.
@@ -43,8 +41,8 @@ const CLASS_ATTR_RE = /\bclass\s*=\s*"([^"]*)"|\bclass\s*=\s*'([^']*)'/g;
 const HTML_COMMENT_OUTER_RE = /<!--[\s\S]*?-->/g;
 
 // Astro frontmatter: leading `---\n` ... `\n---\n?` at file start. We allow a
-// small amount of leading whitespace before the opening fence to mirror the
-// Rust regex `(?s)\A\s*---[ \t]*\r?\n(?P<body>.*?\r?\n)---`.
+// small amount of leading whitespace before the opening fence, equivalent to
+// the pattern `(?s)\A\s*---[ \t]*\r?\n(?P<body>.*?\r?\n)---`.
 const FRONTMATTER_RE = /^\s*---[ \t]*\r?\n([\s\S]*?\r?\n)---\r?\n?/;
 
 const IMPORT_DECL_RE = /import\s+(?:type\s+)?([\s\S]*?)\s+from\s+['"][^'"]+['"]/g;

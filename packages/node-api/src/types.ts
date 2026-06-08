@@ -2,8 +2,8 @@
  * @fugazi/node types — public surface for programmatic consumers.
  *
  * Phase 3h.5 (T201-T204) lands six top-level functions: `analyze`, `findDupes`,
- * `health`, `audit`, `traceFile`, `traceExport`. Per IMP-API-02 the original
- * Fallow `detect_dead_code` / `detect_unused_files` / `detect_unused_exports`
+ * `health`, `audit`, `traceFile`, `traceExport`. Per IMP-API-02 the
+ * `detect_dead_code` / `detect_unused_files` / `detect_unused_exports`
  * trio collapses into a single `analyze()` with a discriminated `rules`
  * option — passing an explicit RuleId list emulates the per-rule helpers.
  *
@@ -37,8 +37,8 @@ export type CoverageRootOption = 'auto' | RebaseAutoExplicit;
  *     `'off'` fires.
  *   - `readonly RuleId[]`: only the listed rules fire — every other rule is
  *     forced to `'off'` via a config-rule override. Per IMP-API-02 this is the
- *     replacement for the original Fallow `detect_dead_code`,
- *     `detect_unused_files`, `detect_unused_exports` helpers.
+ *     replacement for the `detect_dead_code`, `detect_unused_files`,
+ *     `detect_unused_exports` helpers.
  */
 export type AnalyzeRulesOption = 'all' | readonly RuleId[];
 

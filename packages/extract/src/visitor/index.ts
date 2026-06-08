@@ -24,10 +24,9 @@
  * `exported` flag is set. No pre-scan, no parent stack — just the single
  * walker callback's `parent` parameter.
  *
- * Per IMP-DEBT-08: this file (and its sibling helpers) replaces the original
- * Fallow Rust pipeline's string-sentinel multi-pass visitor with a single
- * typed pass over a discriminated-union AST. The legacy sentinel token never
- * appears in source.
+ * Per IMP-DEBT-08: this file (and its sibling helpers) performs a single
+ * typed pass over a discriminated-union AST rather than a string-sentinel
+ * multi-pass visitor. The sentinel token never appears in source.
  */
 
 import { matchAssetUrl } from '../asset-url.js';

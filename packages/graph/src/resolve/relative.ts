@@ -27,9 +27,9 @@ import type { FsAdapter } from './fs-adapter.js';
 import { dirnamePosix, joinPosix } from './path-utils.js';
 
 /**
- * Extensions probed when a relative specifier has no extension. The order
- * matches the original Fallow Rust resolver (TS / TSX before JS variants;
- * declaration files come last so a runtime sibling wins when both exist).
+ * Extensions probed when a relative specifier has no extension. TS / TSX
+ * come before JS variants; declaration files come last so a runtime sibling
+ * wins when both exist.
  *
  * Frozen for determinism — a downstream caller cannot mutate the order
  * mid-run and produce drift across files.

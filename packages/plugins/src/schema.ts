@@ -1,8 +1,8 @@
 /**
  * schema.ts — Zod schemas for runtime plugin validation (Phase 3i Wave A).
  *
- * Mirrors the canonical `plugin-schema.json` published by the upstream Fallow
- * project. The schemas exposed here are the runtime contract that every
+ * Mirrors the canonical `plugin-schema.json` schema definition. The schemas
+ * exposed here are the runtime contract that every
  * bundled JSON data file under `src/data/` and every external plugin loaded
  * via `loadExternalPlugin()` must satisfy.
  *

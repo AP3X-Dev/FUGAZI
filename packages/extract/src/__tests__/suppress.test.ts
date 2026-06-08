@@ -98,50 +98,6 @@ describe('parseSuppressions — fixture cases', () => {
     expect(warningMessages()).toEqual(["unknown ignore token 'zzzzzz' in e.ts"]);
   });
 
-  it('6. legacy alias — emits one deprecation warning per file', () => {
-    const src = '// fallow-ignore-next-line unused-exports\nexport const foo = 1;\n';
-    const result = parseSuppressions(src, 'f.ts');
-    expect(result.length).toBe(1);
-    expect(pick(result[0] as Suppression)).toEqual({
-      file: 'f.ts',
-      line: 1,
-      kind: 'next-line',
-      issueTypes: ['unused-exports'],
-    });
-    expect(warningMessages()).toEqual([
-      'fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in f.ts)',
-    ]);
-  });
-
-  it('7. legacy alias on multiple lines in same file — warns ONCE', () => {
-    const src = [
-      '// fallow-ignore-next-line unused-exports',
-      'export const foo = 1;',
-      '// fallow-ignore-next-line unused-types',
-      'export type Bar = string;',
-      '// fallow-ignore-file boundary-violations',
-      '',
-    ].join('\n');
-    const result = parseSuppressions(src, 'g.ts');
-    expect(result.length).toBe(3);
-    // Only ONE legacy warning despite three legacy directives.
-    const msgs = warningMessages();
-    const legacyCount = msgs.filter((m) => m.includes('deprecated')).length;
-    expect(legacyCount).toBe(1);
-    expect(msgs).toContain('fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in g.ts)');
-  });
-
-  it('8. legacy alias in two different files — warns once per file', () => {
-    const src1 = '// fallow-ignore-next-line unused-exports\nexport const foo = 1;\n';
-    const src2 = '// fallow-ignore-file unused-types\nexport type X = number;\n';
-    parseSuppressions(src1, 'h1.ts');
-    parseSuppressions(src2, 'h2.ts');
-    const msgs = warningMessages();
-    expect(msgs).toContain('fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in h1.ts)');
-    expect(msgs).toContain('fallow-ignore-* is deprecated; use fugazi-ignore-* instead (in h2.ts)');
-    expect(msgs.filter((m) => m.includes('deprecated')).length).toBe(2);
-  });
-
   it('9. multiple ignores on consecutive lines — both records emitted', () => {
     const src = [
       '// fugazi-ignore-next-line unused-exports',
@@ -274,13 +230,13 @@ describe('parseSuppressions — structural invariants', () => {
   });
 
   it('__resetForTest() between tests cleanly clears warn-once state', () => {
-    parseSuppressions('// fallow-ignore-next-line unused-exports\nexport const a = 1;\n', 'r.ts');
+    parseSuppressions('// fugazi-ignore-next-line zzzzzz\nexport const a = 1;\n', 'r.ts');
     expect(__sizeForTest()).toBeGreaterThan(0);
     __resetForTest();
     expect(__sizeForTest()).toBe(0);
-    // After reset, the same legacy comment in the same file warns again.
-    parseSuppressions('// fallow-ignore-next-line unused-exports\nexport const a = 1;\n', 'r.ts');
-    const legacy = warningMessages().filter((m) => m.includes('deprecated'));
-    expect(legacy.length).toBe(2);
+    // After reset, the same unknown token in the same file warns again.
+    parseSuppressions('// fugazi-ignore-next-line zzzzzz\nexport const a = 1;\n', 'r.ts');
+    const warns = warningMessages().filter((m) => m.includes('unknown ignore token'));
+    expect(warns.length).toBe(2);
   });
 });
