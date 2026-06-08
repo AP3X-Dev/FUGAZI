@@ -36,4 +36,3 @@ describe('SC-22: experimentalTsPlugins flag (TS plugin tier deferred to v1.1)', 
     expect(text).toMatch(/v1\.1|deferred/i);
   });
 });
-
