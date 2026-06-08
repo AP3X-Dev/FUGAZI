@@ -41,6 +41,12 @@
       "**/data/**"
     ]
   },
+  "overrides": [
+    {
+      "include": ["**/ecosystem/runner.ts", "**/ecosystem/py-runner.ts"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "single",

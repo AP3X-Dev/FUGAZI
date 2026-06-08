@@ -170,7 +170,6 @@ export async function runAll(): Promise<readonly EcosystemResult[]> {
   const projects = await loadProjects();
   const results: EcosystemResult[] = [];
   for (const project of projects) {
-    // eslint-disable-next-line no-console
     console.log(`[ecosystem] ${project.org}/${project.repo}@${project.branch}`);
     // Failures in one project do NOT abort the sweep.
     // eslint-disable-next-line no-await-in-loop
@@ -182,19 +181,16 @@ export async function runAll(): Promise<readonly EcosystemResult[]> {
 
 async function main(): Promise<void> {
   if (process.env.SKIP_ECOSYSTEM === '1') {
-    // eslint-disable-next-line no-console
     console.log('[ecosystem] SKIP_ECOSYSTEM=1, skipping');
     return;
   }
   const results = await runAll();
   const fails = results.filter((r) => r.status === 'fail');
-  // eslint-disable-next-line no-console
   console.log(
     `[ecosystem] ${results.length - fails.length}/${results.length} passed (${fails.length} failed)`,
   );
   if (fails.length > 0) {
     for (const r of fails) {
-      // eslint-disable-next-line no-console
       console.log(
         `  fail: ${r.project.org}/${r.project.repo} exit=${r.exitCode} elapsed=${r.elapsedMs}ms`,
       );

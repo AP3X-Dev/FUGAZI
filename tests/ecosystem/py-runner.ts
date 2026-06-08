@@ -161,7 +161,6 @@ export async function runPyAll(): Promise<readonly PyEcosystemResult[]> {
   const projects = await loadPyProjects();
   const results: PyEcosystemResult[] = [];
   for (const project of projects) {
-    // eslint-disable-next-line no-console
     console.log(`[ecosystem-py] ${project.org}/${project.repo}@${project.branch}`);
     // eslint-disable-next-line no-await-in-loop
     const result = await runPyOne(project);
@@ -172,19 +171,16 @@ export async function runPyAll(): Promise<readonly PyEcosystemResult[]> {
 
 async function main(): Promise<void> {
   if (process.env.SKIP_ECOSYSTEM === '1') {
-    // eslint-disable-next-line no-console
     console.log('[ecosystem-py] SKIP_ECOSYSTEM=1, skipping');
     return;
   }
   const results = await runPyAll();
   const fails = results.filter((r) => r.status === 'fail');
-  // eslint-disable-next-line no-console
   console.log(
     `[ecosystem-py] ${results.length - fails.length}/${results.length} passed (${fails.length} failed)`,
   );
   if (fails.length > 0) {
     for (const r of fails) {
-      // eslint-disable-next-line no-console
       console.log(
         `  fail: ${r.project.org}/${r.project.repo} exit=${r.exitCode} elapsed=${r.elapsedMs}ms`,
       );

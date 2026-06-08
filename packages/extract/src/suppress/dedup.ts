@@ -41,11 +41,10 @@ export function warnOncePerFile(
   const key = `${file}:${kind}:${token}`;
   if (seen.has(key)) return false;
   seen.add(key);
-  // The deprecation + did-you-mean diagnostics are emitted to stderr via
+  // Unknown-token and did-you-mean diagnostics are emitted to stderr via
   // console.warn per the suppression-parser spec (T076). Tests assert the
-  // exact warning text via vi.spyOn(console, 'warn'). The `noConsole` lint
-  // rule is configured at warn-level for the workspace; this call surfaces
-  // as a warning, not an error, and is intentionally retained.
+  // exact warning text via vi.spyOn(console, 'warn').
+  // biome-ignore lint/suspicious/noConsole: user-facing diagnostic, asserted by tests
   console.warn(message);
   return true;
 }
