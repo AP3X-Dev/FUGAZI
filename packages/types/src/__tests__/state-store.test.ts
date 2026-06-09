@@ -207,15 +207,18 @@ describe('StateStore — stress / no deadlock', () => {
     }
     await Promise.all(ops);
     const elapsed = Date.now() - startedAt;
-    // Generous bound: 200 ops * ~4 ms max delay, with serialised writes,
-    // should complete well under 5 s on any runner.
-    expect(elapsed).toBeLessThan(5000);
+    // Liveness bound, not a perf budget: this asserts the ops *complete* (no
+    // deadlock) rather than hang. The wall-clock figure is generous because
+    // `setTimeout` has ~15 ms granularity on Windows, so 200 serialised ticks
+    // run far slower there than the nominal 0–3 ms delays suggest. A real
+    // deadlock still fails via the per-test timeout below.
+    expect(elapsed).toBeLessThan(20000);
     // n should equal the count of writers we issued.
     const writerCount = ops.length; // upper bound — we re-derive below
     void writerCount;
     // Sanity: at least one write happened (probability ~1 with 200 ops at p=0.3).
     expect((await s.snapshot()).n).toBeGreaterThan(0);
-  }, 10000);
+  }, 30000);
 });
 
 describe('StateStore — implementation contract', () => {
