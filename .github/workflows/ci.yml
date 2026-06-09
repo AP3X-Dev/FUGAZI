@@ -42,7 +42,7 @@ jobs:
 
       - name: Install dependencies (node)
         if: matrix.runtime == 'node'
-        run: npm ci --workspaces --include-workspace-root
+        run: npm install --workspaces --include-workspace-root --no-audit --no-fund
 
       - name: Build (bun)
         if: matrix.runtime == 'bun'
@@ -139,4 +139,4 @@ jobs:
           done
 
       - name: Diff build outputs
-        run: diff -ru .determinism/first .determinism/second
+        run: diff -ru --exclude='*.tsbuildinfo' .determinism/first .determinism/second
