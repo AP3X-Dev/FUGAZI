@@ -60,16 +60,22 @@ describe('project fixtures', () => {
     async (_id, dir) => {
       const result = await freezeFixture(dir);
       if (result.actual !== result.expected) {
-        const a = result.actual.split('\n');
-        const e = result.expected.split('\n');
-        const lines: string[] = [];
-        for (let i = 0; i < Math.max(a.length, e.length); i++) {
-          if (a[i] !== e[i]) {
-            lines.push(`L${i} exp=${JSON.stringify(e[i] ?? null)} got=${JSON.stringify(a[i] ?? null)}`);
+        const A = result.actual;
+        const E = result.expected;
+        let d = -1;
+        const n = Math.min(A.length, E.length);
+        for (let i = 0; i < n; i++) {
+          if (A[i] !== E[i]) {
+            d = i;
+            break;
           }
         }
+        if (d === -1) d = n;
+        const eqIgnoringCR = A.replace(/\r/g, '') === E.replace(/\r/g, '');
         // TEMP diagnostic — unique marker to grep out of CI log noise.
-        console.error(`__WINDIFF__ ${_id}\n${lines.slice(0, 40).join('\n')}\n__WINDIFFEND__`);
+        console.error(
+          `__WINDIFF__ ${_id} lenA=${A.length} lenE=${E.length} firstDiff=${d} eqIgnoringCR=${eqIgnoringCR} expCode=${E.charCodeAt(d)} gotCode=${A.charCodeAt(d)} ctxE=${JSON.stringify(E.slice(Math.max(0, d - 40), d + 20))} ctxA=${JSON.stringify(A.slice(Math.max(0, d - 40), d + 20))} __WINDIFFEND__`,
+        );
       }
       expect(result.actual).toBe(result.expected);
     },
