@@ -8,8 +8,6 @@
 
 Fugazi analyzes a whole project — its module graph, re-export chains, and cross-references — to surface dead code, duplication, complexity, and architecture drift. It runs on Bun for speed and on Node 22+ for compatibility, and it can fold in production runtime evidence to tell you not just what's wrong, but what actually matters.
 
-> **Status:** pre-1.0 and under active development, but usable today. The analysis engine, rule set, framework plugins, and runtime layer are all implemented, and Fugazi works out of the box on an unconfigured project — it infers entry points automatically from your project's conventions (`src/index`, `main`, `cli`, `bin`, test files, `*.config`; Python `__main__.py`, `manage.py`, `conftest.py`, …) and from `package.json` / `pyproject.toml` manifests. Add a `.fugazirc.json` (or run `fugazi init`) only when you want to tune rules, boundaries, or pin entry points explicitly.
-
 ---
 
 ## What it finds
