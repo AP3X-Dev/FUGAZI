@@ -102,6 +102,7 @@ export {
   isAnyPackage,
   isPythonStdlib,
   isRegularPackage,
+  loadPythonEntryPoints,
   loadPythonManifest,
   normalizePackageName,
   parseRelativeSpec,

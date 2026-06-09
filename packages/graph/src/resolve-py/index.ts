@@ -14,6 +14,8 @@ export {
   normalizePackageName,
 } from './manifest.js';
 
+export { loadPythonEntryPoints } from './entry-points.js';
+
 export { findPackageRoot, isAnyPackage, isRegularPackage } from './namespace-pkg.js';
 
 export { parseRelativeSpec, resolvePyRelative } from './relative.js';
