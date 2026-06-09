@@ -1,0 +1,8 @@
+# Enforce LF line endings on every platform so formatting/determinism checks
+# behave identically (Biome formats with `lineEnding: lf`).
+* text=auto eol=lf
+
+# Binary assets — never normalize.
+*.wasm binary
+*.png  binary
+*.tgz  binary
