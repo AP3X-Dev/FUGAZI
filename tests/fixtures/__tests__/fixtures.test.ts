@@ -59,6 +59,18 @@ describe('project fixtures', () => {
     'byte-equality: %s',
     async (_id, dir) => {
       const result = await freezeFixture(dir);
+      if (result.actual !== result.expected) {
+        const a = result.actual.split('\n');
+        const e = result.expected.split('\n');
+        const lines: string[] = [];
+        for (let i = 0; i < Math.max(a.length, e.length); i++) {
+          if (a[i] !== e[i]) {
+            lines.push(`L${i} exp=${JSON.stringify(e[i] ?? null)} got=${JSON.stringify(a[i] ?? null)}`);
+          }
+        }
+        // TEMP diagnostic — unique marker to grep out of CI log noise.
+        console.error(`__WINDIFF__ ${_id}\n${lines.slice(0, 40).join('\n')}\n__WINDIFFEND__`);
+      }
       expect(result.actual).toBe(result.expected);
     },
   );
