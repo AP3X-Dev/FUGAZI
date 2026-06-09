@@ -94,6 +94,10 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   const startedAt = performance.now();
   const emitter = new ProgressEmitter(options.onProgress);
   const signal = options.abortSignal;
+  // POSIX-normalize the project root so it compares correctly against the
+  // forward-slash FileNode paths on Windows (zone matching, import resolution,
+  // entry-point and plugin path matching, and message path rebasing).
+  const projectRoot = toPosix(options.projectRoot);
 
   let graph: Graph;
   let filesScanned: number;
@@ -126,7 +130,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     // Phase 1: discover.
     emitter.emit({ kind: 'discover.start' });
     checkAborted(signal, 'discover');
-    const discovered = await discoverFiles(options.projectRoot, options.config.exclude);
+    const discovered = await discoverFiles(projectRoot, options.config.exclude);
     emitter.emit({ kind: 'discover.done', fileCount: discovered.length });
     checkAborted(signal, 'discover');
 
@@ -156,11 +160,11 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     // the project root (loadPythonManifest handles the fallback chain). When
     // no Python files exist we still load it once — the cost is one stat and
     // is amortised across the whole run.
-    const pythonManifest = loadPythonManifestForRun(options.projectRoot, aggregate.filesByLang.py);
+    const pythonManifest = loadPythonManifestForRun(projectRoot, aggregate.filesByLang.py);
     graph = buildGraph({
       files: fileNodes,
       resolverContext: {
-        projectRoot: options.projectRoot,
+        projectRoot,
         ...(pythonManifest !== undefined ? { pythonManifest } : {}),
       },
     });
@@ -190,21 +194,21 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   // so `entryPoints` already reflects plugin contributions when the rule
   // dispatcher runs.
   const activePlugins = detectActivePluginsForRun(
-    options.projectRoot,
+    projectRoot,
     options.plugins,
     fileNodesByPath,
     options.config,
   );
   const entryPoints = resolveEntryPoints(
     options.config,
-    options.projectRoot,
+    projectRoot,
     activePlugins,
     fileNodesByPath,
   );
   const ruleCtx: RuleContext = {
     graph,
     fileNodes: fileNodesByPath,
-    projectRoot: options.projectRoot,
+    projectRoot,
     entryPoints,
     config: options.config,
     complexity: complexityMap,
@@ -227,7 +231,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
   //  - `alwaysUsed` patterns suppress unused-files for matching paths.
   //  - `usedExports` rules suppress unused-exports per file pattern.
   //  - `toolingDependencies` are stripped from unused-deps / unused-dev-deps.
-  const pluginFilters = buildPluginFilters(activePlugins, options.projectRoot);
+  const pluginFilters = buildPluginFilters(activePlugins, projectRoot);
   const crossRef = applyCrossReferenceFilter(rawIssues, pluginFilters);
   const issues = crossRef.issues;
   emitter.emit({ kind: 'crossref.done' });
@@ -247,7 +251,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
       coverage: options.coverage.input,
       modules: modulesByPath,
       complexityByPath,
-      projectRoot: options.projectRoot,
+      projectRoot,
       ...(options.coverage.root !== undefined ? { coverageRoot: options.coverage.root } : {}),
     });
     emitter.emit({ kind: 'runtime.done' });
