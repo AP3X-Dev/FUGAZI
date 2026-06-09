@@ -201,6 +201,12 @@ export interface AnalysisMetrics {
   /** Non-deterministic — for human display only. Stripped before hashing. */
   readonly elapsedMs: number;
   readonly cacheHitRate: number;
+  /**
+   * Number of entry-point roots resolved for this run (declared + plugin +
+   * inferred). Zero means the unused-* rules had no reachability frame of
+   * reference; consumers may surface a hint to declare entry points.
+   */
+  readonly entryPointsResolved: number;
   readonly filesByLang: FilesByLang;
   readonly parseErrors: ParseErrorSummary;
 }

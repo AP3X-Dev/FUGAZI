@@ -64,6 +64,7 @@ import {
   assignFileIds,
 } from '@fugazi/types';
 import { type PluginCrossRefFilters, applyCrossReferenceFilter } from './cross-ref.js';
+import { inferEntryPoints } from './infer-entrypoints.js';
 import { ProgressEmitter } from './progress.js';
 import { listEnabledRules, runEnabledRules } from './rules/registry.js';
 import type { RuleContext } from './rules/types.js';
@@ -284,6 +285,7 @@ export async function runAnalysis(options: RunAnalysisOptions): Promise<RunAnaly
     diagnosticsByRule: Object.freeze(adjustedByRule),
     elapsedMs,
     cacheHitRate: 0,
+    entryPointsResolved: entryPoints.length,
     // Phase 4e T361: per-language file count and parse-error summary.
     // `Object.freeze` mirrors the rest of the metrics shape — every nested
     // object handed to the caller is deeply readonly.
@@ -771,6 +773,19 @@ function resolveEntryPoints(
           if (matchesGlob(pattern, rel)) push(node.path);
         }
       }
+    }
+  }
+
+  // 3. Zero-config inference fallback. When the user declared no explicit
+  //    entry points, infer a sensible root set from conventions and manifests
+  //    (package.json bin/main/exports, pyproject scripts, src/index, __main__,
+  //    test files, …) so unconfigured projects still get accurate reachability.
+  //    Purely additive on top of any plugin-contributed entries; skipped the
+  //    moment the user takes control via config.entrypoints.
+  const hasUserEntries = raw !== undefined && raw.length > 0;
+  if (!hasUserEntries && fileNodes.size > 0) {
+    for (const abs of inferEntryPoints(toPosix(projectRoot), fileNodes, nodeFsAdapter)) {
+      push(abs);
     }
   }
 
