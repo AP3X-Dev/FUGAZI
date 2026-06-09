@@ -8,7 +8,7 @@
 
 Fugazi analyzes a whole project — its module graph, re-export chains, and cross-references — to surface dead code, duplication, complexity, and architecture drift. It runs on Bun for speed and on Node 22+ for compatibility, and it can fold in production runtime evidence to tell you not just what's wrong, but what actually matters.
 
-> **Status:** pre-1.0, under active development. The analysis engine, rule set, framework plugins, and runtime layer are implemented; the zero-config experience on unconfigured projects is still being tuned, so point Fugazi at your entry points (or run `fugazi init`) for the best results.
+> **Status:** pre-1.0 and under active development, but usable today. The analysis engine, rule set, framework plugins, and runtime layer are all implemented, and Fugazi works out of the box on an unconfigured project — it infers entry points automatically from your project's conventions (`src/index`, `main`, `cli`, `bin`, test files, `*.config`; Python `__main__.py`, `manage.py`, `conftest.py`, …) and from `package.json` / `pyproject.toml` manifests. Add a `.fugazirc.json` (or run `fugazi init`) only when you want to tune rules, boundaries, or pin entry points explicitly.
 
 ---
 
@@ -72,7 +72,7 @@ bun run build
 Then, from inside a project:
 
 ```bash
-fugazi init           # write a starter .fugazirc.json (recommended first step)
+fugazi init           # optional: scaffold .fugazirc.json to tune rules / zones / entry points
 
 fugazi dead-code      # all dead-code rules
 fugazi dupes          # duplication

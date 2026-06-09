@@ -156,6 +156,26 @@ export async function runAndReport(opts: RunOptions): Promise<number> {
     opts.stdout.write(payload);
   }
 
+  // Zero-config hint: when no entry points could be resolved, the reachability
+  // rules (unused files / exports / types) have no frame of reference and
+  // silently report nothing. Nudge the user to declare entry points. Only when
+  // those rules are actually dispatched + enabled; suppressed under --quiet;
+  // written to stderr so machine-readable stdout stays clean.
+  const dispatchesDeadCode = opts.mode === 'full' || opts.mode === 'dead-code-only';
+  const unusedFilesEnabled = (cfg.rules?.['unused-files'] ?? 'error') !== 'off';
+  if (
+    !opts.quiet &&
+    dispatchesDeadCode &&
+    unusedFilesEnabled &&
+    result.metrics.entryPointsResolved === 0 &&
+    result.metrics.filesScanned > 0
+  ) {
+    opts.stderr.write(
+      'fugazi: no entry points detected — unused file/export/type results may be ' +
+        'incomplete. Declare "entrypoints" in .fugazirc.json or run `fugazi init`.\n',
+    );
+  }
+
   // CI preset forces non-zero on any finding regardless of severity.
   if (opts.ciPreset && result.issues.length > 0) return 1;
   return result.issues.some((i) => i.severity === 'error') ? 1 : 0;

@@ -30,6 +30,10 @@ describe('init', () => {
           const body = await readFile(target, 'utf8');
           expect(body).toContain('"rules"');
           expect(body).toContain('"frameworks"');
+          // Documents entry-point auto-detection + the override path as a
+          // commented example, so no active `entrypoints` array is pinned and
+          // inference stays on.
+          expect(body).toContain('//   "entrypoints"');
         } finally {
           process.chdir(cwd);
         }

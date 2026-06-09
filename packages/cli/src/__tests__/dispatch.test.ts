@@ -35,6 +35,52 @@ const ANALYSIS_COMMANDS: readonly (readonly string[])[] = [
   ['boundaries'],
 ];
 
+describe('zero-config entry-point hint', () => {
+  it('warns when no entry points resolve and unused-* rules run', async () => {
+    // a/b/c match no entry convention and package.json declares no entries.
+    await withTempProject(FIXTURE, async (root) => {
+      const ctx = makeContext();
+      const cwd = process.cwd();
+      process.chdir(root);
+      try {
+        await runCli(['unused-files'], ctx);
+        expect(ctx.getStderr()).toContain('no entry points detected');
+      } finally {
+        process.chdir(cwd);
+      }
+    });
+  });
+
+  it('stays silent once an entry point is inferred (src/index.ts present)', async () => {
+    const withEntry = { ...FIXTURE, 'src/index.ts': "import './c.js';\n" };
+    await withTempProject(withEntry, async (root) => {
+      const ctx = makeContext();
+      const cwd = process.cwd();
+      process.chdir(root);
+      try {
+        await runCli(['unused-files'], ctx);
+        expect(ctx.getStderr()).not.toContain('no entry points detected');
+      } finally {
+        process.chdir(cwd);
+      }
+    });
+  });
+
+  it('stays silent under --quiet', async () => {
+    await withTempProject(FIXTURE, async (root) => {
+      const ctx = makeContext();
+      const cwd = process.cwd();
+      process.chdir(root);
+      try {
+        await runCli(['unused-files', '--quiet'], ctx);
+        expect(ctx.getStderr()).not.toContain('no entry points detected');
+      } finally {
+        process.chdir(cwd);
+      }
+    });
+  });
+});
+
 describe('analysis command dispatch', () => {
   for (const cmd of ANALYSIS_COMMANDS) {
     it(`${cmd.join(' ')} runs against a fixture project`, async () => {
