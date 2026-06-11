@@ -89,8 +89,6 @@ bun x vitest run --project @fugazi/extract
 - Security: see [`SECURITY.md`](SECURITY.md). Do not file public issues for vulnerabilities — follow the disclosure process described there.
 - Feature requests: open a Discussion first. Once the shape is agreed, an Issue tracks the implementation.
 
-All interactions are governed by [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
-
 ## Release process
 
 Releases are cut from `main` by maintainers. The release script (`tools/bump-version.ts`) handles version bump, changelog regeneration, and tag creation. Provenance attestation runs in `.github/workflows/release.yml`.

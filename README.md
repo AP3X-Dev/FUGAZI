@@ -1,229 +1,362 @@
 <p align="center">
-  <img src="docs/assets/fugazi-banner.png" alt="Fugazi — codebase intelligence for TypeScript, JavaScript, and Python" width="100%" />
+  <img src="docs/assets/fugazi-banner.png" alt="Fugazi - codebase intelligence for TypeScript, JavaScript, and Python" width="100%" />
 </p>
 
 # Fugazi
 
-**Codebase intelligence for TypeScript, JavaScript, and Python.**
+Fugazi is deterministic codebase intelligence for TypeScript, JavaScript, and
+Python projects. It builds a whole-project model of your source tree, runs
+analysis rules against the resolved module graph, and reports the kind of
+issues that usually survive normal test suites: dead code, dependency drift,
+duplicate logic, circular imports, boundary violations, and complexity
+hotspots.
 
-Fugazi analyzes a whole project — its module graph, re-export chains, and cross-references — to surface dead code, duplication, complexity, and architecture drift. It runs on Bun for speed and on Node 22+ for compatibility, and it can fold in production runtime evidence to tell you not just what's wrong, but what actually matters.
+The same analyzer powers the CLI, Node API, Language Server, MCP server, editor
+extensions, and CI integrations. Output is designed to be stable enough for CI:
+the same input should produce the same findings in the same order.
 
----
+## What Fugazi Finds
 
-## What it finds
+### Dead Code And Import Hygiene
 
-**Dead code**
-- Unused files, exports, and types
-- Unused dependencies (`dependencies`, `devDependencies`, `optionalDependencies`)
-- Unused enum members and class members
-- Unresolved imports, unlisted dependencies, duplicate exports
-- Private types leaking across module boundaries
+- Unused files, exports, types, enum members, class members, and dependencies.
+- Unused `dependencies`, `devDependencies`, and `optionalDependencies`.
+- Unresolved imports, unlisted dependencies, and duplicate exports.
+- Private types that leak through a public API surface.
+- Framework-invoked files and exports are filtered through bundled framework
+  plugins so convention-based code is not treated as dead by default.
 
-**Structure & architecture**
-- Circular dependencies (deterministic cycle reporting)
-- Architecture drift — boundary/zone violations (e.g. "the `api` layer may not import `db`")
+### Architecture Drift
 
-**Duplication**
-- Clone detection from exact copies through renamed and reordered near-duplicates
+- Circular dependency detection with deterministic cycle reporting.
+- Zone-based boundary checks, for example preventing `ui` from importing
+  `db` directly.
 
-**Complexity & health**
-- Per-function cyclomatic and cognitive complexity
-- Maintainability scoring and ranked refactor targets
+### Duplication
 
-**Runtime intelligence** (optional, when you supply V8 coverage)
-- Hot paths — where execution actually concentrates
-- Cold code — shipped but never executed at runtime
-- Runtime-weighted refactor priority — complexity weighted by how often code runs, so you fix the gnarly-and-hot first and simply delete the gnarly-and-dead
-- Coverage gaps — files with no runtime evidence at all
+- Exact clones and near-duplicates, including renamed, reordered, and
+  near-miss clone families.
 
----
+### Health
 
-## Languages
+- Cyclomatic complexity findings.
+- Cognitive complexity findings.
+- A project health score through `fugazi health --score`.
 
-TypeScript / TSX, JavaScript / JSX, and Python (`.py`, `.pyi`). A mixed TypeScript + Python monorepo analyzes in a **single pass** — each file is routed by extension and the findings merge into one report. See [`docs/PYTHON.md`](docs/PYTHON.md) for the Python contract (manifests, decorators, `TYPE_CHECKING`, `__all__`, namespace packages).
+### Runtime Evidence
 
-Framework boilerplate is handled by declarative plugins, so files your framework invokes by convention (routes, migrations, fixtures, entry modules) aren't mistaken for dead code. ~30 Python frameworks ship built in (Flask, FastAPI, Django, SQLAlchemy, pytest, Pydantic, Celery, Click, and more) alongside JavaScript framework plugins.
+The core and Node API can fold in V8 coverage data to identify hot paths, cold
+code, missing coverage evidence, and runtime-weighted refactor targets. The CLI
+also includes `fugazi coverage setup`, which prints runner-specific snippets
+for capturing coverage from supported test runners.
 
----
+## Supported Projects
 
-## Surfaces
+Fugazi analyzes TypeScript, JavaScript, and Python in one pass.
 
-Fugazi is the same engine exposed five ways:
+- TS/JS: `.ts`, `.tsx`, `.js`, `.jsx`, `.mts`, `.cts`, `.mjs`, `.cjs`.
+- Python: `.py`, `.pyi`.
+- Single-file/component handlers live in the extractor layer for formats such
+  as Vue, Astro, MDX, and CSS modules.
+- Python analysis is syntactic. It does not run CPython, mypy, or pyright.
+- TypeScript analysis is syntactic. It does not require a TypeScript
+  type-checker pass.
 
-| Surface | What it is |
-| --- | --- |
-| **CLI** — `fugazi` | The command-line tool (the published package) |
-| **LSP** — `fugazi-lsp` | Editor diagnostics, code actions, hovers, and code lens |
-| **MCP** — `fugazi-mcp` | A Model Context Protocol server so AI agents can call the analyzer over stdio |
-| **Editors** | VS Code and Zed extensions |
-| **CI** | A GitHub composite Action and a GitLab CI template |
+See [docs/PYTHON.md](docs/PYTHON.md) for the Python contract and known
+limitations.
 
----
+## Install
 
-## Quickstart
+Fugazi is a Node 22+ package. Bun is the primary development runtime for this
+repository, but the published CLI runs on Node.
 
 ```bash
-bun install
-bun run build
+npm install -D fugazi
+# or
+bun add -d fugazi
 ```
 
-Then, from inside a project:
+Run it from a project root:
 
 ```bash
-fugazi init           # optional: scaffold .fugazirc.json to tune rules / zones / entry points
-
-fugazi dead-code      # all dead-code rules
-fugazi dupes          # duplication
-fugazi health --score # complexity + a project health score
+npx fugazi --help
+npx fugazi init
+npx fugazi dead-code
 ```
 
-`fugazi` requires a subcommand. Each analysis command operates on the current directory and honors your configuration (entry points, zones, rule severities).
+`fugazi` requires a subcommand. Use `fugazi --help` for the complete command
+list.
 
-### CLI commands
+## Docker
+
+Build the local CLI image:
+
+```bash
+docker build -t fugazi .
+```
+
+Run it against the current project by mounting that project at `/workspace`:
+
+```bash
+docker run --rm -v "$PWD:/workspace" fugazi dead-code --format compact
+docker run --rm -v "$PWD:/workspace" fugazi health --score
+```
+
+The image defaults to the `fugazi` entrypoint. The `fugazi-lsp` and
+`fugazi-mcp` wrappers are also installed in the image for editor and agent
+integrations.
+
+For MCP clients, run the image with the `fugazi-mcp` entrypoint over stdio and
+mount the project at `/workspace`:
+
+```json
+{
+  "mcpServers": {
+    "fugazi": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-v",
+        "/absolute/path/to/project:/workspace:ro",
+        "--entrypoint",
+        "fugazi-mcp",
+        "fugazi"
+      ]
+    }
+  }
+}
+```
+
+Use `projectRoot: "/workspace"` in MCP tool arguments. Keep the mount read-only
+for analysis tools; remove `:ro` when intentionally using mutating tools such
+as `init` or `fix_apply`.
+
+## CLI
+
+Common commands:
 
 | Command | Purpose |
 | --- | --- |
-| `fugazi dead-code` | Run the full dead-code family |
-| `fugazi dupes` | Clone / duplication detection |
-| `fugazi health [--score]` | Complexity, maintainability, refactor targets |
-| `fugazi boundaries` | Only the architecture boundary rule |
-| `fugazi circular-deps` | Only the circular-dependency rule |
-| `fugazi unused-files` \| `unused-exports` \| `unused-types` \| `unused-deps` | Focused single-rule runs |
-| `fugazi audit` | Read-only inventory dump (no rules) — useful for debugging extraction |
-| `fugazi coverage setup` | Wire up V8 coverage capture for the runtime layer |
-| `fugazi fix [--dry-run] [--rule <id>]` | Apply available fixes (e.g. suppression insertion) |
-| `fugazi trace [--file <f>] [--export <name>]` | Trace why a file or export is (un)reachable |
-| `fugazi watch` | Re-analyze on file changes |
-| `fugazi explain <rule-id>` | Describe a rule and why it fires |
-| `fugazi schema [--markdown]` | Print the configuration schema |
+| `fugazi init` | Write a starter `.fugazirc.json` for the current project. |
+| `fugazi dead-code` | Run the dead-code and import-hygiene rule family. |
+| `fugazi unused-files` | Run only the unused-files rule. |
+| `fugazi unused-exports` | Run only the unused-exports rule. |
+| `fugazi unused-types` | Run only the unused-types rule. |
+| `fugazi unused-deps` | Run dependency usage rules. |
+| `fugazi circular-deps` | Run only circular dependency detection. |
+| `fugazi boundaries` | Run only architecture boundary checks. |
+| `fugazi dupes` | Run duplicate-code detection. |
+| `fugazi health` | Run complexity and maintainability rules. |
+| `fugazi health --score` | Print only the integer project health score. |
+| `fugazi audit` | Build and print inventory/metrics without diagnostics. |
+| `fugazi trace --file <path>` | Show importers for a file. |
+| `fugazi trace --export <name>` | Show importers for a named export. |
+| `fugazi explain <rule-id>` | Explain a rule and how to suppress it. |
+| `fugazi schema` | Print the configuration JSON schema. |
+| `fugazi schema --markdown` | Print the configuration schema as Markdown. |
+| `fugazi coverage setup` | Print supported coverage-capture snippets. |
+| `fugazi fix --dry-run` | Preview available machine-applicable fixes. |
+| `fugazi fix` | Apply available machine-applicable fixes. |
+| `fugazi watch` | Re-run analysis when source files change. |
 
-Common flags: `--format <fmt>` (human, `json`, `sarif`, `codeclimate`, `markdown`, `compact`), `--quiet` / `-q`, `--preset <name>`.
+Analysis commands support:
 
-**Exit codes** are a closed set: `0` (clean), `1` (findings at `warn`/`error`), `2` (usage/config error) — never anything else, so Fugazi is safe to gate CI on.
+```bash
+fugazi dead-code --format json --quiet
+fugazi dead-code --format sarif
+fugazi dead-code --preset ci
+```
 
----
+Formats: `human`, `human-plain`, `json`, `sarif`, `compact`, `markdown`, and
+`codeclimate`.
+
+Exit behavior:
+
+- `0`: no error-severity findings.
+- `1`: error-severity findings were reported.
+- `2`: usage or configuration error.
+
+`--preset ci` selects plain output, suppresses progress noise, and fails when
+any finding is present.
 
 ## Configuration
 
-Fugazi reads configuration in priority order (first match wins; formats are not merged):
+The CLI currently auto-loads `.fugazirc.json` from the project root. Run
+`fugazi init` to create the starter file, and run `fugazi schema --markdown`
+for the full field reference.
 
-1. `.fugazirc.json`
-2. `fugazi.config.ts`
-3. `fugazi.toml`
+Minimal example:
 
-`fugazi init` scaffolds a starter file, and `fugazi schema --markdown` prints the full reference. Every rule resolves to a severity: `error` (reported, fails CI), `warn` (reported, exit stays `0`), or `off`.
+```jsonc
+{
+  "entrypoints": ["src/index.ts", "src/cli.ts"],
+  "rules": {
+    "unused-files": "error",
+    "code-duplication": "warn",
+    "unused-dev-deps": "off"
+  },
+  "zones": {
+    "ui": {
+      "pattern": ["src/ui/**"],
+      "canImport": ["domain"]
+    },
+    "domain": {
+      "pattern": ["src/domain/**"],
+      "canImport": []
+    }
+  },
+  "health": {
+    "cyclomaticThreshold": 10,
+    "cognitiveThreshold": 15
+  }
+}
+```
 
-Suppress individual findings inline:
+Every rule resolves to `error`, `warn`, or `off`. Inline suppressions are
+available in TS/JS and Python:
 
 ```ts
-// fugazi-ignore-next-line [issue-type]
-// fugazi-ignore-file [issue-type]
+// fugazi-ignore-next-line unused-exports
+export const keptForReflection = true;
+
+// fugazi-ignore-file unused-files
 ```
 
-`[issue-type]` is optional; omit it to suppress all types for that scope. See [`CONVENTIONS.md`](CONVENTIONS.md) for the full behavioral reference (config resolution, severities, suppression, environment variables, determinism).
-
----
-
-## How it works
-
-A single pipeline drives every surface. `runAnalysis()` runs six phases, passing live data structures forward:
-
-```
-discover → extract → graph → analyze → cross-reference → runtime
+```python
+# fugazi-ignore-next-line unused-exports
+def kept_for_reflection():
+    return True
 ```
 
-1. **discover** — enumerate source files, apply excludes.
-2. **extract** — parse each file with WASM parsers; build a per-file inventory (declarations, imports, exports, usages) and complexity metrics. Parse errors never abort the run.
-3. **graph** — build the module dependency graph, resolve imports and re-export chains, assign stable path-sorted file IDs.
-4. **analyze** — dispatch the detection rules against the graph.
-5. **cross-reference** — collapse redundant findings and apply framework-plugin knowledge so framework-invoked files aren't flagged.
-6. **runtime** — *(optional)* if V8 coverage is supplied, produce the runtime report.
-
-For the full design — the rule registry, the plugin schema, the runtime pipeline, and the determinism contract — see [**`docs/ARCHITECTURE.md`**](docs/ARCHITECTURE.md).
-
----
-
-## Design principles
-
-- **Deterministic.** The same input produces byte-identical output, every time and on every machine — across all reporter formats. File IDs are path-sorted, iteration order is fixed, and there's no clock or randomness in any analysis path. This is what makes Fugazi trustworthy as a CI gate.
-- **Syntactic.** Fugazi reasons about structure directly from the AST. It does not run the TypeScript type-checker, which keeps analysis fast and dependency-light.
-- **Whole-project.** Findings come from the resolved module graph (including re-export chains and dynamic-import reachability), not file-at-a-time heuristics.
-- **Fail-soft.** A file that fails to parse is recorded and skipped; it never takes down the run.
-
----
+See [CONVENTIONS.md](CONVENTIONS.md) for analyzer behavior and determinism
+rules.
 
 ## Programmatic API
 
-The analyzer is available as a library via `@fugazi/node`:
+Install the API package when you want structured analysis results in another
+tool:
+
+```bash
+npm install @fugazi/node
+```
 
 ```ts
-import { analyze } from '@fugazi/node';
+import { analyze, audit, findDupes, health, traceExport, traceFile } from '@fugazi/node';
 
-const result = await analyze({ projectRoot: process.cwd() });
+const result = await analyze({
+  projectRoot: process.cwd(),
+  rules: 'all',
+});
+
 for (const issue of result.issues) {
   console.log(`${issue.severity} ${issue.kind} ${issue.file}: ${issue.message}`);
 }
 ```
 
-Findings are a discriminated union keyed on `kind`, so each variant carries exactly the fields it needs (a `circular-dependencies` issue has a `cycle`, a `boundary-violations` issue has `from`/`to`/`fromZone`/`toZone`, and so on).
+The public functions are `analyze`, `findDupes`, `health`, `audit`,
+`traceFile`, and `traceExport`.
 
----
+## Editor And Agent Surfaces
 
-## Workspace structure
+| Surface | Package or path | Notes |
+| --- | --- | --- |
+| CLI | `fugazi` | Main command-line interface. |
+| Node API | `@fugazi/node` | Structured API for tools and custom automation. |
+| LSP | `fugazi-lsp` / `@fugazi/lsp` | Editor diagnostics, hovers, code actions, and code lens. |
+| MCP | `fugazi-mcp` / `@fugazi/mcp` | Model Context Protocol server for AI agents over stdio. |
+| VS Code | `editors/vscode/` | Extension that bundles the LSP server. |
+| Zed | `editors/zed/` | Manifest scaffold that uses `fugazi-lsp` on PATH. |
+| GitHub Actions | `action/` | Composite action with annotations, PR comments, and SARIF upload support. |
+| GitLab CI | `ci/` | Template for Code Climate output and merge request notes. |
 
-Fugazi is a Bun-workspace monorepo. The pipeline flows left-to-right through these packages:
+## How It Works
 
+The analyzer pipeline is shared by every surface:
+
+```text
+discover -> extract -> graph -> analyze -> cross-reference -> runtime
 ```
+
+- `discover` enumerates supported source files and applies excludes.
+- `extract` parses files into declarations, imports, exports, usages, and
+  complexity metrics.
+- `graph` resolves module edges and re-export chains.
+- `analyze` runs enabled rules against the graph.
+- `cross-reference` removes redundant findings and applies framework-plugin
+  knowledge.
+- `runtime` is optional and runs only when coverage evidence is supplied.
+
+The design is intentionally fail-soft. Parse errors are collected and reported
+as metrics; one bad file should not take down the whole analysis run.
+
+For the detailed design, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Repository Layout
+
+```text
 packages/
-  types/         @fugazi/types        Shared type definitions
-  config/        @fugazi/config       Config loading, schema, framework detection
-  extract/       @fugazi/extract      AST extraction, complexity, parse cache, SFC handlers
-  graph/         @fugazi/graph        Module graph, import & re-export resolution
-  v8-coverage/   @fugazi/v8-coverage  V8 ScriptCoverage parser + line/col mapper
-  core/          @fugazi/core         Orchestration: rules, dedup, health, runtime
-  runtime/       @fugazi/runtime      Runtime-intelligence layer
-  node-api/      @fugazi/node         Programmatic Node API
-  cli/           fugazi               CLI binary (the published package)
-  lsp/           @fugazi/lsp          Language Server
-  mcp/           @fugazi/mcp          MCP server for AI agents
-  plugins/       @fugazi/plugins      Declarative framework plugins (JSON; experimental TS tier)
+  types/         shared public types
+  config/        configuration schema, loaders, framework detection
+  extract/       AST extraction, usage inventory, complexity metrics
+  graph/         module graph and import resolution
+  v8-coverage/   V8 coverage parsing and rebasing
+  core/          analysis pipeline, rules, reporters, runtime integration
+  runtime/       runtime-intelligence report assembly
+  node-api/      @fugazi/node
+  cli/           fugazi CLI and bundled binaries
+  lsp/           @fugazi/lsp
+  mcp/           @fugazi/mcp
+  plugins/       bundled framework plugins
 
-editors/         VS Code + Zed extensions
-action/          GitHub composite Action
+editors/         VS Code and Zed integrations
+action/          GitHub composite action
 ci/              GitLab CI template
-decisions/       Architecture Decision Records (ADRs)
-docs/            Documentation
-fixtures/        Conformance & project fixtures
+docs/            architecture, Python support, release docs
+tests/           conformance, fixtures, regression, and ecosystem tests
 ```
 
-The internal `@fugazi/*` packages are private; only `fugazi` (from `packages/cli/`) is published, bundling the workspace outputs into a single ESM package.
+## Development
 
----
-
-## Building & testing
-
-From the repo root:
+From the repository root:
 
 ```bash
-bun install         # install (npm install --workspaces also works)
-bun run build       # build all packages (Turborepo)
-bun run typecheck   # tsc --noEmit across the workspace
-bun run test        # Vitest across all packages
-bun run lint        # Biome
-bun run dev:watch   # build --watch + test --watch
+bun install
+bun run build
+bun run typecheck
+bun run test
+bun run lint
 ```
 
-Node-only contributors can substitute `npm install --workspaces && npm run build && npm test`; CI runs both lanes.
+Useful scripts:
 
----
+```bash
+bun run fugazi:built -- dead-code --format compact
+bun run dev:watch
+bun run format
+```
+
+Node-only contributors can use npm workspaces for the main build and test
+flow:
+
+```bash
+npm install --workspaces
+npm run build
+npm test
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch, commit, ADR, testing, and
+review conventions.
 
 ## Documentation
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — the full system design
-- [`docs/PYTHON.md`](docs/PYTHON.md) — Python support and contract
-- [`CONVENTIONS.md`](CONVENTIONS.md) — configuration, severities, suppression, determinism
-- [`CONTRIBUTING.md`](CONTRIBUTING.md) — workflow, branch model, ADR process
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - analyzer architecture and rule engine.
+- [docs/PYTHON.md](docs/PYTHON.md) - Python support, framework plugins, and limitations.
+- [docs/RELEASE.md](docs/RELEASE.md) - release process.
+- [docs/V1_LIMITATIONS.md](docs/V1_LIMITATIONS.md) - current v1 limitations.
+- [SECURITY.md](SECURITY.md) - private vulnerability reporting.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT. See [LICENSE](LICENSE).

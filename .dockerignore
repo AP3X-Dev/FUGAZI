@@ -1,0 +1,17 @@
+.git
+.gitignore
+.turbo
+**/.turbo
+node_modules
+**/node_modules
+packages/*/dist
+packages/*/*.tsbuildinfo
+coverage
+.fugazi-coverage
+dist
+build
+*.log
+.DS_Store
+Dockerfile
+docker-compose*.yml
+compose*.yml
